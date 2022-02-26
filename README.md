@@ -159,7 +159,7 @@
         </tr>
         <tr>
             <td><img src="https://gitee.com/sgs98/RuoYi-Vue-Plus-Activiti/raw/master/script/img/UI93PW){9H[_$CHFBYUERMA.png" width="1920" /></td>
-            <td><img src="https://gitee.com/sgs98/RuoYi-Vue-Plus-Activiti/raw/master/script/img/AJPVV@SX4W0FX%G@(S[}]F.png" width="1920" /></td>
+            <td><img src="https://gitee.com/sgs98/RuoYi-Vue-Plus-Activiti/raw/master/script/img/back.png" width="1920" /></td>
         </tr>
     </tbody>
 </table>
