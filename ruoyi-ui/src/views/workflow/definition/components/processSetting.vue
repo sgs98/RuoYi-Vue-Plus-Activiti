@@ -55,6 +55,7 @@
               <el-form-item label-width="100px" label="审批人员" prop="assignee">
                 <el-input readonly v-model="form.assignee" placeholder="审批人员">
                   <el-button type="primary" slot="append" @click="openSelect">选择人员</el-button>
+                  <el-button type="success" slot="append" @click="clearSelect">清空</el-button>
                 </el-input>
                 <el-input v-model="form.assigneeId" v-show="false" placeholder="审批人员ID"/>
               </el-form-item>
@@ -225,6 +226,11 @@ export default {
           this.form.assignee = undefined
           this.form.chooseWay = undefined
           this.form.processDefinitionId = this.definitionId
+        },
+        //清空选择的人员
+        clearSelect(){
+          this.form.assigneeId = ''
+          this.form.assignee = ''
         },
         //选择弹出层
         async openSelect(){
