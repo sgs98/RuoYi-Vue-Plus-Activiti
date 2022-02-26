@@ -149,5 +149,17 @@
             <td><img src="https://oscimg.oschina.net/oscnet/up-fe7e85b65827802bfaadf3acd42568b58c7.png" width="1920" /></td>
             <td><img src="https://oscimg.oschina.net/oscnet/up-eff2b02a54f8188022d8498cfe6af6fcc06.png" width="1920" /></td>
         </tr>
+        <tr>
+            <td><img src="https://gitee.com/sgs98/RuoYi-Vue-Plus-Activiti/raw/master/script/img/9YEJTSRV(~~F%7B1KRU%7D%7BZFCN.png" width="1920" /></td>
+            <td><img src="https://gitee.com/sgs98/RuoYi-Vue-Plus-Activiti/raw/master/script/img/CO14S~C_Y3)GT}S56)`X_TQ.png" width="1920" /></td>
+        </tr>
+        <tr>
+            <td><img src="https://gitee.com/sgs98/RuoYi-Vue-Plus-Activiti/raw/master/script/img/J975VIR6KT]_6RC7R}KOEUN.png" width="1920" /></td>
+            <td><img src="https://gitee.com/sgs98/RuoYi-Vue-Plus-Activiti/raw/master/script/img/M4}LRO8E`I1@6LA{H1TGXD2.png" width="1920" /></td>
+        </tr>
+        <tr>
+            <td><img src="https://gitee.com/sgs98/RuoYi-Vue-Plus-Activiti/raw/master/script/img/UI93PW){9H[_$CHFBYUERMA.png" width="1920" /></td>
+            <td><img src="https://gitee.com/sgs98/RuoYi-Vue-Plus-Activiti/raw/master/script/img/AJPVV@SX4W0FX%G@(S[}]F.png" width="1920" /></td>
+        </tr>
     </tbody>
 </table>
