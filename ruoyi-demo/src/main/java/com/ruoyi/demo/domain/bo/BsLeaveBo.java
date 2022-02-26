@@ -29,7 +29,7 @@ public class BsLeaveBo extends BaseEntity {
      * 主键ID
      */
     @ApiModelProperty(value = "主键ID", required = true)
-    @NotBlank(message = "主键ID不能为空", groups = { AddGroup.class, EditGroup.class })
+    @NotBlank(message = "主键ID不能为空", groups = { EditGroup.class })
     private String id;
 
     /**

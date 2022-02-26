@@ -102,7 +102,7 @@
               </span>
               <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item>
-                  <el-button  size="mini" type="text" icon="el-icon-delete" @click="handleSetting(scope.row)" >设置</el-button>
+                  <el-button  size="mini" type="text" icon="el-icon-setting" @click="handleSetting(scope.row)" >设置</el-button>
                 </el-dropdown-item>
                 <el-dropdown-item>
                   <el-button  size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)" >删除</el-button>
@@ -208,7 +208,7 @@ export default {
         this.multiple = !selection.length
       },
       // 将流程定义转换为模型
-      convertToModel(row){  
+      convertToModel(row){
          this.$modal.confirm('是否转换模型？').then(() => {
             this.loading = true;
             return convertToModel(row.id)

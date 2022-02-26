@@ -425,8 +425,12 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         if (CollectionUtil.isNotEmpty(actNodeAssignees)) {
             for (ProcessNode processNode : nodeList) {
                 //校验画流程模型该环节是否放置审批人员
-                if ((StringUtils.isBlank(processNode.getAssignee()) && CollectionUtil.isNotEmpty(actNodeAssignees))||processNode.getAssigneeId().equals("${assignee}")) {
+                if (StringUtils.isBlank(processNode.getAssignee())) {
+                    if(CollectionUtil.isEmpty(actNodeAssignees)){
+                        throw new ServiceException("该流程定义未配置，请联系管理员！");
+                    }
                     ActNodeAssignee nodeAssignee = actNodeAssignees.stream().filter(e -> e.getNodeId().equals(processNode.getNodeId())).findFirst().orElse(null);
+
                     //按角色 部门 人员id 等设置查询人员信息
                     if (ObjectUtil.isNotNull(nodeAssignee) && StringUtils.isNotBlank(nodeAssignee.getAssigneeId())
                         && nodeAssignee.getFullClassId() == null && StringUtils.isNotBlank(nodeAssignee.getAssignee())) {
@@ -452,9 +456,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
                         }
                         processNode.setMultiple(nodeAssignee.getMultiple());
                         processNode.setMultipleColumn(nodeAssignee.getMultipleColumn());
-                    }
-
-                    if (StringUtils.isBlank(processNode.getAssignee()) && ObjectUtil.isNull(nodeAssignee)) {
+                    }else{
                         throw new ServiceException(processNode.getNodeName() + "未配置审批人，请联系管理员！");
                     }
                 } else {
