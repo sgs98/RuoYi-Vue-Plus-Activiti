@@ -11,14 +11,14 @@
         </el-steps>
       </div>
       <div style="width:80%" v-loading="loading">
-        <el-form ref="form" label-position="left" :rules="rules" :model="form">
+        <el-form ref="form" label-position="left" :model="form">
           <el-form-item label="环节名称">
             <el-tag v-if="nodeName">{{nodeName}}</el-tag><el-tag v-else>无</el-tag>
           </el-form-item>
           <el-row>
             <el-col :span="24"><el-alert title="每个节点设置，如有修改都请保存一次，跳转节点后数据不会自动保存！" type="warning" show-icon :closable="false"/></el-col>
           </el-row>
-          <el-form-item prop="chooseWay">
+          <el-form-item prop="chooseWay" label="选人方式">
             <el-radio-group v-model="form.chooseWay">
               <el-radio border label="person">选择人员</el-radio>
               <el-radio border label="role">选择角色</el-radio>
@@ -110,20 +110,11 @@ export default {
           isShow: true,
           isBack: false,
           multiple: false,
-          chooseWay: 'person'
+          chooseWay: undefined
         },
         definitionId: null,
         assignee: null,
         nodeName: null,
-        // 表单校验
-        rules: {
-          chooseWay: [
-            { required: true, message: "请选择选人方式", trigger: "blur" }
-          ],
-          assignee: [
-            { required: true, message: "请选择审批人", trigger: "blur" }
-          ]
-        },
         // 人员选择
         propUserList: [],
         // 角色选择
@@ -193,23 +184,23 @@ export default {
             if(this.form.chooseWay !== 'rule'){
                 this.form.fullClassId = undefined
             }
-           //this.$refs["form"].validate(valid => {
-             //if (valid) {
-               if(this.form.id){
-                 del(this.form.id)
-                 this.form.id = undefined
-                 edit(this.form).then(response => {
-                   this.form = response.data
-                   this.$modal.msgSuccess("保存成功")
-                 })
-               }else{
-                 add(this.form).then(response => {
-                   this.form = response.data
-                   this.$modal.msgSuccess("保存成功")
-                 })
-               }
-            // }
-          // })
+            if(this.form.chooseWay === null || this.form.chooseWay === ''||this.form.chooseWay === undefined){
+                this.$modal.msgError("请选择选人方式")
+                return false
+            }
+            if(this.form.id){
+              del(this.form.id)
+              this.form.id = undefined
+              edit(this.form).then(response => {
+                this.form = response.data
+                this.$modal.msgSuccess("保存成功")
+              })
+            }else{
+              add(this.form).then(response => {
+                this.form = response.data
+                this.$modal.msgSuccess("保存成功")
+              })
+            }
           }
         },
         // 删除

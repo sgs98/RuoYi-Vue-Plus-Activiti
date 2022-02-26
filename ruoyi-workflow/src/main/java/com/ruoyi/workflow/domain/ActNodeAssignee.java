@@ -3,10 +3,17 @@ package com.ruoyi.workflow.domain;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.ruoyi.common.core.domain.BaseEntity;
+import com.ruoyi.common.core.validate.AddGroup;
+import com.ruoyi.common.core.validate.EditGroup;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**
@@ -16,9 +23,9 @@ import java.io.Serializable;
  * @date 2021-11-21
  */
 @Data
-@NoArgsConstructor
-@Accessors(chain = true)
+@EqualsAndHashCode(callSuper = true)
 @TableName("act_node_assignee")
+@ApiModel("流程定义设置对象")
 public class ActNodeAssignee extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID=1L;
@@ -33,16 +40,19 @@ public class ActNodeAssignee extends BaseEntity implements Serializable {
     /**
      * 流程定义id
      */
+    @NotBlank(message = "流程定义id不能为空", groups = { AddGroup.class, EditGroup.class })
     private String processDefinitionId;
 
     /**
      * 选择方式  role按角色选人  dept按部门选人  person自定义选人
      */
+    @NotBlank(message = "选择方式不能为空", groups = { AddGroup.class, EditGroup.class })
     private String chooseWay;
 
     /**
      * 流程节点id
      */
+    @NotBlank(message = "流程节点id不能为空", groups = { AddGroup.class, EditGroup.class })
     private String nodeId;
 
     /**
@@ -68,11 +78,13 @@ public class ActNodeAssignee extends BaseEntity implements Serializable {
     /**
      * 是否弹出选人
      */
+    @NotNull(message = "是否弹出选人不能为空", groups = { AddGroup.class, EditGroup.class })
     private Boolean isShow;
 
     /**
      * 是否会签
      */
+    @NotNull(message = "是否会签不能为空", groups = { AddGroup.class, EditGroup.class })
     private Boolean multiple;
 
     /**
@@ -83,6 +95,7 @@ public class ActNodeAssignee extends BaseEntity implements Serializable {
     /**
      * 是否可退回
      */
+    @NotNull(message = "是否可退回不能为空", groups = { AddGroup.class, EditGroup.class })
     private Boolean isBack;
 
 
