@@ -21,6 +21,7 @@ import org.activiti.engine.RuntimeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -39,12 +40,6 @@ public class BsLeaveServiceImpl implements IBsLeaveService {
     private final BsLeaveMapper baseMapper;
 
     @Autowired
-    private HistoryService historyService;
-
-    @Autowired
-    private RuntimeService runtimeService;
-
-    @Autowired
     private IProcessInstanceService iProcessInstanceService;
 
     @Autowired
@@ -52,7 +47,8 @@ public class BsLeaveServiceImpl implements IBsLeaveService {
     @Override
     public BsLeaveVo queryById(String id){
         BsLeaveVo vo = baseMapper.selectVoById(id);
-       vo.setProcessInstanceId(iProcessInstanceService.getProcessInstanceId(id));
+        vo.setProcessInstanceId(iProcessInstanceService.getProcessInstanceId(id));
+        workFlowUtils.setStatusFileValue(vo, Arrays.asList(vo.getId()),vo.getId());
         return vo;
     }
 

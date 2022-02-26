@@ -145,6 +145,13 @@
             icon="el-icon-back"
             @click="cancelProcessApply(scope.row.processInstanceId)"
           >撤销</el-button>
+          <el-button
+            v-if="scope.row.actBusinessStatus.status!=='draft'"
+            size="mini"
+            type="text"
+            icon="el-icon-view"
+            @click="handleView(scope.row)"
+          >查看</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -207,11 +214,11 @@
                 </el-date-picker>
               </el-form-item>
             </el-form>
-            <!-- <div slot="footer" class="dialog-footer"> -->
+            <div class="dialog-footer" style="float:right" v-if="flag">
               <el-button :loading="buttonLoading" type="info" @click="submitForm('zancun')">暂存</el-button>
               <el-button :loading="buttonLoading" type="primary" @click="submitForm('submit')">提交</el-button>
               <el-button @click="cancel">取 消</el-button>
-            <!-- </div> -->
+            </div>
         </el-tab-pane>
         <!-- 审批历史 -->
         <el-tab-pane label="审批历史" v-if="processInstanceId">
@@ -306,8 +313,9 @@ export default {
           { required: true, message: "请假结束时间不能为空", trigger: "blur" }
         ]
       },
-      taskVariables: {},
-      taskId: undefined
+      taskVariables: {}, //流程变量
+      taskId: undefined, //任务id
+      flag: true
     };
   },
   created() {
@@ -362,12 +370,14 @@ export default {
     },
     /** 新增按钮操作 */
     handleAdd() {
+      this.flag = true
       this.reset();
       this.open = true;
       this.title = "添加请假业务";
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
+      this.flag = true
       this.loading = true;
       this.reset();
       const id = row.id || this.ids
@@ -379,6 +389,22 @@ export default {
         })
         this.open = true;
         this.title = "修改请假业务";
+      });
+    },
+    //查看
+    handleView(row){
+      this.flag = false
+      this.loading = true;
+      this.reset();
+      const id = row.id || this.ids
+      getLeave(id).then(response => {
+        this.loading = false;
+        this.form = response.data;
+        this.$nextTick(() => {
+          this.processInstanceId=response.data.processInstanceId
+        })
+        this.open = true;
+        this.title = "查看请假业务";
       });
     },
     /** 提交按钮 */
@@ -434,7 +460,6 @@ export default {
     submitFormAppply(entity){
         const data = {
             processKey: 'manykey', // key
-            classFullName: 'com.ruoyi.demo.leave.domain.BsLeave', // 全类名
             businessKey: entity.id // 业务id
         }
         // 启动流程
@@ -447,6 +472,8 @@ export default {
             // 查询下一节点的变量
             this.taskVariables = {
                 entity: entity,  // 变量
+               assignee: '1', // key
+
                 //assigneeList: assigneeList
             }
             this.$refs.verifyRef.visible = true

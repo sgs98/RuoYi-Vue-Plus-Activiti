@@ -201,6 +201,8 @@ export default {
                 this.$modal.msgSuccess("保存成功")
               })
             }
+          }else{
+            this.$modal.msgError("请选择节点")
           }
         },
         // 删除
