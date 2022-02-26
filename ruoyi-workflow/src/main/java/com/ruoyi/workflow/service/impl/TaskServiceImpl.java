@@ -200,8 +200,14 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
                 iActBusinessStatusService.updateState(processInstance.getBusinessKey(), BusinessStatusEnum.WAITING, task.getProcessInstanceId());
             } else {
                 ActNodeAssignee actNodeAssignee = actNodeAssignees.stream().filter(e -> e.getNodeId().equals(task.getTaskDefinitionKey())).findFirst().orElse(null);
-                actTaskNode.setIsBack(actNodeAssignee.getIsBack());
-                actTaskNode.setOrderNo(actTaskNodeList.get(0).getOrderNo() + 1);
+                //如果为设置流程定义配置默认 当前环节可以回退
+                if(ObjectUtil.isEmpty(actNodeAssignee)){
+                    actTaskNode.setIsBack(true);
+                    actTaskNode.setOrderNo(actTaskNodeList.get(0).getOrderNo() + 1);
+                }else{
+                    actTaskNode.setIsBack(actNodeAssignee.getIsBack());
+                    actTaskNode.setOrderNo(actTaskNodeList.get(0).getOrderNo() + 1);
+                }
             }
             iActTaskNodeService.save(actTaskNode);
         }
