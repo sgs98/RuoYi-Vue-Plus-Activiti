@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.workflow.mapper.ActNodeAssigneeMapper">
+
+    <resultMap type="com.ruoyi.workflow.domain.ActNodeAssignee" id="ActNodeAssigneeResult">
+        <result property="id" column="id"/>
+        <result property="processDefinitionId" column="process_definition_id"/>
+        <result property="chooseWay" column="choose_way"/>
+        <result property="nodeId" column="node_id"/>
+        <result property="nodeName" column="node_name"/>
+        <result property="assignee" column="assignee"/>
+        <result property="assigneeId" column="assignee_id"/>
+        <result property="fullClassId" column="full_class_id"/>
+        <result property="isShow" column="is_show"/>
+        <result property="multiple" column="multiple"/>
+        <result property="multipleColumn" column="multiple_column"/>
+        <result property="isBack" column="is_back"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateBy" column="update_by"/>
+    </resultMap>
+
+
+</mapper>

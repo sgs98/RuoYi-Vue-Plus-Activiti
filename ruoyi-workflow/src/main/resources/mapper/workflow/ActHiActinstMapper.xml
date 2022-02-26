@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.workflow.mapper.ActHiActInstMapper">
+
+    <resultMap type="com.ruoyi.workflow.domain.ActHiActInst" id="ActHiActInstResult">
+        <result property="id" column="ID_"/>
+        <result property="procDefId" column="PROC_DEF_ID_"/>
+        <result property="procInstId" column="PROC_INST_ID_"/>
+        <result property="executionId" column="EXECUTION_ID_"/>
+        <result property="actId" column="ACT_ID_"/>
+        <result property="taskId" column="TASK_ID_"/>
+        <result property="callProcInstId" column="CALL_PROC_INST_ID_"/>
+        <result property="actName" column="ACT_NAME_"/>
+        <result property="actType" column="ACT_TYPE_"/>
+        <result property="assignee" column="ASSIGNEE_"/>
+        <result property="startTime" column="START_TIME_"/>
+        <result property="endTime" column="END_TIME_"/>
+        <result property="duration" column="DURATION_"/>
+        <result property="deleteReason" column="DELETE_REASON_"/>
+        <result property="tenantId" column="TENANT_ID_"/>
+    </resultMap>
+</mapper>
