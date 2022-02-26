@@ -4,8 +4,11 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.common.core.domain.PageQuery;
+import com.ruoyi.common.core.validate.AddGroup;
+import com.ruoyi.common.core.validate.EditGroup;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.utils.ValidatorUtils;
 import com.ruoyi.workflow.domain.ActFullClassParam;
 import com.ruoyi.workflow.service.IActFullClassParamService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +21,7 @@ import com.ruoyi.workflow.domain.vo.ActFullClassVo;
 import com.ruoyi.workflow.domain.ActFullClass;
 import com.ruoyi.workflow.mapper.ActFullClassMapper;
 import com.ruoyi.workflow.service.IActFullClassService;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -76,6 +80,7 @@ public class ActFullClassServiceImpl implements IActFullClassService {
         if(CollectionUtil.isNotEmpty(actFullClassParams)){
             actFullClassParams.forEach(e->{
                 e.setFullClassId(add.getId());
+                ValidatorUtils.validate(e, AddGroup.class);
             });
             iActFullClassParamService.saveBatch(actFullClassParams);
         }
@@ -83,6 +88,7 @@ public class ActFullClassServiceImpl implements IActFullClassService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean updateByBo(ActFullClassBo bo) {
         ActFullClass update = BeanUtil.toBean(bo, ActFullClass.class);
         validEntityBeforeSave(update);
@@ -91,6 +97,7 @@ public class ActFullClassServiceImpl implements IActFullClassService {
         if(CollectionUtil.isNotEmpty(actFullClassParams)){
             actFullClassParams.forEach(e->{
                 e.setFullClassId(update.getId());
+                ValidatorUtils.validate(e, EditGroup.class);
             });
             iActFullClassParamService.saveBatch(actFullClassParams);
         }
