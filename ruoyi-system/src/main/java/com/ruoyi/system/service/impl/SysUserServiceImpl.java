@@ -47,6 +47,7 @@ public class SysUserServiceImpl implements ISysUserService {
     private final SysUserMapper baseMapper;
     private final SysRoleMapper roleMapper;
     private final SysPostMapper postMapper;
+    private final SysDeptMapper deptMapper;
     private final SysUserRoleMapper userRoleMapper;
     private final SysUserPostMapper userPostMapper;
 
