@@ -181,7 +181,7 @@ public class SysRoleServiceImpl implements ISysRoleService {
      */
     @Override
     public void checkRoleDataScope(Long roleId) {
-        if (!SysUser.isAdmin(LoginHelper.getUserId())) {
+        if (!LoginHelper.isAdmin()) {
             SysRole role = new SysRole();
             role.setRoleId(roleId);
             List<SysRole> roles = SpringUtils.getAopProxy(this).selectRoleList(role);
@@ -352,8 +352,8 @@ public class SysRoleServiceImpl implements ISysRoleService {
     @Override
     public int deleteAuthUser(SysUserRole userRole) {
         return userRoleMapper.delete(new LambdaQueryWrapper<SysUserRole>()
-                .eq(SysUserRole::getRoleId, userRole.getRoleId())
-                .eq(SysUserRole::getUserId, userRole.getUserId()));
+            .eq(SysUserRole::getRoleId, userRole.getRoleId())
+            .eq(SysUserRole::getUserId, userRole.getUserId()));
     }
 
     /**
