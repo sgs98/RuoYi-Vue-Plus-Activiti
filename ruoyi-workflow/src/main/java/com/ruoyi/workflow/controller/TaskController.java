@@ -140,7 +140,7 @@ public class TaskController extends BaseController {
      */
     @PostMapping("/backProcess")
     @Log(title = "驳回审批", businessType = BusinessType.INSERT)
-    public R<List<String>> backProcess(@RequestBody BackProcessVo backProcessVo) {
+    public R<String> backProcess(@RequestBody BackProcessVo backProcessVo) {
         return R.ok(iTaskService.backProcess(backProcessVo));
     }
 

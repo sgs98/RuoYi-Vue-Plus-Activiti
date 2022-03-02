@@ -66,7 +66,7 @@ public interface ITaskService {
      * @param: backProcessVo
      * @return
      */
-    List<String> backProcess(BackProcessVo backProcessVo);
+    String backProcess(BackProcessVo backProcessVo);
     Boolean backProcess2(BackProcessVo backProcessVo);
 
     /**

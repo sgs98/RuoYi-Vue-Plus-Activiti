@@ -586,7 +586,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public List<String> backProcess(BackProcessVo backProcessVo) {
+    public String backProcess(BackProcessVo backProcessVo) {
 
         Task task = taskService.createTaskQuery().taskId(backProcessVo.getTaskId()).taskAssignee(getUserId().toString()).singleResult();
         if (task.isSuspended()) {
@@ -631,32 +631,16 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         curFlowNode.setOutgoingFlows(targetSequenceFlow);
         // 10. 完成当前任务，流程就会流向目标节点创建新目标任务
         List<Task> list = taskService.createTaskQuery().processInstanceId(processInstanceId).list();
-        List<String> nodeIds = new ArrayList<>();
         for (Task t : list) {
             if (backProcessVo.getTaskId().equals(t.getId())) {
                 // 当前任务，完成当前任务
                 taskService.addComment(t.getId(), processInstanceId, StringUtils.isNotBlank(backProcessVo.getComment()) ? backProcessVo.getComment() : "驳回");
                 // 完成任务，就会进行驳回到目标节点，产生目标节点的任务数据
                 taskService.complete(backProcessVo.getTaskId());
-                //iActHiActInstService.deleteByNodeId(t.getTaskDefinitionKey());
-                for (SequenceFlow outgoingFlow : oriSequenceFlows) {
-                    FlowNode flowNode = (FlowNode)outgoingFlow.getTargetFlowElement();
-                    if(flowNode instanceof  ExclusiveGateway || flowNode instanceof  ParallelGateway){
-                        nodeIds.add(flowNode.getId());
-                    }
-                }
             } else {
                 taskService.complete(t.getId());
                 historyService.deleteHistoricTaskInstance(t.getId());
                 iActHiActInstService.deleteActHiActInstByActId(t.getTaskDefinitionKey());
-                FlowNode tt = (FlowNode) bpmnModel.getFlowElement(t.getTaskDefinitionKey());
-                List<SequenceFlow> outgoingFlows = tt.getOutgoingFlows();
-                for (SequenceFlow outgoingFlow : outgoingFlows) {
-                    FlowNode flowNode = (FlowNode)outgoingFlow.getTargetFlowElement();
-                    if(flowNode instanceof  ExclusiveGateway || flowNode instanceof  ParallelGateway){
-                        nodeIds.add(flowNode.getId());
-                    }
-                }
             }
         }
         // 11. 完成驳回功能后，将当前节点的原出口方向进行恢复
@@ -702,30 +686,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
                 }
             }
         }
-        return nodeIds;
-    }
-
-    /**
-     *  删除未执行的流程执行实例与执行的历史节点
-     * @param nodeIds 节点id
-     * @param processInstanceId 流程实例id
-     * @return
-     */
-    public Boolean deleteActHiActInstByActIds(List<String> nodeIds,String processInstanceId) {
-        if(CollectionUtil.isNotEmpty(nodeIds)){
-            List<ActRuExecution> actRuExecutions = iActRuExecutionService.selectRuExecutionByProcInstId(processInstanceId);
-            for (ActRuExecution actRuExecution : actRuExecutions) {
-                //删除未执行的流程执行实例
-                if(StringUtils.isNotBlank(actRuExecution.getActId())&&actRuExecution.getIsActive()==0){
-                    iActRuExecutionService.deleteWithValidByIds(Arrays.asList(actRuExecution.getId()),false);
-                }
-            }
-           /*DeleteExecutionCommand deleteExecutionCommand = new DeleteExecutionCommand(list.get(0).getExecutionId());
-            managementService.executeCommand(deleteExecutionCommand);*/
-            //iActHiActInstService.deleteActHiActInstByActIds(nodeIds);
-            return true;
-        }
-        return false;
+        return processInstanceId;
     }
 
     @Override
