@@ -100,7 +100,7 @@ public class DefinitionServiceImpl extends WorkflowService implements IDefinitio
 
     @Override
     @Transactional
-    public R deleteDeployment(String deploymentId,String definitionId) {
+    public R<Void> deleteDeployment(String deploymentId,String definitionId) {
         //1.删除部署的流程定义
         repositoryService.deleteDeployment(deploymentId);
         iActNodeAssigneeService.delByDefinitionId(definitionId);
@@ -192,7 +192,7 @@ public class DefinitionServiceImpl extends WorkflowService implements IDefinitio
 
     @Override
 	@Transactional(rollbackFor = Exception.class)
-    public R setting(String processDefinitionId) {
+    public R<List<ActProcessNodeVo>> setting(String processDefinitionId) {
         BpmnModel bpmnModel = repositoryService.getBpmnModel(processDefinitionId);
         List<Process> processes = bpmnModel.getProcesses();
         List<ActProcessNodeVo> processNodeVoList = new ArrayList<>();

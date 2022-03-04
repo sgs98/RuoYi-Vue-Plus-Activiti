@@ -38,15 +38,15 @@ public class ProcessInstanceController {
 
     /**
      * @Description: 提交申请，启动流程实例
-     * @param: startReq
-     * @return: com.ruoyi.common.core.domain.R
-     * @Author: gssong
+     * @param startReq
+     * @return: com.ruoyi.common.core.domain.R<java.util.Map<java.lang.String,java.lang.Object>>
+     * @author: gssong
      * @Date: 2021/10/10
      */
     @ApiOperation("提交申请，启动流程实例")
     @PostMapping("/startWorkFlow")
     @Log(title = "提交申请", businessType = BusinessType.INSERT)
-    public R startWorkFlow(@RequestBody StartREQ startReq){
+    public R<Map<String,Object>> startWorkFlow(@RequestBody StartREQ startReq){
         Map<String,Object> map = processInstanceService.startWorkFlow(startReq);
         return R.ok("提交成功",map);
     }
@@ -98,7 +98,7 @@ public class ProcessInstanceController {
     /**
      * @Description: 挂起或激活流程实例
      * @param: processInstId
-     * @return: com.ruoyi.common.core.domain.R
+     * @return: com.ruoyi.common.core.domain.R<java.lang.Void>
      * @Author: gssong
      * @Date: 2021/10/16
      */
@@ -118,14 +118,14 @@ public class ProcessInstanceController {
     /**
      * @Description: 作废流程实例，不会删除历史记录
      * @param: processInstId
-     * @return: com.ruoyi.common.core.domain.R
+     * @return: com.ruoyi.common.core.domain.R<java.lang.Boolean>
      * @Author: gssong
      * @Date: 2021/10/16
      */
     @ApiOperation("作废流程实例，不会删除历史记录")
     @DeleteMapping("/deleteRuntimeProcessInst/{processInstId}")
     @Log(title = "作废流程实例，不会删除历史记录", businessType = BusinessType.DELETE)
-    public R deleteRuntimeProcessInst(@PathVariable String processInstId){
+    public R<Boolean> deleteRuntimeProcessInst(@PathVariable String processInstId){
         boolean b = processInstanceService.deleteRuntimeProcessInst(processInstId);
         if(b){
             return R.ok();

@@ -3,6 +3,7 @@ package com.ruoyi.workflow.service;
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.workflow.domain.bo.DefREQ;
+import com.ruoyi.workflow.domain.vo.ActProcessNodeVo;
 import com.ruoyi.workflow.domain.vo.ProcessDefinitionVo;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,14 +24,14 @@ public interface IDefinitionService {
      * @param definitionId
      * @return
      */
-    R deleteDeployment(String deploymentId,String definitionId);
+    R<Void> deleteDeployment(String deploymentId,String definitionId);
 
     /**
      * 通过zip或xml部署流程定义
      * @param file
      * @return
      */
-    R deployByFile(MultipartFile file);
+    R<Void> deployByFile(MultipartFile file);
 
     /**
      * 导出流程定义文件（xml,png)
@@ -59,5 +60,5 @@ public interface IDefinitionService {
      * @param processDefinitionId
      * @return
      */
-    R setting(String processDefinitionId);
+    R<List<ActProcessNodeVo>> setting(String processDefinitionId);
 }

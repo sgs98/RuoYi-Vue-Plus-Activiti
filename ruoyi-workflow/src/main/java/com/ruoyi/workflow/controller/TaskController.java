@@ -11,6 +11,7 @@ import com.ruoyi.workflow.domain.bo.NextNodeREQ;
 import com.ruoyi.workflow.domain.bo.TaskCompleteREQ;
 import com.ruoyi.workflow.domain.bo.TaskREQ;
 import com.ruoyi.workflow.domain.vo.BackProcessVo;
+import com.ruoyi.workflow.domain.vo.ProcessNode;
 import com.ruoyi.workflow.domain.vo.TaskFinishVo;
 import com.ruoyi.workflow.domain.vo.TaskWaitingVo;
 import com.ruoyi.workflow.service.IActHiActInstService;
@@ -103,7 +104,7 @@ public class TaskController extends BaseController {
     /**
      * @param req
      * @Description: 完成任务
-     * @return: com.ruoyi.common.core.domain.R
+     * @return: com.ruoyi.common.core.domain.R<java.lang.Void>
      * @author: gssong
      * @Date: 2021/10/21 13:34
      */
@@ -121,20 +122,20 @@ public class TaskController extends BaseController {
     /**
      * @Description: 获取目标节点（下一个节点）
      * @param: taskId
-     * @return: com.ruoyi.common.core.domain.R<java.util.List < com.ruoyi.workflow.domain.vo.ProcessNode>>
+     * @return: com.ruoyi.common.core.domain.R<java.util.List <com.ruoyi.workflow.domain.vo.ProcessNode>>
      * @Author: gssong
      * @Date: 2021/10/23
      */
     @ApiOperation("获取目标节点（下一个节点）")
     @PostMapping("/getNextNodeInfo")
-    public R getNextNodeInfo(@RequestBody NextNodeREQ req) {
+    public R<List<ProcessNode>> getNextNodeInfo(@RequestBody NextNodeREQ req) {
         return R.ok(iTaskService.getNextNodeInfo(req));
     }
 
     /**
      * @Description: 驳回审批
      * @param: backProcessVo
-     * @return: com.ruoyi.common.core.domain.R
+     * @return: com.ruoyi.common.core.domain.R<java.lang.String>
      * @Author: gssong
      * @Date: 2021/11/6
      */
@@ -160,14 +161,14 @@ public class TaskController extends BaseController {
     /**
      * @Description: 签收（拾取）任务
      * @param: taskId
-     * @return: com.ruoyi.common.core.domain.R
+     * @return: @return: com.ruoyi.common.core.domain.R<java.lang.Void>
      * @Author: gssong
      * @Date: 2021/11/16
      */
     @ApiOperation("签收（拾取）任务")
     @PostMapping("/claim/{taskId}")
     @Log(title = "签收（拾取）任务", businessType = BusinessType.INSERT)
-    public R claimTask(@PathVariable String taskId) {
+    public R<Void> claimTask(@PathVariable String taskId) {
         try {
             taskService.claim(taskId, LoginHelper.getUserId().toString());
             return R.ok();
@@ -179,21 +180,42 @@ public class TaskController extends BaseController {
 
     /**
      * @Description: 归还（拾取的）任务
-     * @param: taskId
-     * @return: com.ruoyi.common.core.domain.R
-     * @Author: gssong
+     * @param taskId
+     * @return: com.ruoyi.common.core.domain.R<java.lang.Void>
+     * @author: gssong
      * @Date: 2022/01/01
      */
     @ApiOperation("归还（拾取的）任务")
     @PostMapping("/returnTask/{taskId}")
     @Log(title = "归还（拾取的）任务", businessType = BusinessType.INSERT)
-    public R returnTask(@PathVariable String taskId) {
+    public R<Void> returnTask(@PathVariable String taskId) {
         try {
             taskService.setAssignee(taskId, null);
             return R.ok();
         }catch (Exception e) {
             e.printStackTrace();
             return R.fail("归还任务失败");
+        }
+    }
+
+    /**
+     * @Description: 委派任务
+     * @param taskId
+     * @param userId
+     * @return: com.ruoyi.common.core.domain.R<java.lang.Void>
+     * @author: gssong
+     * @Date: 2022/3/4 13:18
+     */
+    @ApiOperation("委派任务")
+    @GetMapping("/delegateTask/{taskId}/{userId}")
+    @Log(title = "委派任务", businessType = BusinessType.INSERT)
+    public R<Void> delegateTask(@PathVariable String taskId , @PathVariable String userId) {
+        try {
+            taskService.delegateTask(taskId, userId);
+            return R.ok();
+        }catch (Exception e) {
+            e.printStackTrace();
+            return R.fail("委派任务任务失败");
         }
     }
 }

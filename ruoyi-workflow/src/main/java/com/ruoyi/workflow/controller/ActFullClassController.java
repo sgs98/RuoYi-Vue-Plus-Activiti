@@ -2,13 +2,12 @@ package com.ruoyi.workflow.controller;
 
 import java.util.List;
 import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.ruoyi.common.core.domain.PageQuery;
 import lombok.RequiredArgsConstructor;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.*;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.annotation.Validated;
@@ -48,7 +47,7 @@ public class ActFullClassController extends BaseController {
      * 查询业务规则列表
      */
     @ApiOperation("查询业务规则列表")
-    @PreAuthorize("@ss.hasPermi('workflow:fullClass:list')")
+    @SaCheckPermission("workflow:fullClass:list")
     @GetMapping("/list")
     public TableDataInfo<ActFullClassVo> list(@Validated(QueryGroup.class) ActFullClassBo bo, PageQuery pageQuery) {
         return iActFullClassService.queryPageList(bo,pageQuery);
@@ -58,7 +57,7 @@ public class ActFullClassController extends BaseController {
      * 导出业务规则列表
      */
     @ApiOperation("导出业务规则列表")
-    @PreAuthorize("@ss.hasPermi('workflow:fullClass:export')")
+    @SaCheckPermission("workflow:fullClass:export")
     @Log(title = "业务规则", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(@Validated ActFullClassBo bo, HttpServletResponse response) {
@@ -70,7 +69,7 @@ public class ActFullClassController extends BaseController {
      * 获取业务规则详细信息
      */
     @ApiOperation("获取业务规则详细信息")
-    @PreAuthorize("@ss.hasPermi('workflow:fullClass:query')")
+    @SaCheckPermission("workflow:fullClass:query")
     @GetMapping("/{id}")
     public R<ActFullClassVo> getInfo(@ApiParam("主键")
                                                   @NotNull(message = "主键不能为空")
@@ -82,7 +81,7 @@ public class ActFullClassController extends BaseController {
      * 新增业务规则
      */
     @ApiOperation("新增业务规则")
-    @PreAuthorize("@ss.hasPermi('workflow:fullClass:add')")
+    @SaCheckPermission("workflow:fullClass:add")
     @Log(title = "业务规则", businessType = BusinessType.INSERT)
     @RepeatSubmit()
     @PostMapping()
@@ -94,7 +93,7 @@ public class ActFullClassController extends BaseController {
      * 修改业务规则
      */
     @ApiOperation("修改业务规则")
-    @PreAuthorize("@ss.hasPermi('workflow:fullClass:edit')")
+    @SaCheckPermission("workflow:fullClass:edit")
     @Log(title = "业务规则", businessType = BusinessType.UPDATE)
     @RepeatSubmit()
     @PutMapping()
@@ -106,7 +105,7 @@ public class ActFullClassController extends BaseController {
      * 删除业务规则
      */
     @ApiOperation("删除业务规则")
-    @PreAuthorize("@ss.hasPermi('workflow:fullClass:remove')")
+    @SaCheckPermission("workflow:fullClass:remove")
     @Log(title = "业务规则" , businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public R<Void> remove(@ApiParam("主键串")

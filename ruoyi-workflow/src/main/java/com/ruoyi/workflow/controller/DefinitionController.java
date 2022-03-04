@@ -7,6 +7,7 @@ import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.workflow.domain.bo.DefREQ;
+import com.ruoyi.workflow.domain.vo.ActProcessNodeVo;
 import com.ruoyi.workflow.domain.vo.ProcessDefinitionVo;
 import com.ruoyi.workflow.service.IDefinitionService;
 import io.swagger.annotations.Api;
@@ -77,7 +78,7 @@ public class DefinitionController extends BaseController {
     @DeleteMapping("/{deploymentId}/{definitionId}")
     @Log(title = "删除流程定义模型", businessType = BusinessType.DELETE)
     @RepeatSubmit
-    public R deleteDeployment(@PathVariable String deploymentId,@PathVariable String definitionId) {
+    public R<Void> deleteDeployment(@PathVariable String deploymentId,@PathVariable String definitionId) {
         return iDefinitionService.deleteDeployment(deploymentId,definitionId);
     }
 
@@ -85,7 +86,7 @@ public class DefinitionController extends BaseController {
     @PostMapping("/deployByFile")
     @Log(title = "通过zip或xml部署流程定义", businessType = BusinessType.INSERT)
     @RepeatSubmit
-    public R deployByFile(@RequestParam("file") MultipartFile file) {
+    public R<Void> deployByFile(@RequestParam("file") MultipartFile file) {
         return iDefinitionService.deployByFile(file);
     }
 
@@ -125,13 +126,13 @@ public class DefinitionController extends BaseController {
     /**
      * @Description: 查询流程环节
      * @param processDefinitionId
-     * @return: com.ruoyi.common.core.domain.R
+     * @return: com.ruoyi.common.core.domain.R<java.util.List<com.ruoyi.workflow.domain.vo.ActProcessNodeVo>>
      * @author: gssong
      * @Date: 2021/11/19
      */
     @ApiOperation("查询流程环节")
     @GetMapping("/setting/{processDefinitionId}")
-    public R setting(@PathVariable String processDefinitionId){
+    public R<List<ActProcessNodeVo>> setting(@PathVariable String processDefinitionId){
         return iDefinitionService.setting(processDefinitionId);
     }
 

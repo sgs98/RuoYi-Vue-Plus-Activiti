@@ -84,7 +84,7 @@ public class ModelController extends BaseController {
     @Log(title = "通过流程定义模型id部署流程定义", businessType = BusinessType.INSERT)
     @RepeatSubmit
     @PostMapping("/deploy/{id}")
-    public R deploy(@PathVariable("id") String id) {
+    public R<Void> deploy(@PathVariable("id") String id) {
         try {
             return iModelService.deploy(id);
         } catch (IOException e) {
