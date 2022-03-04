@@ -200,8 +200,7 @@ public class TaskController extends BaseController {
 
     /**
      * @Description: 委派任务
-     * @param taskId
-     * @param userId
+     * @param taskREQ
      * @return: com.ruoyi.common.core.domain.R<java.lang.Void>
      * @author: gssong
      * @Date: 2022/3/4 13:18
@@ -209,9 +208,10 @@ public class TaskController extends BaseController {
     @ApiOperation("委派任务")
     @GetMapping("/delegateTask/{taskId}/{userId}")
     @Log(title = "委派任务", businessType = BusinessType.INSERT)
-    public R<Void> delegateTask(@PathVariable String taskId , @PathVariable String userId) {
+    public R<Void> delegateTask(@RequestBody TaskREQ taskREQ) {
         try {
-            taskService.delegateTask(taskId, userId);
+            taskService.addComment(taskREQ.getTaskId(), taskREQ.getProcessInstId(),"【"+LoginHelper.getUsername()+"】委派给【"+taskREQ.getDelegateUserName()+"】");
+            taskService.delegateTask(taskREQ.getTaskId(), taskREQ.getDelegateUserId());
             return R.ok();
         }catch (Exception e) {
             e.printStackTrace();
