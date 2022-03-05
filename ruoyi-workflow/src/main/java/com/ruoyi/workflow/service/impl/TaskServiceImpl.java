@@ -28,6 +28,7 @@ import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.history.HistoricTaskInstanceQuery;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntityImpl;
+import org.activiti.engine.impl.persistence.entity.TaskEntity;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
@@ -146,7 +147,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
     @Transactional(rollbackFor = Exception.class)
     public Boolean completeTask(TaskCompleteREQ req) {
         // 1.查询任务
-        Task task = taskService.createTaskQuery().taskId(req.getTaskId()).taskAssignee(getUserId().toString()).singleResult();
+        TaskEntity task = (TaskEntity)taskService.createTaskQuery().taskId(req.getTaskId()).taskAssignee(getUserId().toString()).singleResult();
 
         if (ObjectUtil.isNull(task)) {
             throw new ServiceException("任务不存在或您不是当前审批人");
@@ -154,6 +155,12 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
 
         if (task.isSuspended()) {
             throw new ServiceException("当前任务已被挂起");
+        }
+        //办理委托任务
+        if(ActConstant.PENDING.equals(task.getDelegationState().name())){
+            taskService.addComment(task.getId(),task.getProcessInstanceId(),req.getMessage());
+            taskService.resolveTask(req.getTaskId());
+            return true;
         }
         ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceId(task.getProcessInstanceId()).singleResult();
         //判断下一节点是否是会签 如果是会签 将选择的人员放到会签变量
@@ -359,7 +366,11 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
     @Override
     public List<ProcessNode> getNextNodeInfo(NextNodeREQ req) {
         //设置变量
-        Task task = taskService.createTaskQuery().taskId(req.getTaskId()).singleResult();
+        TaskEntity task = (TaskEntity)taskService.createTaskQuery().taskId(req.getTaskId()).singleResult();
+        //委托流程
+        if(ActConstant.PENDING.equals(task.getDelegationState().name())){
+            return null;
+        }
         //查询任务
         List<Task> taskList = taskService.createTaskQuery().processInstanceId(task.getProcessInstanceId()).list();
         //如果是会签最后一个人员审批选人

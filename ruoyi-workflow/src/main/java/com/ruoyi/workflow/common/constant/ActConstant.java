@@ -83,6 +83,11 @@ public interface ActConstant {
      */
     String PROCESS_INSTANCE_ID = "processInstanceId";
 
+    /**
+     * 流程委派标识
+     */
+    String PENDING = "PENDING";
+
     String PARAM_BYTE = "Byte";
 
     String PARAM_SHORT = "Short";
