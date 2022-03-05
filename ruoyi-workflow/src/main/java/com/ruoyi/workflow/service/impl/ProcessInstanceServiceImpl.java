@@ -162,6 +162,7 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
                     actHistoryInfoVo.setNickName(sysUser.getNickName());
                 }
             }
+
         }
         List<ActHistoryInfoVo> collect = new ArrayList<>();
         //待办理

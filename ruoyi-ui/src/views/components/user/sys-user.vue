@@ -98,7 +98,7 @@
     closable @close="handleCloseTag(user)" >{{user.userName}} </el-tag>
   </div>
   <div slot="footer" class="dialog-footer">
-        <el-button size="small" type="primary" @click="primary">确认</el-button>
+        <el-button size="small" type="primary" @click="confirmUser">确认</el-button>
         <el-button size="small" @click="visible=false">取 消</el-button>
   </div>
 </el-dialog>
@@ -133,9 +133,9 @@ export default {
       // 总条数
       total: 0,
       // 用户表格数据
-      userList: null,
+      userList: [],
       // 部门树选项
-      deptOptions: undefined,
+      deptOptions: [],
       // 是否显示弹出层
       open: false,
       // 部门名称
@@ -176,6 +176,7 @@ export default {
     },
     propUserList(val) {
       if(val.length>0){
+        console.log(val)
          this.chooseUserList = val
          this.chooseUserList.forEach(row => {
            this.$refs.multipleTable.toggleRowSelection(row,true);
@@ -260,9 +261,9 @@ export default {
        })
     },
     // 确认
-    primary(){
+    confirmUser(){
       if(this.chooseUserList.length>0){
-        this.$emit("primary",this.chooseUserList)
+        this.$emit("confirmUser",this.chooseUserList)
       }else{
         this.$modal.msgWarning("请选择人员！");
       }

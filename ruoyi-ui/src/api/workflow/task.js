@@ -92,5 +92,13 @@ export default {
       url: '/workflow/task/returnTask/'+taskId,
       method: 'post'
     })
+  },
+  // 归还任务
+  delegateTask(data) {
+    return request({
+      url: '/workflow/task/delegateTask',
+      method: 'post',
+      data: data
+    })
   }
 }

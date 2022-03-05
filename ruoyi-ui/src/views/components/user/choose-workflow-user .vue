@@ -66,7 +66,7 @@
     closable @close="handleCloseTag(user)" >{{user.userName}} </el-tag>
   </div>
   <div slot="footer" class="dialog-footer">
-        <el-button :loading="buttonLoading" type="primary" @click="primary">确认</el-button>
+        <el-button :loading="buttonLoading" type="primary" @click="confirmUser">确认</el-button>
         <el-button @click="cancel">取 消</el-button>
   </div>
 </el-dialog>
@@ -236,9 +236,9 @@ export default {
        })
     },
     // 确认
-    primary(){
+    confirmUser(){
       if(this.chooseUserList.length>0){
-        this.$emit("clickUser",this.chooseUserList,this.nodeId)
+        this.$emit("confirmUser",this.chooseUserList,this.nodeId)
         this.visible = false
       }else{
         this.$modal.msgWarning("请选择人员！");

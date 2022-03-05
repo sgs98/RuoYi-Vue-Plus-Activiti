@@ -1,10 +1,13 @@
 package com.ruoyi.workflow.controller;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.core.validate.AddGroup;
 import com.ruoyi.common.enums.BusinessType;
+import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.helper.LoginHelper;
 import com.ruoyi.workflow.domain.ActTaskNode;
 import com.ruoyi.workflow.domain.bo.NextNodeREQ;
@@ -19,6 +22,8 @@ import com.ruoyi.workflow.service.ITaskService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.activiti.engine.TaskService;
+import org.activiti.engine.task.Task;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -203,17 +208,19 @@ public class TaskController extends BaseController {
      * @Date: 2022/3/4 13:18
      */
     @ApiOperation("委派任务")
-    @GetMapping("/delegateTask/{taskId}/{userId}")
+    @PostMapping("/delegateTask")
     @Log(title = "委派任务", businessType = BusinessType.INSERT)
-    public R<Void> delegateTask(@RequestBody TaskREQ taskREQ) {
-        try {
-            taskService.addComment(taskREQ.getTaskId(), taskREQ.getProcessInstId(),"【"+LoginHelper.getUsername()+"】委派给【"+taskREQ.getDelegateUserName()+"】");
+    public R<Void> delegateTask(@Validated({AddGroup.class}) @RequestBody  TaskREQ taskREQ) {
+            if(StringUtils.isBlank(taskREQ.getDelegateUserId())){
+                throw new ServiceException("请选择委托人");
+            }
+            Task task = taskService.createTaskQuery().taskId(taskREQ.getTaskId()).singleResult();
+            if(ObjectUtil.isEmpty(task)){
+                throw new ServiceException("当前任务不存在或你不是任务办理人");
+            }
+            taskService.addComment(taskREQ.getTaskId(), task.getProcessInstanceId(),"【"+LoginHelper.getUsername()+"】委派给【"+taskREQ.getDelegateUserName()+"】");
             taskService.delegateTask(taskREQ.getTaskId(), taskREQ.getDelegateUserId());
             return R.ok();
-        }catch (Exception e) {
-            e.printStackTrace();
-            return R.fail("委派任务任务失败");
-        }
     }
 }
 

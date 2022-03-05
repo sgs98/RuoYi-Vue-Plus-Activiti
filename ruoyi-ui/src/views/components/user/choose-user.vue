@@ -111,9 +111,9 @@ export default {
       // 总条数
       total: 0,
       // 用户表格数据
-      userList: null,
+      userList: [],
       // 部门树选项
-      deptOptions: undefined,
+      deptOptions: [],
       // 是否显示弹出层
       open: false,
       // 部门名称
@@ -227,7 +227,7 @@ export default {
       if(this.chooseUserList.length>0){
         this.$emit("clickUser",this.chooseUserList)
       }else{
-        this.$modal.msgWarning("请选择人员！");  
+        this.$modal.msgWarning("请选择人员！");
       }
     }
   }

@@ -16,7 +16,7 @@
   </el-tree>
   </div>
   <div slot="footer" class="dialog-footer">
-        <el-button size="small" type="primary" @click="primary">确认</el-button>
+        <el-button size="small" type="primary" @click="confirmUser">确认</el-button>
         <el-button size="small" @click="visible=false">取 消</el-button>
   </div>
 </el-dialog>
@@ -97,10 +97,10 @@ export default {
       });
     },
     // 确认
-    primary(){
+    confirmUser(){
       let deptList = this.$refs.tree.getCheckedNodes();
       if(deptList.length>0){
-        this.$emit("primary",deptList)
+        this.$emit("confirmUser",deptList)
       }else{
         this.$modal.msgWarning("请选择部门！");
       }

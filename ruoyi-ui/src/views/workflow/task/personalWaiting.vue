@@ -13,10 +13,10 @@
           <el-form-item>
             <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
             <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
-            <el-button icon="el-icon-refresh" size="mini" @click="userRef">用户</el-button>
-            <el-button icon="el-icon-refresh" size="mini" @click="chooseUserRef">用户</el-button>
-            <el-button icon="el-icon-refresh" size="mini" @click="deptRef">部门</el-button>
-            <el-button icon="el-icon-refresh" size="mini" @click="roleRef">角色</el-button>
+            <el-button icon="el-icon-refresh" size="mini" @click="userRefs">用户</el-button>
+            <el-button icon="el-icon-refresh" size="mini" @click="chooseUserRefs">用户</el-button>
+            <el-button icon="el-icon-refresh" size="mini" @click="deptRefs">部门</el-button>
+            <el-button icon="el-icon-refresh" size="mini" @click="roleRefs">角色</el-button>
           </el-form-item>
         </el-form>
 
@@ -87,7 +87,7 @@
         </el-dialog>
 
 
-        <sys-user :propUserList="propUserList" ref="userRef" @clickUser="clickUser"/>
+        <sys-user ref="userRef" @confirmUser="clickUser"/>
         <choose-user ref="chooseUserRef"/>
         <sys-dept ref="deptRef"/>
         <sys-role ref="roleRef"/>
@@ -152,7 +152,6 @@
         // 点击的行数据
         task: {},
         taskVariables: undefined,
-        propUserList: [],
         processInstanceId: undefined,
         businessKey: undefined, // 业务唯一标识
         visible: false
@@ -209,16 +208,16 @@
           this.taskId = row.id
           this.$refs.approvalForm.visible = true
       },
-      userRef(){
+      userRefs(){
           this.$refs.userRef.visible = true
       },
-      chooseUserRef(){
+      chooseUserRefs(){
           this.$refs.chooseUserRef.visible = true
       },
-      deptRef(){
+      deptRefs(){
           this.$refs.deptRef.visible = true
       },
-      roleRef(){
+      roleRefs(){
           this.$refs.roleRef.visible = true
       },
       clickHistPop(row){
