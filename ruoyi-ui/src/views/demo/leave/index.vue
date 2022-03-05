@@ -459,7 +459,7 @@ export default {
     //提交流程
     submitFormAppply(entity){
         const data = {
-            processKey: 'manykey', // key
+            processKey: 'test', // key
             businessKey: entity.id // 业务id
         }
         // 启动流程

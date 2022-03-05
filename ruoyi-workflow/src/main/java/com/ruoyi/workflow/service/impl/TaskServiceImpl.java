@@ -453,7 +453,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
                     } else if (ObjectUtil.isNotNull(nodeAssignee) && nodeAssignee.getFullClassId() != null) {
                         ActFullClassVo actFullClassVo = iActFullClassService.queryById(nodeAssignee.getFullClassId());
                         Object assignee = workFlowUtils.assignList(actFullClassVo, processNode.getTaskId());
-                        processNode.setChooseWay(ActConstant.WORKFLOW_RULE);
+                        processNode.setChooseWay(nodeAssignee.getChooseWay());
                         processNode.setAssignee("");
                         processNode.setAssigneeId(assignee.toString());
                         processNode.setIsShow(nodeAssignee.getIsShow());
@@ -466,7 +466,20 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
                         throw new ServiceException(processNode.getNodeName() + "未配置审批人，请联系管理员！");
                     }
                 } else {
-                    processNode.setChooseWay(ActConstant.WORKFLOW_ASSIGNEE);
+                    ActNodeAssignee nodeAssignee = actNodeAssignees.stream().filter(e -> e.getNodeId().equals(processNode.getNodeId())).findFirst().orElse(null);
+                    if(ObjectUtil.isNotEmpty(nodeAssignee)){
+                        processNode.setChooseWay(nodeAssignee.getChooseWay());
+                        processNode.setAssignee(nodeAssignee.getAssignee());
+                        processNode.setAssigneeId(nodeAssignee.getAssigneeId());
+                        processNode.setIsShow(nodeAssignee.getIsShow());
+                        if(nodeAssignee.getMultiple()){
+                            processNode.setNodeId(nodeAssignee.getMultipleColumn());
+                        }
+                        processNode.setMultiple(nodeAssignee.getMultiple());
+                        processNode.setMultipleColumn(nodeAssignee.getMultipleColumn());
+                    }else{
+                        processNode.setChooseWay(ActConstant.WORKFLOW_ASSIGNEE);
+                    }
                 }
             }
         }
@@ -476,7 +489,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
                 ProcessNode node = iterator.next();
                 // 去除画流程时设置的选人节点  不需要弹窗 选人
                 // 去除不需要弹窗选人的节点
-                if (node.getChooseWay().contains(ActConstant.WORKFLOW_ASSIGNEE) || !node.getIsShow()) {
+                if (ActConstant.WORKFLOW_ASSIGNEE.equals(node.getChooseWay())||!node.getIsShow()) {
                     iterator.remove();
                 }
             }

@@ -43,9 +43,6 @@ public class TaskController extends BaseController {
     @Autowired
     private TaskService taskService;
 
-    @Autowired
-    private IActHiActInstService iActHiActInstService;
-
     /**
      * @Description: 查询当前用户的待办任务
      * @param: req

@@ -189,6 +189,10 @@ export default {
                 this.$modal.msgError("请选择选人方式")
                 return false
             }
+            if(this.form.isBack === null || this.form.isBack === ''||this.form.isBack === undefined){
+                this.form.isBack = false
+            }
+
             if(this.form.id){
               del(this.form.id)
               this.form.id = undefined
