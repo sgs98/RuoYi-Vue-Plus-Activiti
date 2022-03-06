@@ -157,7 +157,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
             throw new ServiceException("当前任务已被挂起");
         }
         //办理委托任务
-        if(ActConstant.PENDING.equals(task.getDelegationState().name())){
+        if(ObjectUtil.isNotEmpty(task.getDelegationState())&&ActConstant.PENDING.equals(task.getDelegationState().name())){
             taskService.addComment(task.getId(),task.getProcessInstanceId(),req.getMessage());
             taskService.resolveTask(req.getTaskId());
             return true;
@@ -368,7 +368,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         //设置变量
         TaskEntity task = (TaskEntity)taskService.createTaskQuery().taskId(req.getTaskId()).singleResult();
         //委托流程
-        if(ActConstant.PENDING.equals(task.getDelegationState().name())){
+        if(ObjectUtil.isNotEmpty(task.getDelegationState())&&ActConstant.PENDING.equals(task.getDelegationState().name())){
             return null;
         }
         //查询任务
