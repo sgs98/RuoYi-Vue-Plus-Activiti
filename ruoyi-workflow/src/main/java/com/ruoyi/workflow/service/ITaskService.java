@@ -75,4 +75,11 @@ public interface ITaskService {
      * @return
      */
     List<ActTaskNode> getBackNodes(String processInstId);
+
+    /**
+     * 委托
+     * @param taskREQ
+     * @return
+     */
+    Boolean delegateTask(TaskREQ taskREQ);
 }

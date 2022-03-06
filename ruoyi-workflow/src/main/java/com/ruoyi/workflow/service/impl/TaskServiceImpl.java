@@ -11,6 +11,7 @@ import com.ruoyi.system.service.ISysUserService;
 import com.ruoyi.workflow.activiti.cmd.JumpAnyWhereCmd;
 import com.ruoyi.workflow.common.constant.ActConstant;
 import com.ruoyi.workflow.common.enums.BusinessStatusEnum;
+import com.ruoyi.workflow.domain.ActHiTaskInst;
 import com.ruoyi.workflow.domain.ActNodeAssignee;
 import com.ruoyi.workflow.domain.ActRuExecution;
 import com.ruoyi.workflow.domain.ActTaskNode;
@@ -80,6 +81,10 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
 
     @Autowired
     private IActRuExecutionService iActRuExecutionService;
+
+    @Autowired
+    private IActHiTaskInstService iActHiTaskInstService;
+
 
 
     /**
@@ -157,7 +162,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
             throw new ServiceException("当前任务已被挂起");
         }
         //办理委托任务
-        if(ActConstant.PENDING.equals(task.getDelegationState().name())){
+        if(ObjectUtil.isNotEmpty(task.getDelegationState())&&ActConstant.PENDING.equals(task.getDelegationState().name())){
             taskService.addComment(task.getId(),task.getProcessInstanceId(),req.getMessage());
             taskService.resolveTask(req.getTaskId());
             return true;
@@ -368,7 +373,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         //设置变量
         TaskEntity task = (TaskEntity)taskService.createTaskQuery().taskId(req.getTaskId()).singleResult();
         //委托流程
-        if(ActConstant.PENDING.equals(task.getDelegationState().name())){
+        if(ObjectUtil.isNotEmpty(task.getDelegationState())&&ActConstant.PENDING.equals(task.getDelegationState().name())){
             return null;
         }
         //查询任务
@@ -783,4 +788,48 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         List<ActTaskNode> list = iActTaskNodeService.getListByInstanceId(processInstId);
         return list;
     }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean delegateTask(TaskREQ taskREQ) {
+        if(StringUtils.isBlank(taskREQ.getDelegateUserId())){
+            throw new ServiceException("请选择委托人");
+        }
+        Task task = taskService.createTaskQuery().taskId(taskREQ.getTaskId()).singleResult();
+        if(ObjectUtil.isEmpty(task)){
+            throw new ServiceException("当前任务不存在或你不是任务办理人");
+        }
+        TaskEntity subTask = this.createSubTask(task);
+        taskService.addComment(subTask.getId(), task.getProcessInstanceId(),"【"+LoginHelper.getUsername()+"】委派给【"+taskREQ.getDelegateUserName()+"】");
+        taskService.delegateTask(taskREQ.getTaskId(), taskREQ.getDelegateUserId());
+        taskService.complete(subTask.getId());
+        ActHiTaskInst hiTaskInst = iActHiTaskInstService.getById(subTask.getId());
+        if(ObjectUtil.isNotEmpty(hiTaskInst)){
+            hiTaskInst.setProcDefId(task.getProcessDefinitionId());
+            hiTaskInst.setProcInstId(task.getProcessInstanceId());
+            hiTaskInst.setTaskDefKey(task.getTaskDefinitionKey());
+            iActHiTaskInstService.updateById(hiTaskInst);
+        }
+        return true;
+    }
+
+    private TaskEntity createSubTask(Task parentTask){
+        TaskEntity task = null;
+        if(ObjectUtil.isNotEmpty(parentTask)){
+            task = (TaskEntity) taskService.newTask();
+            task.setCategory(parentTask.getCategory());
+            task.setDescription(parentTask.getDescription());
+            task.setTenantId(parentTask.getTenantId());
+            task.setAssignee(parentTask.getAssignee());
+            task.setName(parentTask.getName());
+            task.setProcessDefinitionId(parentTask.getProcessDefinitionId());
+            task.setProcessInstanceId(parentTask.getProcessInstanceId());
+            task.setTaskDefinitionKey(parentTask.getTaskDefinitionKey());
+            task.setPriority(parentTask.getPriority());
+            task.setCreateTime(new Date());
+            taskService.saveTask(task);
+        }
+        return  task;
+    }
+
 }

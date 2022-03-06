@@ -211,16 +211,7 @@ public class TaskController extends BaseController {
     @PostMapping("/delegateTask")
     @Log(title = "委派任务", businessType = BusinessType.INSERT)
     public R<Void> delegateTask(@Validated({AddGroup.class}) @RequestBody  TaskREQ taskREQ) {
-            if(StringUtils.isBlank(taskREQ.getDelegateUserId())){
-                throw new ServiceException("请选择委托人");
-            }
-            Task task = taskService.createTaskQuery().taskId(taskREQ.getTaskId()).singleResult();
-            if(ObjectUtil.isEmpty(task)){
-                throw new ServiceException("当前任务不存在或你不是任务办理人");
-            }
-            taskService.addComment(taskREQ.getTaskId(), task.getProcessInstanceId(),"【"+LoginHelper.getUsername()+"】委派给【"+taskREQ.getDelegateUserName()+"】");
-            taskService.delegateTask(taskREQ.getTaskId(), taskREQ.getDelegateUserId());
-            return R.ok();
+            return toAjax(iTaskService.delegateTask(taskREQ));
     }
 }
 

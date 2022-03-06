@@ -73,8 +73,6 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
     @Autowired
     private IActTaskNodeService iActTaskNodeService;
 
-    @Autowired
-    private IActNodeAssigneeService iActNodeAssigneeService;
 
     @Autowired
     private ProcessEngine processEngine;
