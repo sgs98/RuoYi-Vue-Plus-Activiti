@@ -211,7 +211,7 @@ public class TaskController extends BaseController {
     @PostMapping("/delegateTask")
     @Log(title = "委派任务", businessType = BusinessType.INSERT)
     public R<Void> delegateTask(@Validated({AddGroup.class}) @RequestBody  TaskREQ taskREQ) {
-            return toAjax(iTaskService.delegateTask(taskREQ));
+        return toAjax(iTaskService.delegateTask(taskREQ));
     }
 }
 

@@ -799,21 +799,27 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         if(ObjectUtil.isEmpty(task)){
             throw new ServiceException("当前任务不存在或你不是任务办理人");
         }
-        TaskEntity subTask = this.createSubTask(task);
-        taskService.addComment(subTask.getId(), task.getProcessInstanceId(),"【"+LoginHelper.getUsername()+"】委派给【"+taskREQ.getDelegateUserName()+"】");
-        taskService.delegateTask(taskREQ.getTaskId(), taskREQ.getDelegateUserId());
-        taskService.complete(subTask.getId());
-        ActHiTaskInst hiTaskInst = iActHiTaskInstService.getById(subTask.getId());
-        if(ObjectUtil.isNotEmpty(hiTaskInst)){
-            hiTaskInst.setProcDefId(task.getProcessDefinitionId());
-            hiTaskInst.setProcInstId(task.getProcessInstanceId());
-            hiTaskInst.setTaskDefKey(task.getTaskDefinitionKey());
-            iActHiTaskInstService.updateById(hiTaskInst);
+        try{
+            TaskEntity subTask = this.createSubTask(task,new Date());
+            taskService.addComment(subTask.getId(), task.getProcessInstanceId(),"【"+LoginHelper.getUsername()+"】委派给【"+taskREQ.getDelegateUserName()+"】");
+            //委托任务
+            taskService.delegateTask(taskREQ.getTaskId(), taskREQ.getDelegateUserId());
+            //办理生成的任务记录
+            taskService.complete(subTask.getId());
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
         }
-        return true;
     }
 
-    private TaskEntity createSubTask(Task parentTask){
+    /**
+     * 创建流程任务
+     * @param parentTask
+     * @param createTime
+     * @return
+     */
+    private TaskEntity createSubTask(Task parentTask,Date createTime){
         TaskEntity task = null;
         if(ObjectUtil.isNotEmpty(parentTask)){
             task = (TaskEntity) taskService.newTask();
@@ -826,8 +832,17 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
             task.setProcessInstanceId(parentTask.getProcessInstanceId());
             task.setTaskDefinitionKey(parentTask.getTaskDefinitionKey());
             task.setPriority(parentTask.getPriority());
-            task.setCreateTime(new Date());
+            task.setCreateTime(createTime);
             taskService.saveTask(task);
+        }
+        if(ObjectUtil.isNotNull(task)){
+            ActHiTaskInst hiTaskInst = iActHiTaskInstService.getById(task.getId());
+            if(ObjectUtil.isNotEmpty(hiTaskInst)){
+                hiTaskInst.setProcDefId(task.getProcessDefinitionId());
+                hiTaskInst.setProcInstId(task.getProcessInstanceId());
+                hiTaskInst.setTaskDefKey(task.getTaskDefinitionKey());
+                iActHiTaskInstService.updateById(hiTaskInst);
+            }
         }
         return  task;
     }
