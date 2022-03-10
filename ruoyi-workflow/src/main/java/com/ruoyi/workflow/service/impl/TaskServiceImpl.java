@@ -152,7 +152,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
     @Transactional(rollbackFor = Exception.class)
     public Boolean completeTask(TaskCompleteREQ req) {
         // 1.查询任务
-        TaskEntity task = (TaskEntity)taskService.createTaskQuery().taskId(req.getTaskId()).taskAssignee(getUserId().toString()).singleResult();
+        Task task = taskService.createTaskQuery().taskId(req.getTaskId()).taskAssignee(getUserId().toString()).singleResult();
 
         if (ObjectUtil.isNull(task)) {
             throw new ServiceException("任务不存在或您不是当前审批人");
@@ -165,6 +165,14 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         if(ObjectUtil.isNotEmpty(task.getDelegationState())&&ActConstant.PENDING.equals(task.getDelegationState().name())){
             taskService.addComment(task.getId(),task.getProcessInstanceId(),req.getMessage());
             taskService.resolveTask(req.getTaskId());
+            ActHiTaskInst hiTaskInst = iActHiTaskInstService.getById(task.getId());
+            TaskEntity subTask = createSubTask(task, hiTaskInst.getStartTime());
+            taskService.addComment(subTask.getId(), task.getProcessInstanceId(), req.getMessage());
+            taskService.complete(subTask.getId());
+            ActHiTaskInst actHiTaskInst = new ActHiTaskInst();
+            actHiTaskInst.setId(task.getId());
+            actHiTaskInst.setStartTime(new Date());
+            iActHiTaskInstService.updateById(actHiTaskInst);
             return true;
         }
         ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceId(task.getProcessInstanceId()).singleResult();
@@ -795,7 +803,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         if(StringUtils.isBlank(taskREQ.getDelegateUserId())){
             throw new ServiceException("请选择委托人");
         }
-        Task task = taskService.createTaskQuery().taskId(taskREQ.getTaskId()).singleResult();
+        TaskEntity task = (TaskEntity) taskService.createTaskQuery().taskId(taskREQ.getTaskId()).singleResult();
         if(ObjectUtil.isEmpty(task)){
             throw new ServiceException("当前任务不存在或你不是任务办理人");
         }
@@ -806,6 +814,10 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
             taskService.delegateTask(taskREQ.getTaskId(), taskREQ.getDelegateUserId());
             //办理生成的任务记录
             taskService.complete(subTask.getId());
+            ActHiTaskInst actHiTaskInst = new ActHiTaskInst();
+            actHiTaskInst.setId(task.getId());
+            actHiTaskInst.setStartTime(new Date());
+            iActHiTaskInstService.updateById(actHiTaskInst);
             return true;
         }catch (Exception e){
             e.printStackTrace();

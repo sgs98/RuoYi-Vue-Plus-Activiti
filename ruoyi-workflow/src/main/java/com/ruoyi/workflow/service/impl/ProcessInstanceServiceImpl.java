@@ -165,6 +165,14 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
         List<ActHistoryInfoVo> collect = new ArrayList<>();
         //待办理
         List<ActHistoryInfoVo> waitingTask = actHistoryInfoVoList.stream().filter(e -> e.getEndTime() == null).collect(Collectors.toList());
+        waitingTask.forEach(e->{
+            if(StringUtils.isNotBlank(e.getOwner())){
+                SysUser sysUser = iSysUserService.selectUserById(Long.valueOf(e.getOwner()));
+                if(ObjectUtil.isNotEmpty(sysUser)){
+                    e.setNickName(sysUser.getNickName());
+                }
+            }
+        });
         //已办理
         List<ActHistoryInfoVo> finishTask = actHistoryInfoVoList.stream().filter(e -> e.getEndTime() != null).collect(Collectors.toList());
         collect.addAll(waitingTask);
