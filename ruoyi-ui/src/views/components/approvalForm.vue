@@ -9,7 +9,7 @@
                <el-table-column label="流程审批历史记录" align="center">
                 <el-table-column type="index" label="序号" align="center" width="50"></el-table-column>
                 <el-table-column prop="name" label="任务名称" align="center" ></el-table-column>
-                <el-table-column prop="assignee" label="办理人" align="center" ></el-table-column>
+                <el-table-column prop="nickName" label="办理人" align="center" ></el-table-column>
                 <el-table-column prop="status" label="状态" align="center" ></el-table-column>
                 <el-table-column prop="comment" label="审批意见" align="center" ></el-table-column>
                 <el-table-column prop="startTime" label="开始时间" align="center" ></el-table-column>
