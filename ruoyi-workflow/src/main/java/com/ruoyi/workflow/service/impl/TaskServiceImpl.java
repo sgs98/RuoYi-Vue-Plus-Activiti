@@ -3,6 +3,7 @@ package com.ruoyi.workflow.service.impl;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.exception.ServiceException;
@@ -803,7 +804,8 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         if(StringUtils.isBlank(taskREQ.getDelegateUserId())){
             throw new ServiceException("请选择委托人");
         }
-        TaskEntity task = (TaskEntity) taskService.createTaskQuery().taskId(taskREQ.getTaskId()).singleResult();
+        TaskEntity task = (TaskEntity) taskService.createTaskQuery().taskId(taskREQ.getTaskId())
+            .taskCandidateOrAssigned(LoginHelper.getUserId().toString()).singleResult();
         if(ObjectUtil.isEmpty(task)){
             throw new ServiceException("当前任务不存在或你不是任务办理人");
         }
@@ -822,6 +824,27 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         }catch (Exception e){
             e.printStackTrace();
             return false;
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public R<Boolean> transmit(String taskId, String userId) {
+        Task task = taskService.createTaskQuery().taskId(taskId)
+            .taskCandidateOrAssigned(LoginHelper.getUserId().toString()).singleResult();
+        if(ObjectUtil.isEmpty(task)){
+            return R.fail("当前任务不存在或你不是任务办理人");
+        }
+        try {
+            TaskEntity subTask = createSubTask(task, new Date());
+            taskService.addComment(subTask.getId(), task.getProcessInstanceId(),
+                "【"+LoginHelper.getUsername()+"】转办了给【"+iSysUserService.selectUserById(Long.valueOf(userId)).getUserName()+"】");
+            taskService.complete(subTask.getId());
+            taskService.setAssignee(task.getId(),userId);
+            return R.ok();
+        }catch (Exception e){
+            e.printStackTrace();
+            return R.fail();
         }
     }
 

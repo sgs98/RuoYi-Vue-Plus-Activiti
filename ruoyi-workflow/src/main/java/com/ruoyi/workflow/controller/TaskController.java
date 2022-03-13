@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 /**
@@ -212,6 +213,22 @@ public class TaskController extends BaseController {
     @Log(title = "委派任务", businessType = BusinessType.INSERT)
     public R<Void> delegateTask(@Validated({AddGroup.class}) @RequestBody  TaskREQ taskREQ) {
         return toAjax(iTaskService.delegateTask(taskREQ));
+    }
+
+    /**
+     * @Description: 转办任务
+     * @param taskId
+     * @param userId
+     * @return: com.ruoyi.common.core.domain.R<java.lang.Void>
+     * @author: gssong
+     * @Date: 2022/3/13 13:18
+     */
+    @ApiOperation("转办任务")
+    @PostMapping("/transmit/{taskId}/{userId}")
+    @Log(title = "转办任务", businessType = BusinessType.INSERT)
+    public R<Boolean> transmit(@PathVariable @NotBlank(message = "任务ID不能为空") String taskId,
+                            @PathVariable @NotBlank(message = "代理人ID不能为空") String userId) {
+        return iTaskService.transmit(taskId,userId);
     }
 }
 

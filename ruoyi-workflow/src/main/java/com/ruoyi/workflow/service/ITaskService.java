@@ -1,5 +1,6 @@
 package com.ruoyi.workflow.service;
 
+import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.workflow.domain.ActTaskNode;
 import com.ruoyi.workflow.domain.bo.NextNodeREQ;
@@ -82,4 +83,12 @@ public interface ITaskService {
      * @return
      */
     Boolean delegateTask(TaskREQ taskREQ);
+
+    /**
+     * 转办任务
+     * @param taskId
+     * @param userId
+     * @return
+     */
+    R<Boolean> transmit(String taskId, String userId);
 }
