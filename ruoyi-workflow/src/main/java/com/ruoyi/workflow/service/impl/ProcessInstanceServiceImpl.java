@@ -439,82 +439,75 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean cancelProcessApply(String processInstId) {
-        /*ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceId(processInstId).startedBy(LoginHelper.getUserId().toString()).singleResult();
+        ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceId(processInstId).startedBy(LoginHelper.getUserId().toString()).singleResult();
         if(ObjectUtil.isNull(processInstance)){
             throw new ServiceException("流程不是该审批人提交,撤销失败!");
         }
         List<Task> list = taskService.createTaskQuery().processInstanceId(processInstId).list();
-        for (Task task : list) {
-            if (task.isSuspended()) {
-                throw new ServiceException("当前任务已被挂起");
+        if(list.size()>1){
+            throw new ServiceException("当前任务有多人审批不可撤销");
+        }
+        Task task = list.get(0);
+        if (task.isSuspended()) {
+            throw new ServiceException("当前任务已被挂起");
+        }
+        // 1. 获取流程模型实例 BpmnModel
+        BpmnModel bpmnModel = repositoryService.getBpmnModel(task.getProcessDefinitionId());
+        // 2.当前节点信息
+        FlowNode curFlowNode = (FlowNode) bpmnModel.getFlowElement(task.getTaskDefinitionKey());
+        // 3.获取当前节点原出口连线
+        List<SequenceFlow> sequenceFlowList = curFlowNode.getOutgoingFlows();
+        // 4. 临时存储当前节点的原出口连线
+        List<SequenceFlow> oriSequenceFlows = new ArrayList<>();
+        oriSequenceFlows.addAll(sequenceFlowList);
+        // 5. 将当前节点的原出口清空
+        sequenceFlowList.clear();
+        // 6. 获取目标节点信息
+        List<ActTaskNode> listActTaskNode = iActTaskNodeService.getListByInstanceId(processInstId);
+        if(CollectionUtil.isEmpty(listActTaskNode)){
+            throw new ServiceException("未查询到撤回节点信息");
+        }
+        ActTaskNode actTaskNode = listActTaskNode.stream().filter(e -> e.getOrderNo()==0).findFirst().orElse(null);
+        if(ObjectUtil.isNull(actTaskNode)){
+            throw new ServiceException("未查询到撤回节点信息");
+        }
+        FlowNode targetFlowNode = (FlowNode) bpmnModel.getFlowElement(actTaskNode.getNodeId());
+        // 7. 获取目标节点的入口连线
+        List<SequenceFlow> incomingFlows = targetFlowNode.getIncomingFlows();
+        // 8. 存储所有目标出口
+        List<SequenceFlow> targetSequenceFlow = new ArrayList<>();
+        for (SequenceFlow incomingFlow : incomingFlows) {
+            // 找到入口连线的源头（获取目标节点的父节点）
+            FlowNode source = (FlowNode) incomingFlow.getSourceFlowElement();
+            List<SequenceFlow> sequenceFlows;
+            if (source instanceof ParallelGateway) {
+                // 并行网关: 获取目标节点的父节点（并行网关）的所有出口，
+                sequenceFlows = source.getOutgoingFlows();
+            } else {
+                // 其他类型父节点, 则获取目标节点的入口连续
+                sequenceFlows = targetFlowNode.getIncomingFlows();
             }
-            List<Task> newlist = taskService.createTaskQuery().processInstanceId(processInstId).list();
-            if(CollectionUtil.isNotEmpty(newlist)&&newlist.size()==1){
-                // 1. 获取流程模型实例 BpmnModel
-                BpmnModel bpmnModel = repositoryService.getBpmnModel(task.getProcessDefinitionId());
-                // 2.当前节点信息
-                FlowNode curFlowNode = (FlowNode) bpmnModel.getFlowElement(task.getTaskDefinitionKey());
-                // 3.获取当前节点原出口连线
-                List<SequenceFlow> sequenceFlowList = curFlowNode.getOutgoingFlows();
-                // 4. 临时存储当前节点的原出口连线
-                List<SequenceFlow> oriSequenceFlows = new ArrayList<>();
-                oriSequenceFlows.addAll(sequenceFlowList);
-                // 5. 将当前节点的原出口清空
-                sequenceFlowList.clear();
-                // 6. 获取目标节点信息
-                List<ActTaskNode> listActTaskNode = iActTaskNodeService.getListByInstanceId(processInstId);
-                if(CollectionUtil.isEmpty(listActTaskNode)){
-                    throw new ServiceException("未查询到撤回节点信息");
-                }
-                ActTaskNode actTaskNode = listActTaskNode.stream().filter(e -> e.getOrderNo().equals(0)).findFirst().orElse(null);
-                if(ObjectUtil.isNull(actTaskNode)){
-                    throw new ServiceException("未查询到撤回节点信息");
-                }
-                FlowNode targetFlowNode = (FlowNode) bpmnModel.getFlowElement(actTaskNode.getNodeId());
-                // 7. 获取目标节点的入口连线
-                List<SequenceFlow> incomingFlows = targetFlowNode.getIncomingFlows();
-                // 8. 存储所有目标出口
-                List<SequenceFlow> targetSequenceFlow = new ArrayList<>();
-                for (SequenceFlow incomingFlow : incomingFlows) {
-                    // 找到入口连线的源头（获取目标节点的父节点）
-                    FlowNode source = (FlowNode) incomingFlow.getSourceFlowElement();
-                    List<SequenceFlow> sequenceFlows;
-                    if (source instanceof ParallelGateway) {
-                        // 并行网关: 获取目标节点的父节点（并行网关）的所有出口，
-                        sequenceFlows = source.getOutgoingFlows();
-                    } else {
-                        // 其他类型父节点, 则获取目标节点的入口连续
-                        sequenceFlows = targetFlowNode.getIncomingFlows();
-                    }
-                    targetSequenceFlow.addAll(sequenceFlows);
-                }
-                // 9. 将当前节点的出口设置为新节点
-                curFlowNode.setOutgoingFlows(targetSequenceFlow);
-                // 10. 完成当前任务，流程就会流向目标节点创建新目标任务
-                // 当前任务，完成当前任务
-                taskService.addComment(task.getId(), task.getProcessInstanceId(),"撤销申请");
-                // 完成任务，就会进行驳回到目标节点，产生目标节点的任务数据
-                Map<String, Object> variables =new HashMap<>();
-                variables.put("status",BusinessStatusEnum.CANCEL.getStatus());
-                taskService.setVariables(task.getId(),variables);
-                taskService.complete(task.getId());
-                // 11. 完成驳回功能后，将当前节点的原出口方向进行恢复
-                curFlowNode.setOutgoingFlows(oriSequenceFlows);
-                // 12. 查询目标任务节点历史办理人
-                List<Task> newTaskList = taskService.createTaskQuery().processInstanceId(task.getProcessInstanceId()).list();
-                for (Task newTask : newTaskList) {
-                    taskService.setAssignee(newTask.getId(), LoginHelper.getUserId().toString());
-                }
-            }else{
-                taskService.complete(task.getId());
-                historyService.deleteHistoricTaskInstance(task.getId());
-            }
-
+            targetSequenceFlow.addAll(sequenceFlows);
+        }
+        // 9. 将当前节点的出口设置为新节点
+        curFlowNode.setOutgoingFlows(targetSequenceFlow);
+        // 10. 完成当前任务，流程就会流向目标节点创建新目标任务
+        // 当前任务，完成当前任务
+        taskService.addComment(task.getId(), task.getProcessInstanceId(),"申请人撤销申请");
+        // 完成任务，就会进行驳回到目标节点，产生目标节点的任务数据
+        Map<String, Object> variables =new HashMap<>();
+        variables.put("status",BusinessStatusEnum.CANCEL.getStatus());
+        taskService.setVariables(task.getId(),variables);
+        taskService.complete(task.getId());
+        // 11. 完成驳回功能后，将当前节点的原出口方向进行恢复
+        curFlowNode.setOutgoingFlows(oriSequenceFlows);
+        // 12. 查询目标任务节点历史办理人
+        List<Task> newTaskList = taskService.createTaskQuery().processInstanceId(task.getProcessInstanceId()).list();
+        for (Task newTask : newTaskList) {
+            taskService.setAssignee(newTask.getId(), LoginHelper.getUserId().toString());
         }
         // 13. 删除驳回后的流程节点
-        iActBusinessStatusService.updateState(processInstance.getBusinessKey(),BusinessStatusEnum.CANCEL);
-        Boolean taskNode = iActTaskNodeService.deleteByInstanceId(processInstId);*/
-        boolean b = this.deleteRuntimeProcessAndHisInst(processInstId);
+        boolean b = iActBusinessStatusService.updateState(processInstance.getBusinessKey(), BusinessStatusEnum.CANCEL);
         return b;
     }
 }

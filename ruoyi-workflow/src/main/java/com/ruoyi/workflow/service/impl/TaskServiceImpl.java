@@ -183,9 +183,9 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
             String column = actNodeAssignee.getMultipleColumn();
             String assigneeId = actNodeAssignee.getAssigneeId();
             if(actNodeAssignee.getMultiple()&&actNodeAssignee.getIsShow()){
-                List<Long> userNameList = req.getAssignees(actNodeAssignee.getMultipleColumn());
-                if(CollectionUtil.isNotEmpty(userNameList)){
-                    taskService.setVariable(task.getId(),column,userNameList);
+                List<Long> userIdList = req.getAssignees(actNodeAssignee.getMultipleColumn());
+                if(CollectionUtil.isNotEmpty(userIdList)){
+                    taskService.setVariable(task.getId(),column,userIdList);
                 }
             }
             //判断是否有会签并且不需要弹窗选人的节点
@@ -217,8 +217,6 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
             if (CollectionUtil.isEmpty(actTaskNodeList)) {
                 actTaskNode.setOrderNo(0);
                 actTaskNode.setIsBack(true);
-                // 更新业务状态为：办理中, 和流程实例id
-                iActBusinessStatusService.updateState(processInstance.getBusinessKey(), BusinessStatusEnum.WAITING, task.getProcessInstanceId());
             } else {
                 ActNodeAssignee actNodeAssignee = actNodeAssignees.stream().filter(e -> e.getNodeId().equals(task.getTaskDefinitionKey())).findFirst().orElse(null);
                 //如果为设置流程定义配置默认 当前环节可以回退
@@ -232,6 +230,8 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
             }
             iActTaskNodeService.save(actTaskNode);
         }
+        // 更新业务状态为：办理中, 和流程实例id
+        iActBusinessStatusService.updateState(processInstance.getBusinessKey(), BusinessStatusEnum.WAITING, task.getProcessInstanceId());
         // 6. 查询下一个任务
         List<Task> taskList = taskService.createTaskQuery().processInstanceId(task.getProcessInstanceId()).list();
         // 7. 如果为空 办结任务
