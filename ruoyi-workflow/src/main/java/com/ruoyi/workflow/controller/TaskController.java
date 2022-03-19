@@ -7,7 +7,6 @@ import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.validate.AddGroup;
 import com.ruoyi.common.enums.BusinessType;
-import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.helper.LoginHelper;
 import com.ruoyi.workflow.domain.ActTaskNode;
 import com.ruoyi.workflow.domain.bo.NextNodeREQ;
@@ -17,18 +16,14 @@ import com.ruoyi.workflow.domain.vo.BackProcessVo;
 import com.ruoyi.workflow.domain.vo.ProcessNode;
 import com.ruoyi.workflow.domain.vo.TaskFinishVo;
 import com.ruoyi.workflow.domain.vo.TaskWaitingVo;
-import com.ruoyi.workflow.service.IActHiActInstService;
 import com.ruoyi.workflow.service.ITaskService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.activiti.engine.TaskService;
-import org.activiti.engine.task.Task;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 /**
@@ -217,18 +212,16 @@ public class TaskController extends BaseController {
 
     /**
      * @Description: 转办任务
-     * @param taskId
-     * @param userId
+     * @param taskREQ
      * @return: com.ruoyi.common.core.domain.R<java.lang.Void>
      * @author: gssong
      * @Date: 2022/3/13 13:18
      */
     @ApiOperation("转办任务")
-    @PostMapping("/transmit/{taskId}/{userId}")
+    @PostMapping("/transmitTask")
     @Log(title = "转办任务", businessType = BusinessType.INSERT)
-    public R<Boolean> transmit(@PathVariable @NotBlank(message = "任务ID不能为空") String taskId,
-                            @PathVariable @NotBlank(message = "代理人ID不能为空") String userId) {
-        return iTaskService.transmit(taskId,userId);
+    public R<Boolean> transmit(@RequestBody TaskREQ taskREQ) {
+        return iTaskService.transmitTask(taskREQ);
     }
 }
 

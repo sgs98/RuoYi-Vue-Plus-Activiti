@@ -1,11 +1,13 @@
 package com.ruoyi.system.service;
 
 import com.ruoyi.common.core.domain.PageQuery;
+import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.system.domain.bo.SysUserBo;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 用户 业务层
@@ -212,7 +214,7 @@ public interface ISysUserService {
      * @param sysUserBo
      * @return
      */
-    TableDataInfo<SysUser> getWorkflowUserListByPage(SysUserBo sysUserBo);
+    Map<String,Object> getWorkflowUserListByPage(SysUserBo sysUserBo);
 
 	/**
      * 通过用户ID查询用户集合

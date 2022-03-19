@@ -41,6 +41,9 @@ public class TaskREQ extends PageEntity implements Serializable {
     @ApiModelProperty("委派人")
     private String delegateUserName;
 
+    @ApiModelProperty(value = "择转办人id")
+    private String transmitUserId;
+
     @ApiModelProperty("审批意见")
     private String comment;
 }

@@ -86,9 +86,8 @@ public interface ITaskService {
 
     /**
      * 转办任务
-     * @param taskId
-     * @param userId
+     * @param taskREQ
      * @return
      */
-    R<Boolean> transmit(String taskId, String userId);
+    R<Boolean> transmitTask(TaskREQ taskREQ);
 }

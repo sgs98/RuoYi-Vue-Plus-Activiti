@@ -829,8 +829,8 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<Boolean> transmit(String taskId, String userId) {
-        Task task = taskService.createTaskQuery().taskId(taskId)
+    public R<Boolean> transmitTask(TaskREQ taskREQ) {
+        Task task = taskService.createTaskQuery().taskId(taskREQ.getTaskId())
             .taskCandidateOrAssigned(LoginHelper.getUserId().toString()).singleResult();
         if(ObjectUtil.isEmpty(task)){
             return R.fail("当前任务不存在或你不是任务办理人");
@@ -838,9 +838,9 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         try {
             TaskEntity subTask = createSubTask(task, new Date());
             taskService.addComment(subTask.getId(), task.getProcessInstanceId(),
-                "【"+LoginHelper.getUsername()+"】转办了给【"+iSysUserService.selectUserById(Long.valueOf(userId)).getUserName()+"】");
+                StringUtils.isNotBlank(taskREQ.getComment())?taskREQ.getComment():LoginHelper.getUsername()+"转办了任务");
             taskService.complete(subTask.getId());
-            taskService.setAssignee(task.getId(),userId);
+            taskService.setAssignee(task.getId(),taskREQ.getTransmitUserId());
             return R.ok();
         }catch (Exception e){
             e.printStackTrace();

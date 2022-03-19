@@ -267,7 +267,8 @@ public class SysUserController extends BaseController {
      * @Date: 2021/12/10
      */
     @PostMapping("/getWorkflowUserListByPage")
-    public TableDataInfo<SysUser> getWorkflowUserListByPage(@RequestBody SysUserBo sysUserBo){
-        return userService.getWorkflowUserListByPage(sysUserBo);
+    public R<Map<String,Object>> getWorkflowUserListByPage(@RequestBody SysUserBo sysUserBo){
+        Map<String,Object> map = userService.getWorkflowUserListByPage(sysUserBo);
+        return R.ok(map);
     }
 }

@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.common.constant.UserConstants;
 import com.ruoyi.common.core.domain.PageQuery;
+import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.domain.entity.SysDept;
 import com.ruoyi.common.core.domain.entity.SysRole;
 import com.ruoyi.common.core.domain.entity.SysUser;
@@ -27,9 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.ruoyi.common.constant.Constants.*;
@@ -467,12 +466,13 @@ public class SysUserServiceImpl implements ISysUserService {
     }
 
     @Override
-    public TableDataInfo<SysUser> getWorkflowUserListByPage(SysUserBo sysUserBo) {
+    public Map<String,Object> getWorkflowUserListByPage(SysUserBo sysUserBo) {
+        Map<String, Object> map = new HashMap<>();
         LambdaQueryWrapper<SysUser> queryWrapper = new LambdaQueryWrapper<>();
         //检索条件
         queryWrapper.eq(StringUtils.isNotEmpty(sysUserBo.getDeptId()),SysUser::getDeptId,sysUserBo.getDeptId());
-        queryWrapper.eq(StringUtils.isNotEmpty(sysUserBo.getUserName()),SysUser::getUserName,sysUserBo.getUserName());
-        queryWrapper.eq(StringUtils.isNotEmpty(sysUserBo.getPhonenumber()),SysUser::getPhonenumber,sysUserBo.getPhonenumber());
+        queryWrapper.like(StringUtils.isNotEmpty(sysUserBo.getUserName()),SysUser::getUserName,sysUserBo.getUserName());
+        queryWrapper.like(StringUtils.isNotEmpty(sysUserBo.getPhonenumber()),SysUser::getPhonenumber,sysUserBo.getPhonenumber());
         Page<SysUser> page = new Page<>(sysUserBo.getPageNum(), sysUserBo.getPageSize());
         // 按用户id查询
         if(StringUtils.isNotEmpty(sysUserBo.getParams())){
@@ -484,7 +484,12 @@ public class SysUserServiceImpl implements ISysUserService {
             if (WORKFLOW_PERSON.equals(sysUserBo.getType())||WORKFLOW_RULE.equals(sysUserBo.getType())) {
                 queryWrapper.in(SysUser::getUserId, paramList);
                 Page<SysUser> userPage = baseMapper.selectPage(page, queryWrapper);
-                return TableDataInfo.build(recordPage(userPage));
+                if(CollectionUtil.isNotEmpty(sysUserBo.getIds())){
+                    List<SysUser> list = baseMapper.selectList(new LambdaQueryWrapper<SysUser>().in(SysUser::getUserId, sysUserBo.getIds()));
+                    map.put("list",list);
+                }
+                map.put("page",TableDataInfo.build(recordPage(userPage)));
+                return map;
                 //按角色id查询用户
             } else if (WORKFLOW_ROLE.equals(sysUserBo.getType())) {
                 List<SysRole> sysRoles = roleMapper.selectList(new LambdaQueryWrapper<SysRole>().in(SysRole::getRoleId, paramList));
@@ -493,16 +498,34 @@ public class SysUserServiceImpl implements ISysUserService {
                     List<SysUserRole> sysUserRoles = userRoleMapper.selectList(new LambdaQueryWrapper<SysUserRole>().in(SysUserRole::getRoleId, collectRoleId));
                     queryWrapper.in(SysUser::getUserId, sysUserRoles.stream().map(e -> e.getUserId()).collect(Collectors.toList()));
                     Page<SysUser> userPage = baseMapper.selectPage(page, queryWrapper);
-                    return TableDataInfo.build(recordPage(userPage));
+                    if(CollectionUtil.isNotEmpty(sysUserBo.getIds())){
+                        List<SysUser> list = baseMapper.selectList(new LambdaQueryWrapper<SysUser>().in(SysUser::getUserId, sysUserBo.getIds()));
+                        map.put("list",list);
+                    }
+                    map.put("page",TableDataInfo.build(recordPage(userPage)));
+                    return map;
                 }
                 //按部门id查询用户
             } else if (WORKFLOW_DEPT.equals(sysUserBo.getType())) {
                 queryWrapper.in(SysUser::getDeptId, paramList);
                 Page<SysUser> userPage = baseMapper.selectPage(page, queryWrapper);
-                return TableDataInfo.build(recordPage(userPage));
+                if(CollectionUtil.isNotEmpty(sysUserBo.getIds())){
+                    List<SysUser> list = baseMapper.selectList(new LambdaQueryWrapper<SysUser>().in(SysUser::getUserId, sysUserBo.getIds()));
+                    map.put("list",list);
+                }
+                map.put("page",TableDataInfo.build(recordPage(userPage)));
+                return map;
             }
+        }else{
+            Page<SysUser> userPage = baseMapper.selectPage(page, queryWrapper);
+            if(CollectionUtil.isNotEmpty(sysUserBo.getIds())){
+                List<SysUser> list = baseMapper.selectList(new LambdaQueryWrapper<SysUser>().in(SysUser::getUserId, sysUserBo.getIds()));
+                map.put("list",list);
+            }
+            map.put("page",TableDataInfo.build(recordPage(userPage)));
+            return map;
         }
-        return TableDataInfo.build(new Page<>());
+        return map;
     }
 
     /**

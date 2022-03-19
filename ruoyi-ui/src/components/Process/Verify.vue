@@ -1,5 +1,6 @@
 <template>
-  <el-dialog  title="提交申请" :visible.sync="visible"  width="600px"  append-to-body destroy-on-close @close="closeDialog" >
+<div v-if="visible">
+  <el-dialog  title="提交申请" :visible.sync="visible"  width="800px"  append-to-body destroy-on-close @close="closeDialog" >
     <el-form v-loading="loading"  :rules="rules" ref="formData" :model="formData" status-icon >
       <el-form-item label="审批意见" prop="message" label-width="120px">
         <el-input  type="textarea" v-model="formData.message" maxlength="300"  placeholder="请输入审批意见" :autosize="{ minRows: 4 }" show-word-limit ></el-input>
@@ -33,17 +34,35 @@
       </el-form-item>
       <el-form-item align="center">
         <el-button type="primary" @click="submitForm('formData')" size="small">提交</el-button>
+        <el-button type="success" @click="transmitClick()" size="small">转发</el-button>
         <el-button size="small" @click="visible = false">取消</el-button>
       </el-form-item>
     </el-form>
     <!-- 选择人员组件 -->
-    <chooseWorkflowUser :dataObj="dataObj" :propUserList="propUserList" :nodeId="nodeId" @confirmUser="clickUser" ref="wfUserRef"/>
-    <sys-user :propUserList="propUserList" :multiple = false ref="userRef" @confirmUser="confirmUser"/>
+    <chooseWorkflowUser :dataObj="dataObj" :nodeId="nodeId" @confirmUser="clickUser" ref="wfUserRef"/>
+    <sys-user :propUserList="delegateUserList" :multiple = false ref="userRef" @confirmUser="confirmUser"/>
   </el-dialog>
+  <el-dialog  title="转发申请" :visible.sync="transmitVisible" width="500px"  append-to-body>
+    <el-form  ref="transmitData" :model="transmitForm" :rules="transmitRules"  status-icon >
+      <el-form-item label-width="80px" label="审批意见">
+        <el-input  type="textarea" v-model="transmitForm.message" maxlength="300"  placeholder="请输入审批意见" :autosize="{ minRows: 4 }" show-word-limit ></el-input>
+      </el-form-item>
+      <el-form-item label-width="80px" label="转办人" prop="userName">
+        <el-input  placeholder="请选择转办人" readonly v-model="transmitForm.userName" >
+            <el-button  @click="transmitPeople() " slot="append" icon="el-icon-search" >选择</el-button>
+        </el-input>
+      </el-form-item>
+      <el-form-item  align="center">
+        <el-button type="primary" @click="transmitSubmit('transmitData')" size="small">提交</el-button>
+        <el-button size="small" @click="transmitVisible = false">取消</el-button>
+      </el-form-item>
+    </el-form>
+    <sys-user :propUserList="transmitUserList" :multiple = false ref="transmitUserRef" @confirmUser="confirmTransmitUser"/>
+  </el-dialog>
+</div>
 </template>
 <script>
 import api from "@/api/workflow/task";
-import { selectListUserByIds } from "@/api/system/user";
 import ChooseWorkflowUser from "@/views/components/user/choose-workflow-user ";
 import  SysUser from "@/views/components/user/sys-user";
 export default {
@@ -59,12 +78,18 @@ export default {
     return {
       visible: false, // 弹出窗口，true弹出
       loading: false,
+      transmitVisible: false,
       formData: {
         // 提交表单数据
         message: null,
         assigneeMap: {},
         delegateUserId: undefined,
         delegateUserName: undefined
+      },
+      transmitForm: {
+        message: null,
+        userId: null,
+        userName: null
       },
       delegate: '2',//是否委托
       nextNodes: [], // 下一节点是否为结束节点
@@ -73,12 +98,20 @@ export default {
           { required: true, message: "请输入下一步审批人", trigger: "blur" },
         ],
       },
+      transmitRules: {
+        userName: [
+          { required: true, message: "请输入转办人", trigger: "blur" },
+        ],
+      },
       nickName: {},
       // 查询审批人条件
       dataObj: {},
       // 节点id
       nodeId: undefined,
-      propUserList: [],
+      // 委托用户反选
+      delegateUserList: [],
+      //转发用户反选
+      transmitUserList: [],
       isDelegate: false //是否委托
     };
   },
@@ -179,17 +212,20 @@ export default {
     choosePeople(chooseWay, assigneeId, nodeId) {
       this.propUserList = [];
       if (chooseWay) {
-        this.dataObj = {
-          chooseWay: chooseWay,
-          assigneeId: assigneeId,
-        };
-        this.nodeId = nodeId;
         if (this.formData.assigneeMap[nodeId]) {
-          let userNameList = this.formData.assigneeMap[nodeId].split(",");
-          selectListUserByIds(userNameList).then((response) => {
-            this.propUserList = response.data;
-          });
+          this.dataObj = {
+            chooseWay: chooseWay,
+            assigneeId: assigneeId,
+            ids: this.formData.assigneeMap[nodeId].split(",")
+          };
+        }else{
+           this.dataObj = {
+            chooseWay: chooseWay,
+            assigneeId: assigneeId,
+            ids: []
+          };
         }
+        this.nodeId = nodeId;
         this.$refs.wfUserRef.visible = true;
       }
     },
@@ -209,8 +245,11 @@ export default {
     },
     //选择委托人
     chooseUser(){
+      this.delegateUserList = []
+      this.delegateUserList.push(this.formData.delegateUserId)
       this.$refs.userRef.visible = true
     },
+    //确认委托人员
     confirmUser(data){
       this.formData.delegateUserId = data[0].userId
       this.formData.delegateUserName = data[0].nickName
@@ -223,6 +262,49 @@ export default {
       }else{
         this.isDelegate = false
       }
+    },
+    //打开转发窗口
+    transmitClick(){
+       this.transmitVisible = true
+    },
+    //提交转发
+    transmitSubmit(formName){
+      this.$refs[formName].validate(async (valid) => {
+         if(valid){
+          let params = {
+            transmitUserId: this.transmitForm.userId,
+            taskId: this.taskId,
+            comment: this.transmitForm.message
+          }
+          api.transmitTask(params).then(response=>{
+            if(response.code === 200){
+              // 刷新数据
+              this.$message.success("办理成功");
+              // 将表单清空
+              this.$refs[formName].resetFields();
+              // 关闭窗口
+              this.visible = false;
+              this.transmitVisible = false;
+              // 事件
+              this.$emit("callSubmit")
+            }
+            this.loading = false;
+          })
+         }
+      })
+    },
+    //打开转办人员组件
+    transmitPeople(){
+      console.log(this.transmitForm)
+      this.transmitUserList = []
+      this.transmitUserList.push(this.transmitForm.userId)
+      this.$refs.transmitUserRef.visible = true
+    },
+    //确认转办人员
+    confirmTransmitUser(data){
+      this.transmitForm.userId = data[0].userId
+      this.transmitForm.userName = data[0].nickName
+      this.$refs.transmitUserRef.visible = false
     }
   },
 };

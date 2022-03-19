@@ -94,11 +94,6 @@ export default {
     nodeId: {
       type: String,
       default: ''
-    },
-    //回显的数据
-    propUserList: {
-      type: Array,
-      default:()=>[]
     }
   },
   name: "User",
@@ -127,7 +122,8 @@ export default {
         phonenumber: undefined,
         deptId: undefined,
         type: undefined,
-        params: undefined
+        params: undefined,
+        ids:[]
       },
       // 列信息
       columns: [
@@ -149,28 +145,12 @@ export default {
     dataObj(val) {
        this.queryParams.params = val.assigneeId
        this.queryParams.type = val.chooseWay
+       this.queryParams.ids = val.ids
+       this.$nextTick(() => {
+           this.$refs.multipleTable.clearSelection();
+       });
        this.getList()
     },
-    propUserList(val) {
-      if(val.length>0){
-         this.chooseUserList = val
-         this.chooseUserList.forEach(row => {
-           this.$refs.multipleTable.toggleRowSelection(row,true);
-         })
-         this.getList()
-         let hash = {};
-         //去重
-         this.chooseUserList = this.chooseUserList.reduce((item, next) => {
-              hash[next.userId] ? '' : hash[next.userId] = true && item.push(next);
-              return item
-          }, []);
-      }else{
-         this.$nextTick(() => {
-           this.$refs.multipleTable.clearSelection();
-         });
-         this.chooseUserList = []
-      }
-    }
   },
   created() {
     this.getTreeselect();
@@ -179,9 +159,18 @@ export default {
     /** 查询用户列表 */
     getList() {
       this.loading = true;
+      this.chooseUserList = []
       getWorkflowUserListByPage(this.queryParams).then(response => {
-          this.userList = response.rows;
-          this.total = response.total;
+          let res = response.data.page
+          this.userList = res.rows;
+          this.total = res.total;
+          //反选
+          if(response.data.list){
+            this.chooseUserList = response.data.list
+            response.data.list.forEach(row => {
+              this.$refs.multipleTable.toggleRowSelection(row,true);
+            })
+          }
           this.loading = false;
       });
     },

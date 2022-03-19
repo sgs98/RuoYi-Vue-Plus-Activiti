@@ -93,10 +93,18 @@ export default {
       method: 'post'
     })
   },
-  // 归还任务
+  // 委托任务
   delegateTask(data) {
     return request({
       url: '/workflow/task/delegateTask',
+      method: 'post',
+      data: data
+    })
+  },
+  // 委托任务
+  transmitTask(data) {
+    return request({
+      url: '/workflow/task/transmitTask',
       method: 'post',
       data: data
     })
