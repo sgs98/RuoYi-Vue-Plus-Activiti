@@ -84,7 +84,7 @@
 </template>
 
 <script>
-import { listUser } from "@/api/system/user";
+import { getWorkflowUserListByPage } from "@/api/system/user";
 import { treeselect } from "@/api/system/dept";
 import Treeselect from "@riophae/vue-treeselect";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
@@ -96,6 +96,11 @@ export default {
       type: Boolean,
       default: true,
     },
+    //回显的数据
+    propUserList: {
+      type: Array,
+      default:()=>[]
+    }
   },
   name: "User",
   dicts: ['sys_user_sex'],
@@ -130,7 +135,10 @@ export default {
         pageSize: 10,
         userName: undefined,
         phonenumber: undefined,
-        deptId: undefined
+        deptId: undefined,
+        type: undefined,
+        params: undefined,
+        ids:[]
       },
       // 列信息
       columns: [
@@ -149,6 +157,14 @@ export default {
     // 根据名称筛选部门树
     deptName(val) {
       this.$refs.tree.filter(val);
+    },
+    propUserList(val) {
+      if(val.length>0){
+         this.queryParams.ids = val
+         this.getList()
+      }else{
+       this.chooseUserList = []
+      }
     }
   },
   created() {
@@ -159,9 +175,17 @@ export default {
     /** 查询用户列表 */
     getList() {
       this.loading = true;
-      listUser(this.addDateRange(this.queryParams, this.dateRange)).then(response => {
-          this.userList = response.rows;
-          this.total = response.total;
+      getWorkflowUserListByPage(this.queryParams).then(response => {
+          let res = response.data.page
+          this.userList = res.rows;
+          this.total = res.total;
+           //反选
+          if(response.data.list){
+            this.chooseUserList = response.data.list
+            response.data.list.forEach(row => {
+              this.$refs.multipleTable.toggleRowSelection(row,true);
+            })
+          }
           this.loading = false;
         }
       );
@@ -225,7 +249,7 @@ export default {
     // 确认
     primary(){
       if(this.chooseUserList.length>0){
-        this.$emit("clickUser",this.chooseUserList)
+        this.$emit("confirmUser",this.chooseUserList)
       }else{
         this.$modal.msgWarning("请选择人员！");
       }

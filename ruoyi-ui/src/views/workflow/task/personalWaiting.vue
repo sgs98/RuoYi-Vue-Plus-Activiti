@@ -13,10 +13,6 @@
           <el-form-item>
             <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
             <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
-            <el-button icon="el-icon-refresh" size="mini" @click="userRefs">用户</el-button>
-            <el-button icon="el-icon-refresh" size="mini" @click="chooseUserRefs">用户</el-button>
-            <el-button icon="el-icon-refresh" size="mini" @click="deptRefs">部门</el-button>
-            <el-button icon="el-icon-refresh" size="mini" @click="roleRefs">角色</el-button>
           </el-form-item>
         </el-form>
 
@@ -85,12 +81,6 @@
         <el-dialog title="审批记录" :visible.sync="visible" v-if="visible" width="60%" :close-on-click-modal="false">
           <history :processInstanceId="processInstanceId"></history>
         </el-dialog>
-
-
-        <sys-user ref="userRef" @confirmUser="clickUser"/>
-        <choose-user ref="chooseUserRef"/>
-        <sys-dept ref="deptRef"/>
-        <sys-role ref="roleRef"/>
         <approvalForm ref="approvalForm" :businessKey = 'businessKey' :taskId = 'taskId'
         @refresh = 'refresh' :processInstanceId = 'processInstanceId'/>
     </div>
@@ -102,10 +92,6 @@
   import history from "@/components/Process/History";
   import Back from "@/components/Process/Back";
   import { getLeave} from "@/api/demo/leave";
-  import  SysUser from "@/views/components/user/sys-user";
-  import  ChooseUser from "@/views/components/user/choose-user";
-  import  SysDept from "@/views/components/dept/sys-dept";
-  import  sysRole from "@/views/components/role/sys-role";
   import  approvalForm from "@/views/components/approvalForm";
 
   export default {
@@ -113,10 +99,6 @@
       verify,
       Back,
       history,
-      SysUser,
-      SysDept,
-      ChooseUser,
-      sysRole,
       approvalForm
     },
     data () {
@@ -207,18 +189,6 @@
           this.processInstanceId = row.processInstanceId
           this.taskId = row.id
           this.$refs.approvalForm.visible = true
-      },
-      userRefs(){
-          this.$refs.userRef.visible = true
-      },
-      chooseUserRefs(){
-          this.$refs.chooseUserRef.visible = true
-      },
-      deptRefs(){
-          this.$refs.deptRef.visible = true
-      },
-      roleRefs(){
-          this.$refs.roleRef.visible = true
       },
       clickHistPop(row){
          this.processInstanceId = row.processInstanceId

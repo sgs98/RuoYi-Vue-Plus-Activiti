@@ -243,9 +243,7 @@ export default {
             if(this.form.assigneeId){
               let userIds = this.form.assigneeId.split( ',' )
               if(userIds.length>0){
-                selectListUserByIds(userIds).then(response => {
-                  this.propUserList = response.data
-                })
+                this.propUserList = userIds
               }
             }
             this.$refs.userRef.visible = true
@@ -265,9 +263,7 @@ export default {
             if(this.form.assigneeId){
               let deptIds = this.form.assigneeId.split( ',' )
               if(deptIds.length>0){
-                selectListDeptByIds(deptIds).then(response => {
-                  this.propDeptList = response.data
-                })
+                this.propDeptList = deptIds
               }
             }
             this.$refs.deptRef.visible = true

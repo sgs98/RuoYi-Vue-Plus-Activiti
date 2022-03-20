@@ -65,8 +65,8 @@ export default {
      propDeptList(val) {
        if(val.length>0){
           this.getList()
-          val.forEach(row => {
-            this.deptIds.push(row.deptId)
+          val.forEach(deptId => {
+            this.deptIds.push(deptId)
           })
        }else{
           this.deptIds = []
