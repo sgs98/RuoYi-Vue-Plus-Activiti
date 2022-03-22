@@ -471,6 +471,7 @@ public class SysUserServiceImpl implements ISysUserService {
         LambdaQueryWrapper<SysUser> queryWrapper = new LambdaQueryWrapper<>();
         //检索条件
         queryWrapper.eq(StringUtils.isNotEmpty(sysUserBo.getDeptId()),SysUser::getDeptId,sysUserBo.getDeptId());
+        queryWrapper.eq(SysUser::getStatus,"0");
         queryWrapper.like(StringUtils.isNotEmpty(sysUserBo.getUserName()),SysUser::getUserName,sysUserBo.getUserName());
         queryWrapper.like(StringUtils.isNotEmpty(sysUserBo.getPhonenumber()),SysUser::getPhonenumber,sysUserBo.getPhonenumber());
         Page<SysUser> page = new Page<>(sysUserBo.getPageNum(), sysUserBo.getPageSize());
@@ -517,13 +518,30 @@ public class SysUserServiceImpl implements ISysUserService {
                 return map;
             }
         }else{
-            Page<SysUser> userPage = baseMapper.selectPage(page, queryWrapper);
-            if(CollectionUtil.isNotEmpty(sysUserBo.getIds())){
-                List<SysUser> list = baseMapper.selectList(new LambdaQueryWrapper<SysUser>().in(SysUser::getUserId, sysUserBo.getIds()));
-                map.put("list",list);
+            if(WORKFLOW_ROLE.equals(sysUserBo.getType())){
+                LambdaQueryWrapper<SysRole> roleWrapper = new LambdaQueryWrapper<>();
+                Page<SysRole> rolePage = new Page<>(sysUserBo.getPageNum(), sysUserBo.getPageSize());
+
+                //检索条件
+                roleWrapper.like(StringUtils.isNotEmpty(sysUserBo.getRoleName()),SysRole::getRoleName,sysUserBo.getRoleName());
+                roleWrapper.like(StringUtils.isNotEmpty(sysUserBo.getRoleKey()),SysRole::getRoleName,sysUserBo.getRoleKey());
+                roleWrapper.eq(SysRole::getStatus,"0");
+                Page<SysRole> roleListPage = roleMapper.selectPage(rolePage, roleWrapper);
+                if(CollectionUtil.isNotEmpty(sysUserBo.getIds())){
+                    List<SysRole> list = roleMapper.selectList(new LambdaQueryWrapper<SysRole>().in(SysRole::getRoleId, sysUserBo.getIds()));
+                    map.put("list",list);
+                }
+                map.put("page",TableDataInfo.build(roleListPage));
+            }else{
+                Page<SysUser> userPage = baseMapper.selectPage(page, queryWrapper);
+                if(CollectionUtil.isNotEmpty(sysUserBo.getIds())){
+                    List<SysUser> list = baseMapper.selectList(new LambdaQueryWrapper<SysUser>().in(SysUser::getUserId, sysUserBo.getIds()));
+                    map.put("list",list);
+                }
+                map.put("page",TableDataInfo.build(recordPage(userPage)));
+                return map;
             }
-            map.put("page",TableDataInfo.build(recordPage(userPage)));
-            return map;
+
         }
         return map;
     }
