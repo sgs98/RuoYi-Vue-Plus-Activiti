@@ -242,6 +242,7 @@ public class SysUserController extends BaseController {
      * @Author: gssong
      * @Date: 2021/12/10
      */
+    @ApiOperation("按登录用户名查询")
     @PostMapping("/selectUserListByUserName")
     public R<List<SysUser>> selectUserListByUserName(@RequestBody List<String> userName){
         return R.ok(userService.selectUserListByUserName(userName));
@@ -254,18 +255,20 @@ public class SysUserController extends BaseController {
      * @Author: gssong
      * @Date: 2021/12/10
      */
+    @ApiOperation("按用户id查询")
     @PostMapping("/selectListUserByIds")
     public R<List<SysUser>> selectListUserByIds(@RequestBody List<Long> userIds){
         return R.ok(userService.selectListUserByIds(userIds));
     }
 
     /**
-     * @Description: 分页查询工作流选人
+     * @Description: 分页查询工作流选人,角色，部门等
      * @param: sysUserBo
-     * @return: com.ruoyi.common.core.page.TableDataInfo<com.ruoyi.common.core.domain.entity.SysUser>
+     * @return: com.ruoyi.common.core.domain.R<java.util.Map<java.lang.String,java.lang.Object>>
      * @Author: gssong
      * @Date: 2021/12/10
      */
+    @ApiOperation("分页查询工作流选人,角色，部门等")
     @PostMapping("/getWorkflowUserListByPage")
     public R<Map<String,Object>> getWorkflowUserListByPage(@RequestBody SysUserBo sysUserBo){
         Map<String,Object> map = userService.getWorkflowUserListByPage(sysUserBo);

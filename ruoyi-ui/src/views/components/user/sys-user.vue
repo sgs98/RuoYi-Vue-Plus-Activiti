@@ -140,8 +140,7 @@ export default {
         userName: undefined,
         phonenumber: undefined,
         deptId: undefined,
-        type: undefined,
-        params: undefined,
+        type: 'person',
         ids:[]
       },
       // 列信息
@@ -170,7 +169,7 @@ export default {
          this.queryParams.ids = val
          this.getList()
       }else{
-       this.chooseUserList = []
+         this.chooseUserList = []
       }
     }
   },
@@ -194,8 +193,7 @@ export default {
             })
           }
           this.loading = false;
-        }
-      );
+        });
     },
     /** 查询部门下拉树结构 */
     getTreeselect() {

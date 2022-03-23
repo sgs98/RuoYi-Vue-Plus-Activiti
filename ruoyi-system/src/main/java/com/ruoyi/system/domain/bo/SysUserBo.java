@@ -20,7 +20,7 @@ public class SysUserBo {
     private String type;
 
     /**
-     * 如果为空则查询全部可用的用户或者角色
+     * 如果为空则查询全部可用的用户或者角色,部门等
      * 默认是根据流程配置中选择的人员id或者角色id 部门id等
      */
     private String params;

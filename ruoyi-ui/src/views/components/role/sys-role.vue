@@ -23,34 +23,6 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="状态" prop="status">
-        <el-select
-          v-model="queryParams.status"
-          placeholder="角色状态"
-          clearable
-          size="small"
-          style="width: 240px"
-        >
-          <el-option
-            v-for="dict in dict.type.sys_normal_disable"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="创建时间">
-        <el-date-picker
-          v-model="dateRange"
-          size="small"
-          style="width: 240px"
-          value-format="yyyy-MM-dd"
-          type="daterange"
-          range-separator="-"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-        ></el-date-picker>
-      </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
@@ -96,11 +68,9 @@
 </template>
 
 <script>
-import { listRole} from "@/api/system/role";
-
+import { getWorkflowUserListByPage } from "@/api/system/user";
 export default {
   name: "Role",
-  dicts: ['sys_normal_disable'],
   props: {
     //回显的数据
     propRoleList: {
@@ -137,7 +107,8 @@ export default {
         pageSize: 10,
         roleName: undefined,
         roleKey: undefined,
-        status: undefined
+        type: 'role',
+        ids:[]
       },
       getRowKey(row) {
         return row.roleId
@@ -149,13 +120,10 @@ export default {
   watch: {
     propRoleList(val) {
       if(val.length>0){
-         this.chooseRoleList = val
-         this.chooseRoleList.forEach(row => {
-           this.$refs.multipleTable.toggleRowSelection(row,true);
-         })
+         this.queryParams.ids = val
          this.getList()
       }else{
-       this.chooseRoleList = []
+         this.chooseRoleList = []
       }
     }
   },
@@ -166,13 +134,19 @@ export default {
     /** 查询角色列表 */
     getList() {
       this.loading = true;
-      listRole(this.addDateRange(this.queryParams, this.dateRange)).then(
-        response => {
-          this.roleList = response.rows;
-          this.total = response.total;
+      getWorkflowUserListByPage(this.queryParams).then(response => {
+          let res = response.data.page
+          this.userList = res.rows;
+          this.total = res.total;
+           //反选
+          if(response.data.list){
+            this.chooseRoleList = response.data.list
+            response.data.list.forEach(row => {
+              this.$refs.multipleTable.toggleRowSelection(row,true);
+            })
+          }
           this.loading = false;
-        }
-      );
+        });
     },
     /** 搜索按钮操作 */
     handleQuery() {

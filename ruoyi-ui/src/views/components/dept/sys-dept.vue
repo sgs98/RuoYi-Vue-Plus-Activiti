@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import { listDept } from "@/api/system/dept";
+import { getWorkflowUserListByPage } from "@/api/system/user";
 import Treeselect from "@riophae/vue-treeselect";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
 
@@ -57,13 +57,18 @@ export default {
       // 表格树数据
       deptList: [],
       //回显id
-      deptIds: []
+      deptIds: [],
+      // 查询参数
+      queryParams: {
+        type: 'dept'
+      },
     };
   },
 
   watch: {
      propDeptList(val) {
        if(val.length>0){
+          this.deptIds = []
           this.getList()
           val.forEach(deptId => {
             this.deptIds.push(deptId)
@@ -85,9 +90,10 @@ export default {
     },
     /** 查询部门列表 */
     getList() {
+        console.log(this.deptIds)
       this.loading = true;
-      listDept().then(response => {
-        this.deptList = this.handleTree(response.data, "deptId");
+      getWorkflowUserListByPage(this.queryParams).then(response => {
+        this.deptList = this.handleTree(response.data.list, "deptId");
         this.loading = false;
         this.$nextTick(() => {
           if(this.deptIds.length > 0){

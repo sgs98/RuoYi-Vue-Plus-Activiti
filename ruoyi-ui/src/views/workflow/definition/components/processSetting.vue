@@ -89,9 +89,6 @@ import  SysDept from "@/views/components/dept/sys-dept";
 import  ProcessRule from "@/views/workflow/definition/components/processRule";
 import {setting} from "@/api/workflow/definition";
 import {getInfo,add,edit,del} from "@/api/workflow/actNodeAssginee";
-import { selectListUserByIds } from "@/api/system/user";
-import { selectListRoleByIds } from "@/api/system/role";
-import { selectListDeptByIds } from "@/api/system/dept";
 
 export default {
     components: {
@@ -252,9 +249,7 @@ export default {
             if(this.form.assigneeId){
               let roleIds = this.form.assigneeId.split( ',' )
               if(roleIds.length>0){
-                selectListRoleByIds(roleIds).then(response => {
-                  this.propRoleList = response.data
-                })
+                this.propRoleList = roleIds
               }
             }
             this.$refs.roleRef.visible = true
