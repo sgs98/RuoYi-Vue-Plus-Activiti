@@ -156,7 +156,8 @@ export default {
         return row.userId
       },
       // 保存选择的用户
-      chooseUserList: []
+      chooseUserList: [],
+      flag: false
     };
   },
   watch: {
@@ -168,6 +169,7 @@ export default {
       if(val.length>0){
          this.queryParams.ids = val
          this.getList()
+         this.flag = true
       }else{
          this.chooseUserList = []
       }
@@ -186,7 +188,7 @@ export default {
           this.userList = res.rows;
           this.total = res.total;
            //反选
-          if(response.data.list){
+          if(this.flag && response.data.list){
             this.chooseUserList = response.data.list
             response.data.list.forEach(row => {
               this.$refs.multipleTable.toggleRowSelection(row,true);
@@ -219,6 +221,7 @@ export default {
 
     /** 搜索按钮操作 */
     handleQuery() {
+      this.flag = false
       this.queryParams.pageNum = 1;
       this.getList();
     },

@@ -525,7 +525,7 @@ public class SysUserServiceImpl implements ISysUserService {
 
                 //检索条件
                 roleWrapper.like(StringUtils.isNotEmpty(sysUserBo.getRoleName()),SysRole::getRoleName,sysUserBo.getRoleName());
-                roleWrapper.like(StringUtils.isNotEmpty(sysUserBo.getRoleKey()),SysRole::getRoleName,sysUserBo.getRoleKey());
+                roleWrapper.like(StringUtils.isNotEmpty(sysUserBo.getRoleKey()),SysRole::getRoleKey,sysUserBo.getRoleKey());
                 roleWrapper.eq(SysRole::getStatus,UserStatus.OK.getCode());
                 Page<SysRole> roleListPage = roleMapper.selectPage(rolePage, roleWrapper);
                 if(CollectionUtil.isNotEmpty(sysUserBo.getIds())){

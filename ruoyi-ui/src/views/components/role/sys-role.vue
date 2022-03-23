@@ -114,13 +114,15 @@ export default {
         return row.roleId
       },
       //选中的角色
-      chooseRoleList: []
+      chooseRoleList: [],
+      flag: false
     };
   },
   watch: {
     propRoleList(val) {
       if(val.length>0){
          this.queryParams.ids = val
+         this.flag = true
          this.getList()
       }else{
          this.chooseRoleList = []
@@ -136,10 +138,10 @@ export default {
       this.loading = true;
       getWorkflowUserListByPage(this.queryParams).then(response => {
           let res = response.data.page
-          this.userList = res.rows;
+          this.roleList = res.rows;
           this.total = res.total;
            //反选
-          if(response.data.list){
+          if(this.flag && response.data.list){
             this.chooseRoleList = response.data.list
             response.data.list.forEach(row => {
               this.$refs.multipleTable.toggleRowSelection(row,true);
@@ -150,6 +152,7 @@ export default {
     },
     /** 搜索按钮操作 */
     handleQuery() {
+      this.flag = false
       this.queryParams.pageNum = 1;
       this.getList();
     },
