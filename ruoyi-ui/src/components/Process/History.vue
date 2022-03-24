@@ -40,9 +40,7 @@ export default {
     watch: {
       processInstanceId: {
         handler(newVal,oldVal){
-          console.log(this.processInstanceId)
           if(newVal) {
-            //this.getFormNameByProcInstId()
             // 审批历史数据
             this.getHistoryInfoList()
             // 通过流程实例id获取历史流程图

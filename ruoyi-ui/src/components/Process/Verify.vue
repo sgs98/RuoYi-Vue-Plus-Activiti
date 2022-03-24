@@ -1,5 +1,6 @@
 <template>
 <div v-if="visible">
+  <!-- 提交申请开始 -->
   <el-dialog  title="提交申请" :visible.sync="visible"  width="800px"  :close-on-click-modal="false"
   append-to-body destroy-on-close @close="closeDialog" >
     <el-form v-loading="loading"  :rules="rules" ref="formData" :model="formData" status-icon >
@@ -39,11 +40,16 @@
         <el-button size="small" @click="visible = false">取消</el-button>
       </el-form-item>
     </el-form>
-    <!-- 选择人员组件 -->
-    <chooseWorkflowUser :dataObj="dataObj" :nodeId="nodeId" @confirmUser="clickUser" ref="wfUserRef"/>
-    <sys-user :propUserList="delegateUserList" :multiple = false ref="userRef" @confirmUser="confirmUser"/>
   </el-dialog>
-  <el-dialog  title="转发申请" :visible.sync="transmitVisible" width="500px"  append-to-body>
+  <!-- 提交申请结束 -->
+
+  <!-- 选择人员组件开始 -->
+  <chooseWorkflowUser :dataObj="dataObj" :nodeId="nodeId" @confirmUser="clickUser" ref="wfUserRef"/>
+  <sys-user :propUserList="delegateUserList" :multiple = false ref="userRef" @confirmUser="confirmUser"/>
+  <!-- 选择人员组件结束 -->
+
+  <!-- 转办申请开始 -->
+  <el-dialog  :close-on-click-modal="false" title="转发申请" :visible.sync="transmitVisible" width="500px"  append-to-body>
     <el-form  ref="transmitData" :model="transmitForm" :rules="transmitRules"  status-icon >
       <el-form-item label-width="80px" label="审批意见">
         <el-input  type="textarea" v-model="transmitForm.message" maxlength="300"  placeholder="请输入审批意见" :autosize="{ minRows: 4 }" show-word-limit ></el-input>
@@ -60,6 +66,7 @@
     </el-form>
     <sys-user :propUserList="transmitUserList" :multiple = false ref="transmitUserRef" @confirmUser="confirmTransmitUser"/>
   </el-dialog>
+  <!-- 转办申请结束 -->
 </div>
 </template>
 <script>
@@ -205,9 +212,9 @@ export default {
     closeDialog() {
       // 将表单清空
       this.$refs["formData"].resetFields();
-      this.formData = { 
-          message: null, 
-          assigneeMap: {} 
+      this.formData = {
+          message: null,
+          assigneeMap: {}
       }
       this.visible = false;
     },
@@ -232,6 +239,7 @@ export default {
         this.$refs.wfUserRef.visible = true;
       }
     },
+    //确定选择人员
     clickUser(userList, nodeId) {
       let assignee = userList.map((item) => {
         return item.userId;
@@ -268,6 +276,7 @@ export default {
     },
     //打开转发窗口
     transmitClick(){
+       this.transmitForm = {}
        this.transmitVisible = true
     },
     //提交转发
@@ -298,7 +307,6 @@ export default {
     },
     //打开转办人员组件
     transmitPeople(){
-      console.log(this.transmitForm)
       this.transmitUserList = []
       this.transmitUserList.push(this.transmitForm.userId)
       this.$refs.transmitUserRef.visible = true
@@ -307,6 +315,7 @@ export default {
     confirmTransmitUser(data){
       this.transmitForm.userId = data[0].userId
       this.transmitForm.userName = data[0].nickName
+      this.$forceUpdate()
       this.$refs.transmitUserRef.visible = false
     },
     //重置表单
@@ -314,10 +323,9 @@ export default {
         this.isDelegate = false
         this.delegate = '2'
         this.transmitForm = {}
-        this.formData.message = ''
+        this.formData.message = null
         this.formData.assigneeMap = {}
-        this.$forceUpdate()
-        console.log(this.formData.assigneeMap)    
+        this.nickName = {}
     }
   },
 };
