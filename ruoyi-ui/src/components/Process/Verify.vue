@@ -1,6 +1,7 @@
 <template>
 <div v-if="visible">
-  <el-dialog  title="提交申请" :visible.sync="visible"  width="800px"  append-to-body destroy-on-close @close="closeDialog" >
+  <el-dialog  title="提交申请" :visible.sync="visible"  width="800px"  :close-on-click-modal="false"
+  append-to-body destroy-on-close @close="closeDialog" >
     <el-form v-loading="loading"  :rules="rules" ref="formData" :model="formData" status-icon >
       <el-form-item label="审批意见" prop="message" label-width="120px">
         <el-input  type="textarea" v-model="formData.message" maxlength="300"  placeholder="请输入审批意见" :autosize="{ minRows: 4 }" show-word-limit ></el-input>
@@ -135,7 +136,6 @@ export default {
       }
     },
   },
-
   methods: {
     // 提交表单数据
     async submitForm(formName) {
@@ -175,7 +175,7 @@ export default {
               this.$refs[formName].resetFields();
               // 关闭窗口
               this.visible = false;
-              // 事件
+              // 回调事件
               this.$emit("callSubmit")
             }
             this.loading = false;
@@ -195,7 +195,7 @@ export default {
         this.$refs[formName].resetFields();
         // 关闭窗口
         this.visible = false;
-        // 事件
+        // 回调事件
         this.$emit("callSubmit")
       }
       this.loading = false;
@@ -205,8 +205,11 @@ export default {
     closeDialog() {
       // 将表单清空
       this.$refs["formData"].resetFields();
-      (this.formData = { message: null, assigneeMap: {} }),
-        (this.visible = false);
+      this.formData = { 
+          message: null, 
+          assigneeMap: {} 
+      }
+      this.visible = false;
     },
     // 选择人员
     choosePeople(chooseWay, assigneeId, nodeId) {
@@ -285,7 +288,7 @@ export default {
               // 关闭窗口
               this.visible = false;
               this.transmitVisible = false;
-              // 事件
+              // 回调事件
               this.$emit("callSubmit")
             }
             this.loading = false;
@@ -305,6 +308,16 @@ export default {
       this.transmitForm.userId = data[0].userId
       this.transmitForm.userName = data[0].nickName
       this.$refs.transmitUserRef.visible = false
+    },
+    //重置表单
+    reset(){
+        this.isDelegate = false
+        this.delegate = '2'
+        this.transmitForm = {}
+        this.formData.message = ''
+        this.formData.assigneeMap = {}
+        this.$forceUpdate()
+        console.log(this.formData.assigneeMap)    
     }
   },
 };
