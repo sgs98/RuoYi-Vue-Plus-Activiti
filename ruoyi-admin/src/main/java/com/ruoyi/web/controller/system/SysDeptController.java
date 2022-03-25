@@ -146,16 +146,4 @@ public class SysDeptController extends BaseController {
         deptService.checkDeptDataScope(deptId);
         return toAjax(deptService.deleteDeptById(deptId));
     }
-
-    /**
-     * @Description: 按照部门id查询
-     * @param: deptIds
-     * @return: com.ruoyi.common.core.domain.AjaxResult<java.util.List<com.ruoyi.common.core.domain.entity.SysDept>>
-     * @Author: gssong
-     * @Date: 2021/12/11
-     */
-    @PostMapping("/selectListDeptByIds")
-    public R<List<SysDept>> selectListDeptByIds(@RequestBody List<String> deptIds){
-        return R.ok(deptService.selectListDeptByIds(deptIds));
-    }
 }

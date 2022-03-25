@@ -66,12 +66,3 @@ export function delDept(deptId) {
     method: 'delete'
   })
 }
-
-// 按部门id查询部门
-export function selectListDeptByIds(data) {
-    return request({
-      url: '/system/dept/selectListDeptByIds',
-      method: 'post',
-      data: data
-    })
-}

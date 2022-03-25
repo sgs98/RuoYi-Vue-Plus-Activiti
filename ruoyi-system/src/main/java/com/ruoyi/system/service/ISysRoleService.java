@@ -176,11 +176,4 @@ public interface ISysRoleService {
      * @return 结果
      */
     int insertAuthUsers(Long roleId, Long[] userIds);
-	
-    /**
-     * 按照角色id查询
-     * @param roleIds
-     * @return
-     */
-    List<SysRole> selectListRoleByIds(List<String> roleIds);
 }

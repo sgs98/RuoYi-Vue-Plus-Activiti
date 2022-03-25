@@ -109,12 +109,3 @@ export function authUserSelectAll(data) {
     params: data
   })
 }
-
-// 按角色id查询角色
-export function selectListRoleByIds(data) {
-    return request({
-      url: '/system/role/selectListRoleByIds',
-      method: 'post',
-      data: data
-    })
-}

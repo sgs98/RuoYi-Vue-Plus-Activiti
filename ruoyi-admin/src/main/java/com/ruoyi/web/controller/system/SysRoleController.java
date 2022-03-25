@@ -223,16 +223,4 @@ public class SysRoleController extends BaseController {
         roleService.checkRoleDataScope(roleId);
         return toAjax(roleService.insertAuthUsers(roleId, userIds));
     }
-
-    /**
-     * @Description: 按照角色id查询
-     * @param: roleIds
-     * @return: com.ruoyi.common.core.domain.AjaxResult<java.util.List<com.ruoyi.common.core.domain.entity.SysRole>>
-     * @Author: gssong
-     * @Date: 2021/12/11
-     */
-    @PostMapping("/selectListRoleByIds")
-    public R<List<SysRole>> selectListRoleByIds(@RequestBody List<String> roleIds){
-        return R.ok(roleService.selectListRoleByIds(roleIds));
-    }
 }

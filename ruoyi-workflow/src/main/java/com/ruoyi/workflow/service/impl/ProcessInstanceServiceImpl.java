@@ -6,7 +6,6 @@ import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.helper.LoginHelper;
-import com.ruoyi.system.service.ISysUserService;
 import com.ruoyi.workflow.activiti.config.CustomProcessDiagramGenerator;
 import com.ruoyi.workflow.activiti.config.ICustomProcessDiagramGenerator;
 import com.ruoyi.workflow.activiti.config.WorkflowConstants;
@@ -20,10 +19,8 @@ import com.ruoyi.workflow.domain.vo.ActHistoryInfoVo;
 import com.ruoyi.workflow.domain.vo.ProcessInstFinishVo;
 import com.ruoyi.workflow.domain.vo.ProcessInstRunningVo;
 import com.ruoyi.workflow.factory.WorkflowService;
-import com.ruoyi.workflow.service.IActBusinessStatusService;
-import com.ruoyi.workflow.service.IActNodeAssigneeService;
-import com.ruoyi.workflow.service.IActTaskNodeService;
-import com.ruoyi.workflow.service.IProcessInstanceService;
+import com.ruoyi.workflow.service.*;
+import lombok.RequiredArgsConstructor;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.FlowNode;
 import org.activiti.bpmn.model.ParallelGateway;
@@ -62,20 +59,12 @@ import java.util.stream.Collectors;
  * @created: 2021/10/10 18:38
  */
 @Service
+@RequiredArgsConstructor
 public class ProcessInstanceServiceImpl extends WorkflowService implements IProcessInstanceService {
-
-    @Autowired
-    IActBusinessStatusService iActBusinessStatusService;
-
-    @Autowired
-    private ISysUserService iSysUserService;
-
-    @Autowired
-    private IActTaskNodeService iActTaskNodeService;
-
-
-    @Autowired
-    private ProcessEngine processEngine;
+    private final IActBusinessStatusService iActBusinessStatusService;
+    private final IUserService iUserService;
+    private final IActTaskNodeService iActTaskNodeService;
+    private final ProcessEngine processEngine;
 
 
 
@@ -153,7 +142,7 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
             for (String userId : collect) {
                 userIds.add(Long.valueOf(userId));
             }
-            List<SysUser> sysUsers = iSysUserService.selectListUserByIds(userIds);
+            List<SysUser> sysUsers = iUserService.selectListUserByIds(userIds);
             for (ActHistoryInfoVo actHistoryInfoVo : actHistoryInfoVoList) {
                 SysUser sysUser = sysUsers.stream().filter(e -> e.getUserId().toString().equals(actHistoryInfoVo.getAssignee())).findFirst().orElse(null);
                 if(ObjectUtil.isNotEmpty(sysUser)){
@@ -167,7 +156,7 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
         List<ActHistoryInfoVo> waitingTask = actHistoryInfoVoList.stream().filter(e -> e.getEndTime() == null).collect(Collectors.toList());
         waitingTask.forEach(e->{
             if(StringUtils.isNotBlank(e.getOwner())){
-                SysUser sysUser = iSysUserService.selectUserById(Long.valueOf(e.getOwner()));
+                SysUser sysUser = iUserService.selectUserById(Long.valueOf(e.getOwner()));
                 if(ObjectUtil.isNotEmpty(sysUser)){
                     e.setNickName(sysUser.getNickName());
                 }
@@ -258,7 +247,7 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
         for (ProcessInstance pi : processInstances) {
             ProcessInstRunningVo processInstRunningVo = new ProcessInstRunningVo();
             BeanUtils.copyProperties(pi, processInstRunningVo);
-            SysUser sysUser = iSysUserService.selectUserById(Long.valueOf(pi.getStartUserId()));
+            SysUser sysUser = iUserService.selectUserById(Long.valueOf(pi.getStartUserId()));
             if (ObjectUtil.isNotEmpty(sysUser)) {
                 processInstRunningVo.setStartUserNickName(sysUser.getNickName());
             }
@@ -279,7 +268,7 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
                         userIds.add(Long.valueOf(userId));
                     }
                     //办理人
-                    List<SysUser> sysUsers = iSysUserService.selectListUserByIds(userIds);
+                    List<SysUser> sysUsers = iUserService.selectListUserByIds(userIds);
                     if (CollectionUtil.isNotEmpty(sysUsers)) {
                         nickNameList = sysUsers.stream().map(SysUser::getNickName).collect(Collectors.toList());
                     }
@@ -403,7 +392,7 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
         for (HistoricProcessInstance hpi : list) {
             ProcessInstFinishVo processInstFinishVo = new ProcessInstFinishVo();
             BeanUtils.copyProperties(hpi, processInstFinishVo);
-            SysUser sysUser = iSysUserService.selectUserById(Long.valueOf(hpi.getStartUserId()));
+            SysUser sysUser = iUserService.selectUserById(Long.valueOf(hpi.getStartUserId()));
             if (ObjectUtil.isNotEmpty(sysUser)) {
                 processInstFinishVo.setStartUserNickName(sysUser.getNickName());
             }

@@ -68,7 +68,7 @@
 </template>
 
 <script>
-import { getWorkflowUserListByPage } from "@/api/system/user";
+import { getWorkflowUserListByPage } from "@/api/workflow/workflowUser";
 export default {
   name: "Role",
   props: {

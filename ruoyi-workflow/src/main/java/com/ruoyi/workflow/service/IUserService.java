@@ -1,0 +1,33 @@
+package com.ruoyi.workflow.service;
+
+import com.ruoyi.common.core.domain.entity.SysUser;
+import com.ruoyi.workflow.domain.bo.SysUserBo;
+
+import java.util.List;
+import java.util.Map;
+
+public interface IUserService {
+
+    /**
+     * 通过用户ID查询用户集合
+     *
+     * @param userIds 用户ID
+     * @return 用户对象信息
+     */
+    List<SysUser> selectListUserByIds(List<Long> userIds);
+
+    /**
+     * 通过用户ID查询用户
+     *
+     * @param userId 用户ID
+     * @return 用户对象信息
+     */
+    SysUser selectUserById(Long userId);
+
+    /**
+     * 分页查询
+     * @param sysUserBo
+     * @return
+     */
+    Map<String,Object> getWorkflowUserListByPage(SysUserBo sysUserBo);
+}

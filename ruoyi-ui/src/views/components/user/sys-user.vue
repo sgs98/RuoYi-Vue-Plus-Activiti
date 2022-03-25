@@ -94,7 +94,7 @@
 </template>
 
 <script>
-import { getWorkflowUserListByPage } from "@/api/system/user";
+import { getWorkflowUserListByPage } from "@/api/workflow/workflowUser";
 import { treeselect } from "@/api/system/dept";
 
 export default {

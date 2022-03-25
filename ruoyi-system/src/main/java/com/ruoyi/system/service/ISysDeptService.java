@@ -105,11 +105,4 @@ public interface ISysDeptService {
      * @return 结果
      */
     int deleteDeptById(Long deptId);
-	
-    /**
-     * 按照部门id查询
-     * @param deptIds
-     * @return
-     */
-    List<SysDept> selectListDeptByIds(List<String> deptIds);
 }

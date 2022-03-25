@@ -246,13 +246,4 @@ public class SysDeptServiceImpl implements ISysDeptService {
         return baseMapper.deleteById(deptId);
     }
 
-    /**
-     * 按照部门id查询
-     * @param deptIds
-     * @return
-     */
-    @Override
-    public List<SysDept> selectListDeptByIds(List<String> deptIds) {
-        return baseMapper.selectBatchIds(deptIds);
-    }
 }

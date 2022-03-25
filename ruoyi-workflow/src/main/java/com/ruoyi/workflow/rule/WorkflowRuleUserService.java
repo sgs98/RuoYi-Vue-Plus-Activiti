@@ -1,10 +1,11 @@
-package com.ruoyi.system.workflow;
+package com.ruoyi.workflow.rule;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.exception.user.UserException;
 import com.ruoyi.common.utils.spring.SpringUtils;
 import com.ruoyi.system.mapper.SysUserMapper;
+
 /**
  * 业务规则选人
  *

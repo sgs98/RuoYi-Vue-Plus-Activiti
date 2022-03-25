@@ -1,4 +1,4 @@
-package com.ruoyi.system.domain.bo;
+package com.ruoyi.workflow.domain.bo;
 
 import lombok.Data;
 

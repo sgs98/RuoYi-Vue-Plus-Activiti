@@ -125,30 +125,3 @@ export function updateAuthRole(data) {
     params: data
   })
 }
-
-// 按登录用户名查询
-export function selectUserListByUserName(data) {
-  return request({
-    url: '/system/user/selectUserListByUserName',
-    method: 'post',
-    data: data
-  })
-}
-
-// 按用户id查询
-export function selectListUserByIds(data) {
-  return request({
-    url: '/system/user/selectListUserByIds',
-    method: 'post',
-    data: data
-  })
-}
-
-// 查询工作流接口用户
-export function getWorkflowUserListByPage(data) {
-    return request({
-      url: '/system/user/getWorkflowUserListByPage',
-      method: 'post',
-      data: data
-    })
-}

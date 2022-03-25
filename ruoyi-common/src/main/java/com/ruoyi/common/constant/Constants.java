@@ -122,29 +122,5 @@ public interface Constants {
      */
     String SYS_DICT_KEY = "sys_dict:";
 
-    /**
-     * 工作流用户权限
-     */
-	String ROLE_ACTIVITI_USER = "ROLE_ACTIVITI_USER";
-
-    /**
-     * 角色
-     */
-	String WORKFLOW_ROLE = "role";
-
-    /**
-     * 部门
-     */
-	String WORKFLOW_DEPT = "dept";
-
-    /**
-     * 人员id
-     */
-	String WORKFLOW_PERSON = "person";
-
-    /**
-     * 业务规则
-     */
-    String WORKFLOW_RULE= "rule";
-   
 }
+

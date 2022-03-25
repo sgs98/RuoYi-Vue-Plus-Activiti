@@ -19,7 +19,6 @@ import com.ruoyi.common.excel.ExcelResult;
 import com.ruoyi.common.helper.LoginHelper;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.poi.ExcelUtil;
-import com.ruoyi.system.domain.bo.SysUserBo;
 import com.ruoyi.system.domain.vo.SysUserExportVo;
 import com.ruoyi.system.domain.vo.SysUserImportVo;
 import com.ruoyi.system.listener.SysUserImportListener;
@@ -234,44 +233,5 @@ public class SysUserController extends BaseController {
         userService.checkUserDataScope(userId);
         userService.insertUserAuth(userId, roleIds);
         return R.ok();
-    }
-    /**
-     * @Description: 按登录用户名查询
-     * @param: userName
-     * @return: com.ruoyi.common.core.domain.AjaxResult<java.util.List<com.ruoyi.common.core.domain.entity.SysUser>>
-     * @Author: gssong
-     * @Date: 2021/12/10
-     */
-    @ApiOperation("按登录用户名查询")
-    @PostMapping("/selectUserListByUserName")
-    public R<List<SysUser>> selectUserListByUserName(@RequestBody List<String> userName){
-        return R.ok(userService.selectUserListByUserName(userName));
-    }
-
-    /**
-     * @Description: 按用户id查询
-     * @param: userIds
-     * @return: com.ruoyi.common.core.domain.AjaxResult<java.util.List<com.ruoyi.common.core.domain.entity.SysUser>>
-     * @Author: gssong
-     * @Date: 2021/12/10
-     */
-    @ApiOperation("按用户id查询")
-    @PostMapping("/selectListUserByIds")
-    public R<List<SysUser>> selectListUserByIds(@RequestBody List<Long> userIds){
-        return R.ok(userService.selectListUserByIds(userIds));
-    }
-
-    /**
-     * @Description: 分页查询工作流选人,角色，部门等
-     * @param: sysUserBo
-     * @return: com.ruoyi.common.core.domain.R<java.util.Map<java.lang.String,java.lang.Object>>
-     * @Author: gssong
-     * @Date: 2021/12/10
-     */
-    @ApiOperation("分页查询工作流选人,角色，部门等")
-    @PostMapping("/getWorkflowUserListByPage")
-    public R<Map<String,Object>> getWorkflowUserListByPage(@RequestBody SysUserBo sysUserBo){
-        Map<String,Object> map = userService.getWorkflowUserListByPage(sysUserBo);
-        return R.ok(map);
     }
 }

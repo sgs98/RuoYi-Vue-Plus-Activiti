@@ -1,13 +1,10 @@
 package com.ruoyi.system.service;
 
 import com.ruoyi.common.core.domain.PageQuery;
-import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.core.page.TableDataInfo;
-import com.ruoyi.system.domain.bo.SysUserBo;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 用户 业务层
@@ -202,25 +199,5 @@ public interface ISysUserService {
      * @return 结果
      */
     int deleteUserByIds(Long[] userIds);
-    /**
-     * 按登录名称查询用户集合
-     * @param userName
-     * @return
-     */
-    List<SysUser> selectUserListByUserName(List<String> userName);
 
-    /**
-     * 分页查询
-     * @param sysUserBo
-     * @return
-     */
-    Map<String,Object> getWorkflowUserListByPage(SysUserBo sysUserBo);
-
-	/**
-     * 通过用户ID查询用户集合
-     *
-     * @param userIds 用户ID
-     * @return 用户对象信息
-     */
-     List<SysUser> selectListUserByIds(List<Long> userIds);
 }

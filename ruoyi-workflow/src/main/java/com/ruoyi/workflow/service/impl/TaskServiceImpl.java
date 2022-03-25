@@ -8,7 +8,6 @@ import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.helper.LoginHelper;
-import com.ruoyi.system.service.ISysUserService;
 import com.ruoyi.workflow.activiti.cmd.JumpAnyWhereCmd;
 import com.ruoyi.workflow.common.constant.ActConstant;
 import com.ruoyi.workflow.common.enums.BusinessStatusEnum;
@@ -23,6 +22,7 @@ import com.ruoyi.workflow.domain.vo.*;
 import com.ruoyi.workflow.factory.WorkflowService;
 import com.ruoyi.workflow.service.*;
 import com.ruoyi.workflow.utils.WorkFlowUtils;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.activiti.bpmn.model.*;
 import org.activiti.engine.ManagementService;
@@ -37,7 +37,6 @@ import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskQuery;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,37 +53,28 @@ import static com.ruoyi.common.helper.LoginHelper.getUserId;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class TaskServiceImpl extends WorkflowService implements ITaskService {
 
-    @Autowired
-    private ISysUserService iSysUserService;
+    private final IUserService iUserService;
 
-    @Autowired
-    private IActBusinessStatusService iActBusinessStatusService;
+    private final IActBusinessStatusService iActBusinessStatusService;
 
-    @Autowired
-    private WorkFlowUtils workFlowUtils;
+    private final WorkFlowUtils workFlowUtils;
 
-    @Autowired
-    private IActTaskNodeService iActTaskNodeService;
+    private final IActTaskNodeService iActTaskNodeService;
 
-    @Autowired
-    private IActNodeAssigneeService iActNodeAssigneeService;
+    private final IActNodeAssigneeService iActNodeAssigneeService;
 
-    @Autowired
-    private IActFullClassService iActFullClassService;
+    private final IActFullClassService iActFullClassService;
 
-    @Autowired
-    private IActHiActInstService iActHiActInstService;
+    private final IActHiActInstService iActHiActInstService;
 
-    @Autowired
-    private ManagementService managementService;
+    private final ManagementService managementService;
 
-    @Autowired
-    private IActRuExecutionService iActRuExecutionService;
+    private final IActRuExecutionService iActRuExecutionService;
 
-    @Autowired
-    private IActHiTaskInstService iActHiTaskInstService;
+    private final IActHiTaskInstService iActHiTaskInstService;
 
 
 
@@ -117,7 +107,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
                 for (String userId : split) {
                     userIds.add(Long.valueOf(userId));
                 }
-                List<SysUser> userList = iSysUserService.selectListUserByIds(userIds);
+                List<SysUser> userList = iUserService.selectListUserByIds(userIds);
                 if (CollectionUtil.isNotEmpty(userList)) {
                     List<String> nickNames = userList.stream().map(SysUser::getNickName).collect(Collectors.toList());
                     taskWaitingVo.setAssignee(StringUtils.join(nickNames, ","));
@@ -131,7 +121,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
             //流程发起人
             String startUserId = pi.getStartUserId();
             if (StringUtils.isNotBlank(startUserId)) {
-                SysUser sysUser = iSysUserService.selectUserById(Long.valueOf(startUserId));
+                SysUser sysUser = iUserService.selectUserById(Long.valueOf(startUserId));
                 if (ObjectUtil.isNotNull(sysUser)) {
                     taskWaitingVo.setStartUserNickName(sysUser.getNickName());
                 }
@@ -261,7 +251,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
                             for (String userId : splitUserIds) {
                                 userIds.add(Long.valueOf(userId));
                             }
-                            List<SysUser> userList = iSysUserService.selectListUserByIds(userIds);
+                            List<SysUser> userList = iUserService.selectListUserByIds(userIds);
                             if (CollectionUtil.isEmpty(userList)) {
                                 throw new ServiceException("【" + t.getName() + "】任务环节未配置审批人");
                             }
@@ -359,7 +349,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
                 for (String userId : split) {
                     userIds.add(Long.valueOf(userId));
                 }
-                List<SysUser> userList = iSysUserService.selectListUserByIds(userIds);
+                List<SysUser> userList = iUserService.selectListUserByIds(userIds);
                 if (CollectionUtil.isNotEmpty(userList)) {
                     List<String> nickNames = userList.stream().map(SysUser::getNickName).collect(Collectors.toList());
                     taskFinishVo.setAssignee(StringUtils.join(nickNames, ","));
@@ -551,7 +541,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
                 for (String userId : split) {
                     userIds.add(Long.valueOf(userId));
                 }
-                List<SysUser> userList = iSysUserService.selectListUserByIds(userIds);
+                List<SysUser> userList = iUserService.selectListUserByIds(userIds);
                 if (CollectionUtil.isNotEmpty(userList)) {
                     List<String> nickNames = userList.stream().map(SysUser::getNickName).collect(Collectors.toList());
                     taskFinishVo.setAssignee(StringUtils.join(nickNames, ","));
@@ -590,7 +580,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
                 for (String userId : split) {
                     userIds.add(Long.valueOf(userId));
                 }
-                List<SysUser> userList = iSysUserService.selectListUserByIds(userIds);
+                List<SysUser> userList = iUserService.selectListUserByIds(userIds);
                 if (CollectionUtil.isNotEmpty(userList)) {
                     List<String> nickNames = userList.stream().map(SysUser::getNickName).collect(Collectors.toList());
                     taskWaitingVo.setAssignee(StringUtils.join(nickNames, ","));
@@ -604,7 +594,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
             //流程发起人
             String startUserId = pi.getStartUserId();
             if (StringUtils.isNotBlank(startUserId)) {
-                SysUser sysUser = iSysUserService.selectUserById(Long.valueOf(startUserId));
+                SysUser sysUser = iUserService.selectUserById(Long.valueOf(startUserId));
                 if (ObjectUtil.isNotNull(sysUser)) {
                     taskWaitingVo.setStartUserNickName(sysUser.getNickName());
                 }

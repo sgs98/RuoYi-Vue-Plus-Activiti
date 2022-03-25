@@ -7,7 +7,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.common.constant.UserConstants;
 import com.ruoyi.common.core.domain.PageQuery;
 import com.ruoyi.common.core.domain.entity.SysRole;
-import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.helper.LoginHelper;
@@ -392,12 +391,5 @@ public class SysRoleServiceImpl implements ISysRoleService {
             rows = userRoleMapper.insertBatch(list) ? list.size() : 0;
         }
         return rows;
-    }
-
-    @Override
-    public List<SysRole> selectListRoleByIds(List<String> roleIds) {
-        LambdaQueryWrapper<SysRole> wrapper = new LambdaQueryWrapper<>();
-        wrapper.in(SysRole::getRoleId,roleIds);
-        return baseMapper.selectList(wrapper);
     }
 }
