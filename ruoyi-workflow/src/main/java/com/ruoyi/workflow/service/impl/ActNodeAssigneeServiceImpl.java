@@ -102,6 +102,7 @@ public class ActNodeAssigneeServiceImpl extends ServiceImpl<ActNodeAssigneeMappe
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean copy(String id,String key) {
         LambdaQueryWrapper<ActNodeAssignee> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(ActNodeAssignee::getProcessDefinitionId,id);

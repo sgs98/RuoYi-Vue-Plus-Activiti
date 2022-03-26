@@ -28,12 +28,12 @@ import java.util.List;
 
 /**
  * @program: ruoyi-vue-plus
- * @description: 任务控制器
+ * @description: 任务管理控制器
  * @author: gssong
  * @created: 2021/10/17 14:46
  */
 @Validated
-@Api(value = "任务控制器", tags = {"任务控制器"})
+@Api(value = "任务管理控制器", tags = {"任务管理控制器"})
 @RestController
 @RequestMapping("/workflow/task")
 public class TaskController extends BaseController {
@@ -108,7 +108,7 @@ public class TaskController extends BaseController {
      */
     @ApiOperation("完成任务")
     @PostMapping("/completeTask")
-    @Log(title = "完成任务", businessType = BusinessType.INSERT)
+    @Log(title = "任务管理", businessType = BusinessType.INSERT)
     public R<Void> completeTask(@RequestBody TaskCompleteREQ req) {
         Boolean task = iTaskService.completeTask(req);
         if (!task) {
@@ -138,7 +138,7 @@ public class TaskController extends BaseController {
      * @Date: 2021/11/6
      */
     @PostMapping("/backProcess")
-    @Log(title = "驳回审批", businessType = BusinessType.INSERT)
+    @Log(title = "任务管理", businessType = BusinessType.INSERT)
     public R<String> backProcess(@RequestBody BackProcessVo backProcessVo) {
         return R.ok(iTaskService.backProcess(backProcessVo));
     }
@@ -165,7 +165,7 @@ public class TaskController extends BaseController {
      */
     @ApiOperation("签收（拾取）任务")
     @PostMapping("/claim/{taskId}")
-    @Log(title = "签收（拾取）任务", businessType = BusinessType.INSERT)
+    @Log(title = "任务管理", businessType = BusinessType.INSERT)
     public R<Void> claimTask(@PathVariable String taskId) {
         try {
             taskService.claim(taskId, LoginHelper.getUserId().toString());
@@ -185,7 +185,7 @@ public class TaskController extends BaseController {
      */
     @ApiOperation("归还（拾取的）任务")
     @PostMapping("/returnTask/{taskId}")
-    @Log(title = "归还（拾取的）任务", businessType = BusinessType.INSERT)
+    @Log(title = "任务管理", businessType = BusinessType.INSERT)
     public R<Void> returnTask(@PathVariable String taskId) {
         try {
             taskService.setAssignee(taskId, null);
@@ -205,7 +205,7 @@ public class TaskController extends BaseController {
      */
     @ApiOperation("委派任务")
     @PostMapping("/delegateTask")
-    @Log(title = "委派任务", businessType = BusinessType.INSERT)
+    @Log(title = "任务管理", businessType = BusinessType.INSERT)
     public R<Void> delegateTask(@Validated({AddGroup.class}) @RequestBody  TaskREQ taskREQ) {
         return toAjax(iTaskService.delegateTask(taskREQ));
     }
@@ -219,7 +219,7 @@ public class TaskController extends BaseController {
      */
     @ApiOperation("转办任务")
     @PostMapping("/transmitTask")
-    @Log(title = "转办任务", businessType = BusinessType.INSERT)
+    @Log(title = "任务管理", businessType = BusinessType.INSERT)
     public R<Boolean> transmit(@RequestBody TaskREQ taskREQ) {
         return iTaskService.transmitTask(taskREQ);
     }

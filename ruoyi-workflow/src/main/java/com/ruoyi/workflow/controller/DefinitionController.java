@@ -76,7 +76,7 @@ public class DefinitionController extends BaseController {
      */
     @ApiOperation("删除流程定义")
     @DeleteMapping("/{deploymentId}/{definitionId}")
-    @Log(title = "删除流程定义模型", businessType = BusinessType.DELETE)
+    @Log(title = "流程定义", businessType = BusinessType.DELETE)
     @RepeatSubmit
     public R<Void> deleteDeployment(@PathVariable String deploymentId,@PathVariable String definitionId) {
         return iDefinitionService.deleteDeployment(deploymentId,definitionId);
@@ -84,7 +84,7 @@ public class DefinitionController extends BaseController {
 
     @ApiOperation("通过zip或xml部署流程定义")
     @PostMapping("/deployByFile")
-    @Log(title = "通过zip或xml部署流程定义", businessType = BusinessType.INSERT)
+    @Log(title = "流程定义", businessType = BusinessType.INSERT)
     @RepeatSubmit
     public R<Void> deployByFile(@RequestParam("file") MultipartFile file) {
         return iDefinitionService.deployByFile(file);
@@ -118,7 +118,7 @@ public class DefinitionController extends BaseController {
      */
     @ApiOperation("激活或者挂起流程定义")
     @PutMapping("/updateProcDefState/{definitionId}")
-    @Log(title = "激活或者挂起流程定义", businessType = BusinessType.UPDATE)
+    @Log(title = "流程定义", businessType = BusinessType.UPDATE)
     public R<Boolean> updateProcDefState(@PathVariable String definitionId){
         return R.ok(iDefinitionService.updateProcDefState(definitionId));
     }

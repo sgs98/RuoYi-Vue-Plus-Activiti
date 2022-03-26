@@ -45,7 +45,7 @@ public class ProcessInstanceController {
      */
     @ApiOperation("提交申请，启动流程实例")
     @PostMapping("/startWorkFlow")
-    @Log(title = "提交申请", businessType = BusinessType.INSERT)
+    @Log(title = "流程实例", businessType = BusinessType.INSERT)
     public R<Map<String,Object>> startWorkFlow(@RequestBody StartREQ startReq){
         Map<String,Object> map = processInstanceService.startWorkFlow(startReq);
         return R.ok("提交成功",map);
@@ -104,7 +104,7 @@ public class ProcessInstanceController {
      */
     @ApiOperation("挂起或激活流程实例")
     @PutMapping("/state/{processInstId}")
-    @Log(title = "挂起或激活流程实例", businessType = BusinessType.UPDATE)
+    @Log(title = "流程实例", businessType = BusinessType.UPDATE)
     public R<Void> updateProcInstState(@PathVariable String processInstId){
         try {
             processInstanceService.updateProcInstState(processInstId);
@@ -124,7 +124,7 @@ public class ProcessInstanceController {
      */
     @ApiOperation("作废流程实例，不会删除历史记录")
     @DeleteMapping("/deleteRuntimeProcessInst/{processInstId}")
-    @Log(title = "作废流程实例，不会删除历史记录", businessType = BusinessType.DELETE)
+    @Log(title = "流程实例", businessType = BusinessType.DELETE)
     public R<Boolean> deleteRuntimeProcessInst(@PathVariable String processInstId){
         boolean b = processInstanceService.deleteRuntimeProcessInst(processInstId);
         if(b){
@@ -143,7 +143,7 @@ public class ProcessInstanceController {
      */
     @ApiOperation("删除运行中的实例，删除历史记录，删除业务与流程关联信息")
     @DeleteMapping("/deleteRuntimeProcessAndHisInst/{processInstId}")
-    @Log(title = "删除程实例，删除历史记录，删除业务与流程关联信息", businessType = BusinessType.DELETE)
+    @Log(title = "流程实例", businessType = BusinessType.DELETE)
     public R<Void> deleteRuntimeProcessAndHisInst(@PathVariable String processInstId){
         boolean b = processInstanceService.deleteRuntimeProcessAndHisInst(processInstId);
         if(b){
@@ -162,7 +162,7 @@ public class ProcessInstanceController {
      */
     @ApiOperation("删除已完成的实例，删除历史记录，删除业务与流程关联信息")
     @DeleteMapping("/deleteFinishProcessAndHisInst/{processInstId}")
-    @Log(title = "删除已完成的实例，删除历史记录，删除业务与流程关联信息", businessType = BusinessType.DELETE)
+    @Log(title = "流程实例", businessType = BusinessType.DELETE)
     public R<Void> deleteFinishProcessAndHisInst(@PathVariable String processInstId){
         boolean b = processInstanceService.deleteFinishProcessAndHisInst(processInstId);
         if(b){
@@ -181,7 +181,7 @@ public class ProcessInstanceController {
      */
     @ApiOperation("撤销申请")
     @GetMapping("/cancelProcessApply/{processInstId}")
-    @Log(title = "撤销申请", businessType = BusinessType.DELETE)
+    @Log(title = "流程实例", businessType = BusinessType.DELETE)
     public R<Void> cancelProcessApply(@PathVariable String processInstId){
         boolean b = processInstanceService.cancelProcessApply(processInstId);
         if(b){

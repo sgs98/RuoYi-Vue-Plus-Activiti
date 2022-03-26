@@ -60,7 +60,7 @@ public class ModelController extends BaseController {
      * @Date: 2021/10/3
      */
     @ApiOperation("新建模型")
-    @Log(title = "新建模型", businessType = BusinessType.INSERT)
+    @Log(title = "模型管理", businessType = BusinessType.INSERT)
     @RepeatSubmit
     @PostMapping
     public R<Model> add(@RequestBody ModelAdd modelAdd) {
@@ -81,7 +81,7 @@ public class ModelController extends BaseController {
      * @Date: 2021/10/3
      */
     @ApiOperation("通过流程定义模型id部署流程定义")
-    @Log(title = "通过流程定义模型id部署流程定义", businessType = BusinessType.INSERT)
+    @Log(title = "模型管理", businessType = BusinessType.INSERT)
     @RepeatSubmit
     @PostMapping("/deploy/{id}")
     public R<Void> deploy(@PathVariable("id") String id) {
@@ -102,7 +102,7 @@ public class ModelController extends BaseController {
      * @Date: 2021/10/3
      */
     @ApiOperation("删除流程定义模型")
-    @Log(title = "删除流程定义模型", businessType = BusinessType.DELETE)
+    @Log(title = "模型管理", businessType = BusinessType.DELETE)
     @RepeatSubmit
     @DeleteMapping("/{id}")
     public R<Void> add(@PathVariable String id) {

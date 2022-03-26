@@ -40,7 +40,7 @@ public class ActNodeAssigneeController extends BaseController {
      */
     @PostMapping
     @ApiOperation("保存流程定义设置")
-    @Log(title = "保存流程定义设置", businessType = BusinessType.INSERT)
+    @Log(title = "流程定义设置", businessType = BusinessType.INSERT)
     public R<ActNodeAssignee> add(@Validated(AddGroup.class) @RequestBody ActNodeAssignee actNodeAssignee){
         return R.ok(iActNodeAssigneeService.add(actNodeAssignee));
     }
@@ -54,7 +54,7 @@ public class ActNodeAssigneeController extends BaseController {
      */
     @PutMapping
     @ApiOperation("修改流程定义设置")
-    @Log(title = "修改流程定义设置", businessType = BusinessType.UPDATE)
+    @Log(title = "流程定义设置", businessType = BusinessType.UPDATE)
     public R<ActNodeAssignee> edit(@Validated(EditGroup.class)  @RequestBody ActNodeAssignee actNodeAssignee){
         return R.ok(iActNodeAssigneeService.edit(actNodeAssignee));
     }
@@ -82,7 +82,7 @@ public class ActNodeAssigneeController extends BaseController {
      */
     @DeleteMapping("{id}")
     @ApiOperation("删除")
-    @Log(title = "删除", businessType = BusinessType.DELETE)
+    @Log(title = "流程定义设置", businessType = BusinessType.DELETE)
     public R<Void> del(@PathVariable String id){
         return toAjax(iActNodeAssigneeService.del(id) ? 1 : 0);
     }
@@ -97,7 +97,7 @@ public class ActNodeAssigneeController extends BaseController {
      */
     @PostMapping("copy/{id}/{key}")
     @ApiOperation("复制为最新流程定义")
-    @Log(title = "复制为最新流程定义", businessType = BusinessType.INSERT)
+    @Log(title = "流程定义设置", businessType = BusinessType.INSERT)
     public R<Void> copy(@PathVariable("id") @NotBlank(message = "ID不能为空") String id,
                         @PathVariable("key") @NotBlank(message = "Key不能为空") String key){
         Boolean copy = iActNodeAssigneeService.copy(id, key);
