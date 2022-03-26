@@ -75,13 +75,13 @@
                 @click="clickUpdateProcDefState(scope.row)"
                 type="text"
                 size="mini"
-                icon="el-icon-setting"
+                icon="el-icon-lock"
               >挂起</el-button>
               <el-button
                 v-else type="text"
                 @click="clickUpdateProcDefState(scope.row)"
                 size="mini"
-                icon="el-icon-setting"
+                icon="el-icon-unlock"
               >激活</el-button>
             </el-col>
           </el-row>
@@ -284,6 +284,7 @@ export default {
           let data = {id:this.definitionId,key:this.propKey}
           this.$refs.hisListRef.getList(data)
       },
+      //打开设置
       handleSetting(row){
         this.$nextTick(() => {
           this.$refs.settingRef.visible = true

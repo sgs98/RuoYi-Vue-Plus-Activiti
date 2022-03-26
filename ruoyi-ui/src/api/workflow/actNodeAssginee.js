@@ -30,3 +30,10 @@ export function getInfo(processDefinitionId,nodeId) {
   })
 }
 
+export function copy(processDefinitionId,key) {
+  return request({
+    url: `/workflow/actNodeAssignee/copy/${processDefinitionId}/${key}`,
+    method: 'post'
+  })
+}
+

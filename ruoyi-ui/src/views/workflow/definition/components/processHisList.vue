@@ -1,12 +1,12 @@
 <template>
-    <el-dialog title="历史版本" :visible.sync="visible" width="85%" append-to-body>
+    <el-dialog title="历史版本" :visible.sync="visible" width="90%" :close-on-click-modal="false" append-to-body>
         <div class="app-container">
             <!-- 表格数据 -->
             <el-table v-loading="loading" :data="list" @selection-change="handleSelectionChange">
                 <!-- <el-table-column type="selection" width="55" align="center" /> -->
-                <el-table-column fixed align="center" type="index" label="序号" width="50"></el-table-column>
-                <el-table-column fixed align="center" prop="name" label="模型名称"  min-width="160"></el-table-column>
-                <el-table-column  align="center" prop="key" label="标识Key"  min-width="120"></el-table-column>
+                <el-table-column align="center" type="index" label="序号" width="50"></el-table-column>
+                <el-table-column align="center" prop="name" label="模型名称"  min-width="160"></el-table-column>
+                <el-table-column align="center" prop="key" label="标识Key"  min-width="120"></el-table-column>
                 <el-table-column align="center" prop="version" label="版本号" width="80" >
                 <template slot-scope="{row}"> v{{row.version}}.0</template>
                 </el-table-column>
@@ -21,57 +21,92 @@
                 <el-link type="primary" @click="clickPreviewImg(row.id)">{{ row.diagramResourceName }}</el-link>
                 </template>
                 </el-table-column>
-                <el-table-column  align="center" prop="suspensionState" label="状态"  min-width="50">
+                <el-table-column align="center" prop="suspensionState" label="状态"  min-width="50">
                 <template slot-scope="scope">
                     <el-tag type="success" v-if="scope.row.suspensionState==1">激活</el-tag>
                     <el-tag type="danger" v-else>挂起</el-tag>
                 </template>
                 </el-table-column>
-                <el-table-column  align="center" prop="deploymentTime" label="部署时间" width="160"></el-table-column>
+                <el-table-column align="center" prop="deploymentTime" label="部署时间" width="160"></el-table-column>
                 <el-table-column label="操作" align="center" width="200" class-name="small-padding fixed-width">
                 <template slot-scope="scope">
-                <el-button
-                    v-if="scope.row.suspensionState == 1"
-                    @click="clickUpdateProcDefState(scope.row)"
-                    type="text"
-                    size="mini"
-                    icon="el-icon-setting"
-                >挂起</el-button>
-                <el-button
-                    v-else type="text"
-                    @click="clickUpdateProcDefState(scope.row)"
-                    size="mini"
-                    icon="el-icon-setting"
-                >激活</el-button>
-                <el-button
-                    type="text"
-                    @click="convertToModel(scope.row)"
-                    size="mini"
-                    icon="el-icon-sort"
-                >转换模型</el-button>
-                <el-button
-                    size="mini"
-                    type="text"
-                    icon="el-icon-delete"
-                    @click="handleDelete(scope.row)"
-                >删除</el-button>
+                  <el-dropdown>
+                  <span class="el-dropdown-link">
+                    更多<i class="el-icon-arrow-down el-icon--right"></i>
+                  </span>
+                  <el-dropdown-menu slot="dropdown">
+                      <el-dropdown-item>
+                      <el-button
+                        v-if="scope.row.suspensionState == 1"
+                        @click="clickUpdateProcDefState(scope.row)"
+                        type="text"
+                        size="mini"
+                        icon="el-icon-lock"
+                    >挂起</el-button>
+                    <el-button
+                        v-else type="text"
+                        @click="clickUpdateProcDefState(scope.row)"
+                        size="mini"
+                        icon="el-icon-unlock"
+                    >激活</el-button>
+                    </el-dropdown-item>
+                    <el-dropdown-item>
+                      <el-button
+                          type="text"
+                          @click="convertToModel(scope.row)"
+                          size="mini"
+                          icon="el-icon-sort"
+                      >转换模型</el-button>
+                    </el-dropdown-item>
+                    <el-dropdown-item>
+                      <el-button
+                          size="mini"
+                          type="text"
+                          icon="el-icon-copy-document"
+                          @click="copySetting(scope.row)"
+                      >复制流程</el-button>
+                      </el-dropdown-item>
+
+                    <el-dropdown-item>
+                      <el-button
+                          size="mini"
+                          type="text"
+                          icon="el-icon-setting"
+                          @click="handleSetting(scope.row)"
+                      >设置</el-button>
+                    </el-dropdown-item>
+
+                    <el-dropdown-item>
+                      <el-button
+                          size="mini"
+                          type="text"
+                          icon="el-icon-delete"
+                          @click="handleDelete(scope.row)"
+                      >删除</el-button>
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                  </el-dropdown>
                 </template>
                 </el-table-column>
             </el-table>
 
             <!-- 预览图片 -->
             <process-preview ref="previewRef" :url="url" />
+            <!-- 流程设置 -->
+            <process-setting ref="settingRef"/>
         </div>
     </el-dialog>
 </template>
 <script>
 import {hisList,del,updateProcDefState} from "@/api/workflow/definition";
+import {copy} from "@/api/workflow/actNodeAssginee";
 import processDeploy from './processDeploy'
 import processPreview from './processPreview'
+import processSetting from './processSetting'
 import {convertToModel} from "@/api/workflow/model";
 
 export default {
-    components: { processDeploy, processPreview},
+    components: { processDeploy, processPreview, processSetting},
     props:{
       propKey: {
         type: String
@@ -183,6 +218,27 @@ export default {
            this.loading = false;
          });
       },
+      //打开设置
+      handleSetting(row){
+        this.$nextTick(() => {
+          this.$refs.settingRef.visible = true
+          this.$refs.settingRef.init(row.id)
+        })
+      },
+      copySetting(row){
+        this.$modal.confirm('是否确认将此设置复制为最新？').then(() => {
+           this.loading = true;
+           copy(row.id,row.key).then(response => {
+              if(response.code === 200){
+                this.$modal.msgSuccess("操作成功");
+              }else{
+                this.$modal.msgError(response.msg);
+              }
+            })
+         }).finally(() => {
+           this.loading = false;
+         });
+      }
     }
 }
 </script>

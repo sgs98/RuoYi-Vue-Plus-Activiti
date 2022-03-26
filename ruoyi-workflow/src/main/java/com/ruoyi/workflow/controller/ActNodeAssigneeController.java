@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.constraints.NotBlank;
+
 /**
  * @program: ruoyi-vue-plus
  * @description: 流程定义设置控制层
@@ -73,7 +75,7 @@ public class ActNodeAssigneeController extends BaseController {
 
     /**
      * @Description: 删除
-     * @param: actNodeAssignee
+     * @param: id
      * @return: com.ruoyi.common.core.domain.R<java.lang.Void>
      * @Author: gssong
      * @Date: 2021/11/21
@@ -83,5 +85,25 @@ public class ActNodeAssigneeController extends BaseController {
     @Log(title = "删除", businessType = BusinessType.DELETE)
     public R<Void> del(@PathVariable String id){
         return toAjax(iActNodeAssigneeService.del(id) ? 1 : 0);
+    }
+
+    /**
+     * @Description: 复制为最新流程定义
+     * @param: id 流程定义id
+     * @param: key 流程定义key
+     * @return: com.ruoyi.common.core.domain.R<java.lang.Void>
+     * @Author: gssong
+     * @Date: 2022/03/26
+     */
+    @PostMapping("copy/{id}/{key}")
+    @ApiOperation("复制为最新流程定义")
+    @Log(title = "复制为最新流程定义", businessType = BusinessType.INSERT)
+    public R<Void> copy(@PathVariable("id") @NotBlank(message = "ID不能为空") String id,
+                        @PathVariable("key") @NotBlank(message = "Key不能为空") String key){
+        Boolean copy = iActNodeAssigneeService.copy(id, key);
+        if(copy){
+            return R.ok();
+        }
+        return R.fail("当前流程未设置人员");
     }
 }

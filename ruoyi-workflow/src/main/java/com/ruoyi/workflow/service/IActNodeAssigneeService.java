@@ -64,4 +64,12 @@ public interface IActNodeAssigneeService extends IService<ActNodeAssignee> {
      * @return
      */
     Boolean delByDefinitionIdAndNodeId(String definitionId,String nodeId);
+
+    /**
+     * 复制为最新流程定义
+     * @param id
+     * @param key
+     * @return
+     */
+    Boolean copy(String id,String key);
 }

@@ -165,7 +165,7 @@
     />
 
     <!-- 添加或修改请假业务对话框 -->
-    <el-dialog :title="title" :visible.sync="open" v-if="open" width="800px" append-to-body>
+    <el-dialog :title="title" :visible.sync="open" width="800px" append-to-body>
       <el-tabs  type="border-card" >
         <el-tab-pane label="业务单据" v-loading="loading">
             <el-form ref="form" :model="form" :rules="rules" label-width="120px">
@@ -350,7 +350,6 @@ export default {
         startDate: undefined,
         endDate: undefined
       };
-      this.processInstanceId = undefined
       this.resetForm("form");
     },
     /** 搜索按钮操作 */
@@ -467,6 +466,7 @@ export default {
         let assigneeList = []
         assigneeList.push(1)
         assigneeList.push(2)
+        console.log(assigneeList)
         processAip.startProcessApply(data).then(response => {
             this.taskId = response.data.taskId;
             // 查询下一节点的变量
@@ -477,7 +477,6 @@ export default {
                 //assigneeList: assigneeList
             }
             this.$refs.verifyRef.visible = true
-            this.$refs.verifyRef.reset()
         })
     },
     //撤回
