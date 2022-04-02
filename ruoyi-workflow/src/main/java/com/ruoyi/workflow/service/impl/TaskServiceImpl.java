@@ -398,7 +398,15 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         ExecutionEntityImpl executionEntity = (ExecutionEntityImpl) runtimeService.createExecutionQuery()
             .executionId(task.getExecutionId()).singleResult();
         workFlowUtils.getNextNodes(flowElement,executionEntity, nextNodes, tempNodes, task.getId(), businessKey, null);
-
+        if(CollectionUtil.isEmpty(tempNodes)&&CollectionUtil.isNotEmpty(nextNodes)){
+            Iterator<ProcessNode> iterator = nextNodes.iterator();
+            while (iterator.hasNext()) {
+                ProcessNode node = iterator.next();
+                if (ActConstant.FALSE.equals(node.getExpression())){
+                    iterator.remove();
+                }
+            }
+        }
         //排它网关  如果下已审批节点变量判断都为false  将保存的临时的节点赋予下一节点
         List<String> exclusiveLists = nextNodes.stream().filter(e -> e.getNodeType().equals(ActConstant.EXCLUSIVEGATEWAY) && e.getExpression().equals(ActConstant.TRUE)).
             map(ProcessNode::getNodeType).collect(Collectors.toList());

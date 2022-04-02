@@ -26,6 +26,11 @@ public interface ActConstant {
      String EXCLUSIVEGATEWAY = "exclusiveGateway";
 
     /**
+     *结束
+     */
+    String ENDTASK = "endTask";
+
+    /**
      * 用户任务
      */
      String USER_TASK = "userTask";

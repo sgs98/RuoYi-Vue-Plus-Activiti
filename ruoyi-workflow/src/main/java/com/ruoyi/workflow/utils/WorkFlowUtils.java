@@ -191,7 +191,11 @@ public class WorkFlowUtils {
                     nextNodes.add(processNode);
                 }
             } else if (outFlowElement instanceof EndEvent) {
-                break;
+                /*if(outgoingFlows.size()>1){
+                    getNextNodes(outFlowElement, executionEntity, nextNodes, tempNodes, taskId, businessKey, ActConstant.ENDTASK);
+                }else{
+                    break;
+                }*/
             } else if (outFlowElement instanceof ExclusiveGateway) { // 排他网关
                 getNextNodes(outFlowElement, executionEntity, nextNodes, tempNodes, taskId, businessKey, ActConstant.EXCLUSIVEGATEWAY);
             } else if (outFlowElement instanceof ParallelGateway) { //并行网关
