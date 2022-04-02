@@ -196,6 +196,15 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         // 4. 完成任务
         taskService.setVariables(req.getTaskId(), req.getVariables());
         taskService.complete(req.getTaskId());
+        //这里有时候办理完任务后查询列表还是会有该任务
+        while (true){
+            Task checkTask = taskService.createTaskQuery().taskId(req.getTaskId()).singleResult();
+            if(ObjectUtil.isNotEmpty(checkTask)&&task.getId().equals(checkTask.getId())) {
+                taskService.complete(checkTask.getId());
+            }else{
+                break;
+            }
+        }
         // 5. 记录执行过的流程任务
         List<ActTaskNode> actTaskNodeList = iActTaskNodeService.getListByInstanceId(task.getProcessInstanceId());
         List<String> nodeIdList = actTaskNodeList.stream().map(ActTaskNode::getNodeId).collect(Collectors.toList());
