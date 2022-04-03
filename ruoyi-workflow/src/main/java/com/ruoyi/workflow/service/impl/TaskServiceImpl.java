@@ -200,6 +200,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         while (true){
             Task checkTask = taskService.createTaskQuery().taskId(req.getTaskId()).singleResult();
             if(ObjectUtil.isNotEmpty(checkTask)&&task.getId().equals(checkTask.getId())) {
+                taskService.addComment(checkTask.getId(), task.getProcessInstanceId(), req.getMessage());
                 taskService.complete(checkTask.getId());
             }else{
                 break;

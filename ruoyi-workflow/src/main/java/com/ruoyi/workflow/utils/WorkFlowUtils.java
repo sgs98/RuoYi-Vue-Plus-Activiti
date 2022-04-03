@@ -184,22 +184,18 @@ public class WorkFlowUtils {
                     processNode.setNodeName(outFlowElement.getName());
                     processNode.setNodeType(ActConstant.USER_TASK);
                     processNode.setTaskId(taskId);
-                    processNode.setExpression(false);
+                    processNode.setExpression(true);
                     processNode.setChooseWay(ActConstant.WORKFLOW_ASSIGNEE);
                     processNode.setAssignee(((UserTask) outFlowElement).getAssignee());
                     processNode.setAssigneeId(((UserTask) outFlowElement).getAssignee());
                     nextNodes.add(processNode);
                 }
-            } else if (outFlowElement instanceof EndEvent) {
-                /*if(outgoingFlows.size()>1){
-                    getNextNodes(outFlowElement, executionEntity, nextNodes, tempNodes, taskId, businessKey, ActConstant.ENDTASK);
-                }else{
-                    break;
-                }*/
-            } else if (outFlowElement instanceof ExclusiveGateway) { // 排他网关
+            }else if (outFlowElement instanceof ExclusiveGateway) { // 排他网关
                 getNextNodes(outFlowElement, executionEntity, nextNodes, tempNodes, taskId, businessKey, ActConstant.EXCLUSIVEGATEWAY);
             } else if (outFlowElement instanceof ParallelGateway) { //并行网关
                 getNextNodes(outFlowElement,executionEntity, nextNodes, tempNodes, taskId, businessKey, ActConstant.PARALLELGATEWAY);
+            }  else if (outFlowElement instanceof EndEvent) {
+                continue;
             } else {
                 throw new ServiceException("未识别出节点类型");
             }
