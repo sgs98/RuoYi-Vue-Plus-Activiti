@@ -15,6 +15,7 @@ import com.ruoyi.system.mapper.SysUserMapper;
 import com.ruoyi.system.mapper.SysUserRoleMapper;
 import com.ruoyi.system.service.ISysRoleService;
 import com.ruoyi.system.service.ISysUserService;
+import com.ruoyi.workflow.activiti.cmd.ExpressCommand;
 import com.ruoyi.workflow.common.constant.ActConstant;
 import com.ruoyi.workflow.common.enums.BusinessStatusEnum;
 import com.ruoyi.workflow.domain.ActBusinessStatus;
@@ -29,6 +30,7 @@ import lombok.SneakyThrows;
 import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.model.*;
 import org.activiti.editor.language.json.converter.BpmnJsonConverter;
+import org.activiti.engine.ManagementService;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
@@ -49,10 +51,7 @@ import javax.el.ValueExpression;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.ruoyi.workflow.common.constant.ActConstant.*;
@@ -90,6 +89,9 @@ public class WorkFlowUtils {
     @Autowired
     private SysUserRoleMapper userRoleMapper;
 
+    @Autowired
+    private ManagementService managementService;
+
 
     /**
      * @Description: bpmnModel转为xml
@@ -121,10 +123,12 @@ public class WorkFlowUtils {
      * @param nextNodes
      * @param tempNodes
      * @param taskId
-     * @param businessKey
      * @param gateway
+     * @return: void
+     * @author: gssong
+     * @Date: 2022/4/11 10:31
      */
-    public void getNextNodes(FlowElement flowElement, ExecutionEntityImpl executionEntity,List<ProcessNode> nextNodes, List<ProcessNode> tempNodes, String taskId, String businessKey, String gateway) {
+    public void getNextNodes(FlowElement flowElement, ExecutionEntityImpl executionEntity,List<ProcessNode> nextNodes, List<ProcessNode> tempNodes, String taskId, String gateway) {
         // 获取当前节点的连线信息
         List<SequenceFlow> outgoingFlows = ((FlowNode) flowElement).getOutgoingFlows();
         // 当前节点的所有下一节点出口
@@ -134,55 +138,105 @@ public class WorkFlowUtils {
             ProcessNode tempNode = new ProcessNode();
             FlowElement outFlowElement = sequenceFlow.getTargetFlowElement();
             if (outFlowElement instanceof UserTask) {
-                // 用户任务，则获取响应给前端设置办理人或者候选人
-                // 判断是否为排它网关
-                if (ActConstant.EXCLUSIVEGATEWAY.equals(gateway)) {
-                    String conditionExpression = sequenceFlow.getConditionExpression();
-                    //判断是否有条件
-                    if (StringUtils.isNotBlank(conditionExpression)) {
-                        ProcessEngineConfigurationImpl processEngineConfiguration = (ProcessEngineConfigurationImpl)processEngine.getProcessEngineConfiguration();
-                        Context.setCommandContext(processEngineConfiguration.getCommandContextFactory().createCommandContext(null));
-                        Context.setProcessEngineConfiguration(processEngineConfiguration);
-                        Expression expression = Context.getProcessEngineConfiguration().getExpressionManager().createExpression(conditionExpression);
-                        Condition condition = new UelExpressionCondition(expression);
-                        boolean evaluate = condition.evaluate(sequenceFlow.getId(), executionEntity);
-                        if (evaluate) {
-                            processNode.setNodeId(outFlowElement.getId());
-                            processNode.setNodeName(outFlowElement.getName());
-                            processNode.setNodeType(ActConstant.EXCLUSIVEGATEWAY);
-                            processNode.setTaskId(taskId);
-                            processNode.setExpression(true);
-                            processNode.setChooseWay(ActConstant.WORKFLOW_ASSIGNEE);
-                            processNode.setAssignee(((UserTask) outFlowElement).getAssignee());
-                            processNode.setAssigneeId(((UserTask) outFlowElement).getAssignee());
-                            nextNodes.add(processNode);
-                        } else {
-                            processNode.setNodeId(outFlowElement.getId());
-                            processNode.setNodeName(outFlowElement.getName());
-                            processNode.setNodeType(ActConstant.EXCLUSIVEGATEWAY);
-                            processNode.setTaskId(taskId);
-                            processNode.setExpression(false);
-                            processNode.setChooseWay(ActConstant.WORKFLOW_ASSIGNEE);
-                            processNode.setAssignee(((UserTask) outFlowElement).getAssignee());
-                            processNode.setAssigneeId(((UserTask) outFlowElement).getAssignee());
-                            nextNodes.add(processNode);
-                        }
-                    } else {
-                        tempNode.setNodeId(outFlowElement.getId());
-                        tempNode.setNodeName(outFlowElement.getName());
-                        tempNode.setNodeType(ActConstant.EXCLUSIVEGATEWAY);
-                        tempNode.setTaskId(taskId);
-                        tempNode.setExpression(true);
-                        tempNode.setChooseWay(ActConstant.WORKFLOW_ASSIGNEE);
-                        tempNode.setAssignee(((UserTask) outFlowElement).getAssignee());
-                        tempNode.setAssigneeId(((UserTask) outFlowElement).getAssignee());
-                        tempNodes.add(tempNode);
+                buildNode(executionEntity, nextNodes, tempNodes, taskId, gateway, sequenceFlow, processNode, tempNode, outFlowElement);
+            }else if (outFlowElement instanceof ExclusiveGateway) { // 排他网关
+                getNextNodes(outFlowElement, executionEntity, nextNodes, tempNodes, taskId, ActConstant.EXCLUSIVEGATEWAY);
+            }else if (outFlowElement instanceof ParallelGateway) { //并行网关
+                getNextNodes(outFlowElement,executionEntity, nextNodes, tempNodes, taskId, ActConstant.PARALLELGATEWAY);
+            }else if(outFlowElement instanceof InclusiveGateway){ //包含网关
+                getNextNodes(outFlowElement,executionEntity, nextNodes, tempNodes, taskId, ActConstant.INCLUSIVEGATEWAY);
+            }else if (outFlowElement instanceof EndEvent) {
+                continue;
+            }else if(outFlowElement instanceof SubProcess) {
+                Collection<FlowElement> flowElements = ((SubProcess) outFlowElement).getFlowElements();
+                for (FlowElement element : flowElements) {
+                    if (element instanceof UserTask) {
+                        buildNode(executionEntity, nextNodes, tempNodes, taskId, gateway, sequenceFlow, processNode, tempNode, element);
+                        break;
                     }
+                }
+            }else {
+                throw new ServiceException("未识别出节点类型");
+            }
+        }
+    }
 
+    /**
+     * 构建下一审批节点
+     * @param executionEntity
+     * @param nextNodes 下一节点信息
+     * @param tempNodes 保存没有表达式的节点信息
+     * @param taskId 任务id
+     * @param gateway 网关
+     * @param sequenceFlow  节点
+     * @param processNode 下一节点的目标元素
+     * @param tempNode  保存没有表达式的节点
+     * @param outFlowElement 目标节点
+     * @return: void
+     * @author: gssong
+     * @Date: 2022/4/11 10:31
+     */
+    private void buildNode(ExecutionEntityImpl executionEntity, List<ProcessNode> nextNodes, List<ProcessNode> tempNodes, String taskId, String gateway, SequenceFlow sequenceFlow, ProcessNode processNode, ProcessNode tempNode, FlowElement outFlowElement) {
+        // 用户任务，则获取响应给前端设置办理人或者候选人
+        // 判断是否为排它网关
+        if (ActConstant.EXCLUSIVEGATEWAY.equals(gateway)) {
+            String conditionExpression = sequenceFlow.getConditionExpression();
+            //判断是否有条件
+            if (StringUtils.isNotBlank(conditionExpression)) {
+                ExpressCommand expressCommand = new ExpressCommand(sequenceFlow,executionEntity,conditionExpression);
+                Boolean condition  = managementService.executeCommand(expressCommand);
+                if (condition ) {
+                    processNode.setNodeId(outFlowElement.getId());
+                    processNode.setNodeName(outFlowElement.getName());
+                    processNode.setNodeType(ActConstant.EXCLUSIVEGATEWAY);
+                    processNode.setTaskId(taskId);
+                    processNode.setExpression(true);
+                    processNode.setChooseWay(ActConstant.WORKFLOW_ASSIGNEE);
+                    processNode.setAssignee(((UserTask) outFlowElement).getAssignee());
+                    processNode.setAssigneeId(((UserTask) outFlowElement).getAssignee());
+                    nextNodes.add(processNode);
                 } else {
                     processNode.setNodeId(outFlowElement.getId());
                     processNode.setNodeName(outFlowElement.getName());
-                    processNode.setNodeType(ActConstant.USER_TASK);
+                    processNode.setNodeType(ActConstant.EXCLUSIVEGATEWAY);
+                    processNode.setTaskId(taskId);
+                    processNode.setExpression(false);
+                    processNode.setChooseWay(ActConstant.WORKFLOW_ASSIGNEE);
+                    processNode.setAssignee(((UserTask) outFlowElement).getAssignee());
+                    processNode.setAssigneeId(((UserTask) outFlowElement).getAssignee());
+                    nextNodes.add(processNode);
+                }
+            } else {
+                tempNode.setNodeId(outFlowElement.getId());
+                tempNode.setNodeName(outFlowElement.getName());
+                tempNode.setNodeType(ActConstant.EXCLUSIVEGATEWAY);
+                tempNode.setTaskId(taskId);
+                tempNode.setExpression(true);
+                tempNode.setChooseWay(ActConstant.WORKFLOW_ASSIGNEE);
+                tempNode.setAssignee(((UserTask) outFlowElement).getAssignee());
+                tempNode.setAssigneeId(((UserTask) outFlowElement).getAssignee());
+                tempNodes.add(tempNode);
+            }
+        // 判断是否为包含网关
+        } else if(ActConstant.INCLUSIVEGATEWAY.equals(gateway)){
+            String conditionExpression = sequenceFlow.getConditionExpression();
+            if(StringUtils.isBlank(conditionExpression)){
+                processNode.setNodeId(outFlowElement.getId());
+                processNode.setNodeName(outFlowElement.getName());
+                processNode.setNodeType(ActConstant.EXCLUSIVEGATEWAY);
+                processNode.setTaskId(taskId);
+                processNode.setExpression(true);
+                processNode.setChooseWay(ActConstant.WORKFLOW_ASSIGNEE);
+                processNode.setAssignee(((UserTask) outFlowElement).getAssignee());
+                processNode.setAssigneeId(((UserTask) outFlowElement).getAssignee());
+                nextNodes.add(processNode);
+            } else{
+                ExpressCommand expressCommand = new ExpressCommand(sequenceFlow,executionEntity,conditionExpression);
+                Boolean condition  = managementService.executeCommand(expressCommand);
+                if (condition) {
+                    processNode.setNodeId(outFlowElement.getId());
+                    processNode.setNodeName(outFlowElement.getName());
+                    processNode.setNodeType(ActConstant.EXCLUSIVEGATEWAY);
                     processNode.setTaskId(taskId);
                     processNode.setExpression(true);
                     processNode.setChooseWay(ActConstant.WORKFLOW_ASSIGNEE);
@@ -190,94 +244,29 @@ public class WorkFlowUtils {
                     processNode.setAssigneeId(((UserTask) outFlowElement).getAssignee());
                     nextNodes.add(processNode);
                 }
-            }else if (outFlowElement instanceof ExclusiveGateway) { // 排他网关
-                getNextNodes(outFlowElement, executionEntity, nextNodes, tempNodes, taskId, businessKey, ActConstant.EXCLUSIVEGATEWAY);
-            } else if (outFlowElement instanceof ParallelGateway) { //并行网关
-                getNextNodes(outFlowElement,executionEntity, nextNodes, tempNodes, taskId, businessKey, ActConstant.PARALLELGATEWAY);
-            }  else if (outFlowElement instanceof EndEvent) {
-                continue;
-            } else {
-                throw new ServiceException("未识别出节点类型");
             }
+        } else {
+            processNode.setNodeId(outFlowElement.getId());
+            processNode.setNodeName(outFlowElement.getName());
+            processNode.setNodeType(ActConstant.USER_TASK);
+            processNode.setTaskId(taskId);
+            processNode.setExpression(true);
+            processNode.setChooseWay(ActConstant.WORKFLOW_ASSIGNEE);
+            processNode.setAssignee(((UserTask) outFlowElement).getAssignee());
+            processNode.setAssigneeId(((UserTask) outFlowElement).getAssignee());
+            nextNodes.add(processNode);
         }
     }
 
-    /**
-     * @Description: 判断uel表达式
-     * @param: uel uel条件
-     * @param: businessKey 业务key
-     * @param: taskId 任务id
-     * @return: boolean
-     * @Author: gssong
-     * @Date: 2021/11/5
-     */
-    public boolean isCondition(String uel, String businessKey, String taskId) {
-        Map<String, VariableInstance> variables = taskService.getVariableInstances(taskId);
-
-        Class className = null;
-        Object entity = null;
-        ActBusinessStatus actBusinessStatus = iActBusinessStatusService.getInfoByBusinessKey(businessKey);
-        if (ObjectUtil.isNull(actBusinessStatus)) {
-            throw new ServiceException("业务流程不存在");
-        }
-
-        for (Map.Entry<String, VariableInstance> variable : variables.entrySet()) {
-            // 变量名 key
-            String name = variable.getValue().getName();
-            // 变量值 value
-            String textValue = variable.getValue().getTextValue();
-            // 变量类型
-            String typeName = variable.getValue().getTypeName();
-            if (ActConstant.JSON.equals(typeName) && uel.contains(name)) {
-                try {
-                    //通过全类名获取
-                    className = Class.forName(actBusinessStatus.getClassFullName());
-                    //转为对象
-                    entity = objectMapper.readValue(textValue, className);
-                    ExpressionFactory factory = new ExpressionFactoryImpl();
-                    SimpleContext context = new SimpleContext(new SimpleResolver());
-                    context.setVariable(name, factory.createValueExpression(entity, className));
-                    ValueExpression exp = factory.createValueExpression(context, uel, boolean.class);
-                    if ((boolean) exp.getValue(context)) {
-                        return true;
-                    }
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                    throw new ServiceException("找不到指定的类");
-                } catch (JsonProcessingException ex) {
-                    ex.printStackTrace();
-                    throw new ServiceException("JSON转换异常");
-                }
-            } else if (uel.contains(name)) {
-                ExpressionFactory factory = new ExpressionFactoryImpl();
-                SimpleContext context = new SimpleContext(new SimpleResolver());
-                if (ActConstant.STRING.equals(typeName)) {
-                    context.setVariable(name, factory.createValueExpression(textValue, String.class));
-                } else if (ActConstant.INTEGER.equals(typeName)) {
-                    context.setVariable(name, factory.createValueExpression(textValue, Integer.class));
-                } else if (ActConstant.LONG.equals(typeName)) {
-                    context.setVariable(name, factory.createValueExpression(textValue, Long.class));
-                } else if (ActConstant.DOUBLE.equals(typeName)) {
-                    context.setVariable(name, factory.createValueExpression(textValue, Double.class));
-                } else if (ActConstant.SHORT.equals(typeName)) {
-                    context.setVariable(name, factory.createValueExpression(textValue, Short.class));
-                } else if (ActConstant.DATE.equals(typeName)) {
-                    context.setVariable(name, factory.createValueExpression(textValue, Date.class));
-                }
-                ValueExpression exp = factory.createValueExpression(context, uel, boolean.class);
-                if ((boolean) exp.getValue(context)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
 
     /**
      *
      * @param actFullClass 业务规则对象
      * @param taskId 任务id
      * @return 查询业务规则
+     * @return: java.lang.Object
+     * @author: gssong
+     * @Date: 2022/4/11 10:31
      */
     @SneakyThrows
     public Object assignList(ActFullClassVo actFullClass, String taskId) {
@@ -404,7 +393,9 @@ public class WorkFlowUtils {
      * @param params
      * @param chooseWay
      * @param nodeName
-     * @return
+     * @return: java.util.List<java.lang.Long>
+     * @author: gssong
+     * @Date: 2022/4/11 10:32
      */
     public List<Long> assignees(String params, String chooseWay, String nodeName) {
         List<Long> paramList = new ArrayList<>();

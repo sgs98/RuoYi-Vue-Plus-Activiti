@@ -8,7 +8,6 @@ import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.helper.LoginHelper;
-import com.ruoyi.workflow.activiti.cmd.JumpAnyWhereCmd;
 import com.ruoyi.workflow.common.constant.ActConstant;
 import com.ruoyi.workflow.common.enums.BusinessStatusEnum;
 import com.ruoyi.workflow.domain.ActHiTaskInst;
@@ -18,6 +17,7 @@ import com.ruoyi.workflow.domain.ActTaskNode;
 import com.ruoyi.workflow.domain.bo.NextNodeREQ;
 import com.ruoyi.workflow.domain.bo.TaskCompleteREQ;
 import com.ruoyi.workflow.domain.bo.TaskREQ;
+import com.ruoyi.workflow.domain.bo.TransmitREQ;
 import com.ruoyi.workflow.domain.vo.*;
 import com.ruoyi.workflow.factory.WorkflowService;
 import com.ruoyi.workflow.service.*;
@@ -403,7 +403,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         List<ProcessNode> tempNodes = new ArrayList<>();
         ExecutionEntityImpl executionEntity = (ExecutionEntityImpl) runtimeService.createExecutionQuery()
             .executionId(task.getExecutionId()).singleResult();
-        workFlowUtils.getNextNodes(flowElement,executionEntity, nextNodes, tempNodes, task.getId(), businessKey, null);
+        workFlowUtils.getNextNodes(flowElement,executionEntity, nextNodes, tempNodes, task.getId(), null);
         if(CollectionUtil.isEmpty(tempNodes)&&CollectionUtil.isNotEmpty(nextNodes)){
             Iterator<ProcessNode> iterator = nextNodes.iterator();
             while (iterator.hasNext()) {
@@ -729,66 +729,6 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
             }
         }
         return processInstanceId;
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public Boolean backProcess2(BackProcessVo backProcessVo) {
-        String taskId = backProcessVo.getTaskId();
-        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
-        String processInstanceId = task.getProcessInstanceId();
-        JumpAnyWhereCmd jumpAnyWhereCmd = new JumpAnyWhereCmd
-            (backProcessVo.getTaskId(),backProcessVo.getTargetActivityId(),repositoryService);
-        managementService.executeCommand(jumpAnyWhereCmd);
-        /*String processInstanceId = task.getProcessInstanceId();
-        //当前节点id
-        String currentActivityId = task.getTaskDefinitionKey();
-        //驳回的目标节点id
-        String targetActivityId = backProcessVo.getTargetActivityId();
-        //获取模型实体
-        String processDefinitionId = task.getProcessDefinitionId();
-        BpmnModel bpmnModel = repositoryService.getBpmnModel(processDefinitionId);
-
-        //获取当前节点
-        FlowElement currentFlowElement = bpmnModel.getFlowElement(currentActivityId);
-
-        //获取当前节点
-        FlowElement targetFlowElement = bpmnModel.getFlowElement(targetActivityId);
-        //创建连线
-        SequenceFlow newSequenceFlow  = new SequenceFlow();
-        String id = IdUtil.getSnowflake().nextIdStr();
-        newSequenceFlow .setId(id);
-        newSequenceFlow.setSourceFlowElement(currentFlowElement);
-        newSequenceFlow.setTargetFlowElement(targetFlowElement);
-        //设置条件
-        newSequenceFlow.setConditionExpression("${\"+id+\"==\"" + id + "\"}");
-        bpmnModel.getMainProcess().addFlowElement(newSequenceFlow);
-        //提交
-        taskService.addComment(task.getId(), task.getProcessInstanceId(), "撤回申请");
-        //完成任务
-        taskService.complete(task.getId());
-        //删除连线
-        bpmnModel.getMainProcess().removeFlowElement(id);
-
-        List<Task> newTaskList = taskService.createTaskQuery().processInstanceId(processInstanceId).list();
-        for (Task newTask : newTaskList) {
-            HistoricTaskInstance singleResult = historyService.createHistoricTaskInstanceQuery().taskId(backProcessVo.getTaskId()).singleResult();
-            taskService.setAssignee(newTask.getId(), singleResult.getAssignee());
-        }*/
-        // 13. 删除驳回后的流程节点
-        ActTaskNode actTaskNode = iActTaskNodeService.getListByInstanceIdAndNodeId(task.getProcessInstanceId(), backProcessVo.getTargetActivityId());
-        if(ObjectUtil.isNotNull(actTaskNode)&&actTaskNode.getOrderNo()==0){
-            ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceId(processInstanceId).singleResult();
-            List<Task> newList = taskService.createTaskQuery().processInstanceId(processInstanceId).list();
-            for (Task t : newList) {
-                Map<String, Object> variables =new HashMap<>();
-                variables.put("status",BusinessStatusEnum.BACK.getStatus());
-                taskService.setVariables(t.getId(),variables);
-            }
-            iActBusinessStatusService.updateState(processInstance.getBusinessKey(),BusinessStatusEnum.BACK);
-        }
-        Boolean taskNode = iActTaskNodeService.deleteBackTaskNode(processInstanceId, backProcessVo.getTargetActivityId());
-        return taskNode;
     }
 
     /**

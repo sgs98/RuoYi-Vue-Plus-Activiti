@@ -281,29 +281,25 @@ export default {
     },
     //提交转发
     transmitSubmit(formName){
-      this.$refs[formName].validate(async (valid) => {
-         if(valid){
-          let params = {
-            transmitUserId: this.transmitForm.userId,
-            taskId: this.taskId,
-            comment: this.transmitForm.message
+        let params = {
+          transmitUserId: this.transmitForm.userId,
+          taskId: this.taskId,
+          comment: this.transmitForm.message
+        }
+        api.transmitTask(params).then(response=>{
+          if(response.code === 200){
+            // 刷新数据
+            this.$message.success("办理成功");
+            // 将表单清空
+            this.$refs[formName].resetFields();
+            // 关闭窗口
+            this.visible = false;
+            this.transmitVisible = false;
+            // 回调事件
+            this.$emit("callSubmit")
           }
-          api.transmitTask(params).then(response=>{
-            if(response.code === 200){
-              // 刷新数据
-              this.$message.success("办理成功");
-              // 将表单清空
-              this.$refs[formName].resetFields();
-              // 关闭窗口
-              this.visible = false;
-              this.transmitVisible = false;
-              // 回调事件
-              this.$emit("callSubmit")
-            }
-            this.loading = false;
-          })
-         }
-      })
+          this.loading = false;
+        })
     },
     //打开转办人员组件
     transmitPeople(){
