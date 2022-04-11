@@ -11,35 +11,26 @@ import org.springframework.validation.annotation.Validated;
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 
+
 /**
  * @program: ruoyi-vue-plus
- * @description: 任务请求
+ * @description: 转办请求
  * @author: gssong
- * @created: 2021/10/17 14:50
+ * @created: 2022/04/10 14:50
  */
 @Data
 @Validated
-@EqualsAndHashCode(callSuper = true)
-@ApiModel("任务请求")
-public class TaskREQ extends PageEntity implements Serializable {
+@ApiModel("转办请求")
+public class TransmitREQ implements Serializable {
 
     private static final long serialVersionUID=1L;
-
-    @ApiModelProperty("任务名称")
-    private String taskName;
 
     @ApiModelProperty("任务id")
     private String taskId;
 
-    @ApiModelProperty("流程定义id")
-    private String processInstId;
-
-    @ApiModelProperty(value = "委派人id")
-    @NotBlank(message = "请选择委派人",groups = AddGroup.class)
-    private String delegateUserId;
-
-    @ApiModelProperty("委派人")
-    private String delegateUserName;
+    @NotBlank(message = "请选择转办人",groups = AddGroup.class)
+    @ApiModelProperty(value = "转办人id")
+    private String transmitUserId;
 
     @ApiModelProperty("审批意见")
     private String comment;

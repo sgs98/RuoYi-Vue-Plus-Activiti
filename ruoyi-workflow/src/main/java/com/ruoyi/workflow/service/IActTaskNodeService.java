@@ -40,4 +40,11 @@ public interface IActTaskNodeService extends IService<ActTaskNode> {
      * @return
      */
     Boolean deleteByInstanceId(String processInstanceId);
+
+    /**
+     * 保存完成的节点
+     * @param actTaskNode
+     * @return
+     */
+    void saveTaskNode(ActTaskNode actTaskNode);
 }

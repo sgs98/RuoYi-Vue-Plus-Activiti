@@ -1,6 +1,7 @@
 package com.ruoyi.workflow.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ruoyi.common.exception.ServiceException;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @program: ruoyi-vue-plus
@@ -25,7 +27,6 @@ public class ActTaskNodeServiceImpl extends ServiceImpl<ActTaskNodeMapper, ActTa
     public List<ActTaskNode> getListByInstanceId(String processInstanceId) {
         LambdaQueryWrapper<ActTaskNode> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(ActTaskNode::getInstanceId, processInstanceId);
-        queryWrapper.eq(ActTaskNode::getIsBack, true);
         queryWrapper.orderByDesc(ActTaskNode::getOrderNo);
         List<ActTaskNode> list = this.baseMapper.selectList(queryWrapper);
         return list;
@@ -79,5 +80,23 @@ public class ActTaskNodeServiceImpl extends ServiceImpl<ActTaskNodeMapper, ActTa
             throw new ServiceException("删除失败");
         }
         return true;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void saveTaskNode(ActTaskNode actTaskNode) {
+        List<ActTaskNode> list = getListByInstanceId(actTaskNode.getInstanceId());
+        if(list.size()>0){
+            ActTaskNode taskNode = list.stream().filter(e -> e.getNodeId().equals(actTaskNode.getNodeId()) && e.getOrderNo() == 0).findFirst().orElse(null);
+            if(ObjectUtil.isEmpty(taskNode)){
+                LambdaQueryWrapper<ActTaskNode> queryWrapper = new LambdaQueryWrapper<>();
+                queryWrapper.eq(ActTaskNode::getInstanceId, actTaskNode.getInstanceId());
+                queryWrapper.eq(ActTaskNode::getNodeId, actTaskNode.getNodeId());
+                baseMapper.delete(queryWrapper);
+                List<ActTaskNode> nodeList = getListByInstanceId(actTaskNode.getInstanceId());
+                actTaskNode.setOrderNo(nodeList.get(0).getOrderNo()+1);
+                save(actTaskNode);
+            }
+        }
     }
 }

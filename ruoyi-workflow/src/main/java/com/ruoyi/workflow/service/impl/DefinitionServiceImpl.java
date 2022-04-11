@@ -204,6 +204,17 @@ public class DefinitionServiceImpl extends WorkflowService implements IDefinitio
                 actProcessNodeVo.setNodeName(element.getName());
                 actProcessNodeVo.setProcessDefinitionId(processDefinitionId);
                 processNodeVoList.add(actProcessNodeVo);
+            }else if(element instanceof SubProcess){
+                Collection<FlowElement> flowElements = ((SubProcess) element).getFlowElements();
+                for (FlowElement flowElement : flowElements) {
+                    ActProcessNodeVo actProcessNode= new ActProcessNodeVo();
+                    if (flowElement instanceof UserTask) {
+                        actProcessNode.setNodeId(flowElement.getId());
+                        actProcessNode.setNodeName(flowElement.getName());
+                        actProcessNode.setProcessDefinitionId(processDefinitionId);
+                        processNodeVoList.add(actProcessNode);
+                    }
+                }
             }
         }
         ActProcessNodeVo actProcessNodeVo = processNodeVoList.get(0);

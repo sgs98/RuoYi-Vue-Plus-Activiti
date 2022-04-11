@@ -1,6 +1,5 @@
 package com.ruoyi.workflow.controller;
 
-import cn.hutool.core.util.ObjectUtil;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.R;
@@ -12,6 +11,7 @@ import com.ruoyi.workflow.domain.ActTaskNode;
 import com.ruoyi.workflow.domain.bo.NextNodeREQ;
 import com.ruoyi.workflow.domain.bo.TaskCompleteREQ;
 import com.ruoyi.workflow.domain.bo.TaskREQ;
+import com.ruoyi.workflow.domain.bo.TransmitREQ;
 import com.ruoyi.workflow.domain.vo.BackProcessVo;
 import com.ruoyi.workflow.domain.vo.ProcessNode;
 import com.ruoyi.workflow.domain.vo.TaskFinishVo;
@@ -212,7 +212,7 @@ public class TaskController extends BaseController {
 
     /**
      * @Description: 转办任务
-     * @param taskREQ
+     * @param transmitREQ
      * @return: com.ruoyi.common.core.domain.R<java.lang.Void>
      * @author: gssong
      * @Date: 2022/3/13 13:18
@@ -220,8 +220,8 @@ public class TaskController extends BaseController {
     @ApiOperation("转办任务")
     @PostMapping("/transmitTask")
     @Log(title = "任务管理", businessType = BusinessType.INSERT)
-    public R<Boolean> transmit(@RequestBody TaskREQ taskREQ) {
-        return iTaskService.transmitTask(taskREQ);
+    public R<Boolean> transmit(@Validated({AddGroup.class}) @RequestBody TransmitREQ transmitREQ) {
+        return iTaskService.transmitTask(transmitREQ);
     }
 }
 
