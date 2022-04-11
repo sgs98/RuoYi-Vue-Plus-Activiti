@@ -3,7 +3,6 @@ package com.ruoyi.workflow.utils;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ruoyi.common.core.domain.entity.SysRole;
@@ -13,9 +12,7 @@ import com.ruoyi.system.domain.SysUserRole;
 import com.ruoyi.system.mapper.SysRoleMapper;
 import com.ruoyi.system.mapper.SysUserMapper;
 import com.ruoyi.system.mapper.SysUserRoleMapper;
-import com.ruoyi.system.service.ISysRoleService;
-import com.ruoyi.system.service.ISysUserService;
-import com.ruoyi.workflow.activiti.cmd.ExpressCommand;
+import com.ruoyi.workflow.activiti.cmd.ExpressCmd;
 import com.ruoyi.workflow.common.constant.ActConstant;
 import com.ruoyi.workflow.common.enums.BusinessStatusEnum;
 import com.ruoyi.workflow.domain.ActBusinessStatus;
@@ -23,22 +20,13 @@ import com.ruoyi.workflow.domain.ActFullClassParam;
 import com.ruoyi.workflow.domain.vo.ActFullClassVo;
 import com.ruoyi.workflow.domain.vo.ProcessNode;
 import com.ruoyi.workflow.service.IActBusinessStatusService;
-import de.odysseus.el.ExpressionFactoryImpl;
-import de.odysseus.el.util.SimpleContext;
-import de.odysseus.el.util.SimpleResolver;
 import lombok.SneakyThrows;
 import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.model.*;
+import org.activiti.engine.impl.cmd.DeleteTaskCmd;
+import org.activiti.engine.task.Task;
 import org.activiti.editor.language.json.converter.BpmnJsonConverter;
-import org.activiti.engine.ManagementService;
-import org.activiti.engine.ProcessEngine;
-import org.activiti.engine.RuntimeService;
-import org.activiti.engine.TaskService;
-import org.activiti.engine.delegate.Expression;
-import org.activiti.engine.impl.Condition;
-import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
-import org.activiti.engine.impl.context.Context;
-import org.activiti.engine.impl.el.UelExpressionCondition;
+import org.activiti.engine.*;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntityImpl;
 import org.activiti.engine.impl.persistence.entity.VariableInstance;
 import org.apache.commons.lang3.StringUtils;
@@ -46,8 +34,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import javax.el.ExpressionFactory;
-import javax.el.ValueExpression;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -78,6 +64,9 @@ public class WorkFlowUtils {
 
     @Autowired
     private RuntimeService runtimeService;
+
+    @Autowired
+    private HistoryService historyService;
 
 
     @Autowired
@@ -128,7 +117,7 @@ public class WorkFlowUtils {
      * @author: gssong
      * @Date: 2022/4/11 10:31
      */
-    public void getNextNodes(FlowElement flowElement, ExecutionEntityImpl executionEntity,List<ProcessNode> nextNodes, List<ProcessNode> tempNodes, String taskId, String gateway) {
+    public void getNextNodes(FlowElement flowElement, ExecutionEntityImpl executionEntity, List<ProcessNode> nextNodes, List<ProcessNode> tempNodes, String taskId, String gateway) {
         // 获取当前节点的连线信息
         List<SequenceFlow> outgoingFlows = ((FlowNode) flowElement).getOutgoingFlows();
         // 当前节点的所有下一节点出口
@@ -183,8 +172,8 @@ public class WorkFlowUtils {
             String conditionExpression = sequenceFlow.getConditionExpression();
             //判断是否有条件
             if (StringUtils.isNotBlank(conditionExpression)) {
-                ExpressCommand expressCommand = new ExpressCommand(sequenceFlow,executionEntity,conditionExpression);
-                Boolean condition  = managementService.executeCommand(expressCommand);
+                ExpressCmd expressCmd = new ExpressCmd(sequenceFlow,executionEntity,conditionExpression);
+                Boolean condition  = managementService.executeCommand(expressCmd);
                 if (condition ) {
                     processNode.setNodeId(outFlowElement.getId());
                     processNode.setNodeName(outFlowElement.getName());
@@ -231,8 +220,8 @@ public class WorkFlowUtils {
                 processNode.setAssigneeId(((UserTask) outFlowElement).getAssignee());
                 nextNodes.add(processNode);
             } else{
-                ExpressCommand expressCommand = new ExpressCommand(sequenceFlow,executionEntity,conditionExpression);
-                Boolean condition  = managementService.executeCommand(expressCommand);
+                ExpressCmd expressCmd = new ExpressCmd(sequenceFlow,executionEntity,conditionExpression);
+                Boolean condition  = managementService.executeCommand(expressCmd);
                 if (condition) {
                     processNode.setNodeId(outFlowElement.getId());
                     processNode.setNodeName(outFlowElement.getName());

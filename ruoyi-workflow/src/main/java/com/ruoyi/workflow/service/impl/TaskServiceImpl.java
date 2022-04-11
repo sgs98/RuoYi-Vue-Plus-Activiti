@@ -696,13 +696,16 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         if(ObjectUtil.isNotEmpty(actNodeAssignee)&&!actNodeAssignee.getMultiple()){
             for (Task newTask : newTaskList) {
                 // 取之前的历史办理人
-                HistoricTaskInstance oldTargerTask = historyService.createHistoricTaskInstanceQuery()
+                List<HistoricTaskInstance> oldTargerTaskList = historyService.createHistoricTaskInstanceQuery()
                     .taskDefinitionKey(newTask.getTaskDefinitionKey()) // 节点id
                     .processInstanceId(processInstanceId)
                     .finished() // 已经完成才是历史
                     .orderByTaskCreateTime().desc() // 最新办理的在最前面
-                    .list().get(0);
-                taskService.setAssignee(newTask.getId(), oldTargerTask.getAssignee());
+                    .list();
+                if(CollectionUtil.isNotEmpty(oldTargerTaskList)){
+                    HistoricTaskInstance oldTargerTask = oldTargerTaskList.get(0);
+                    taskService.setAssignee(newTask.getId(), oldTargerTask.getAssignee());
+                }
             }
         }
 

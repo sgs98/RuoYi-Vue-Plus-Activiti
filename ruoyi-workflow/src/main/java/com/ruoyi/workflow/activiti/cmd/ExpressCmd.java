@@ -9,13 +9,13 @@ import org.activiti.engine.impl.interceptor.Command;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntityImpl;
 
-public class ExpressCommand implements Command<Boolean> {
+public class ExpressCmd implements Command<Boolean> {
 
     private SequenceFlow sequenceFlow;
     private ExecutionEntityImpl executionEntity;
     private String conditionExpression;
 
-    public ExpressCommand(SequenceFlow sequenceFlow, ExecutionEntityImpl executionEntity,String conditionExpression) {
+    public ExpressCmd(SequenceFlow sequenceFlow, ExecutionEntityImpl executionEntity, String conditionExpression) {
         this.sequenceFlow = sequenceFlow;
         this.executionEntity = executionEntity;
         this.conditionExpression = conditionExpression;
