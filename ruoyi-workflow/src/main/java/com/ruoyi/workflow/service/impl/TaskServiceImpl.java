@@ -208,27 +208,23 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         }
         // 5. 记录执行过的流程任务
         List<ActTaskNode> actTaskNodeList = iActTaskNodeService.getListByInstanceId(task.getProcessInstanceId());
-        List<String> nodeIdList = actTaskNodeList.stream().map(ActTaskNode::getNodeId).collect(Collectors.toList());
-        if (!nodeIdList.contains(task.getTaskDefinitionKey())) {
-            ActTaskNode actTaskNode = new ActTaskNode();
-            actTaskNode.setNodeId(task.getTaskDefinitionKey());
-            actTaskNode.setNodeName(task.getName());
-            actTaskNode.setInstanceId(task.getProcessInstanceId());
-            if (CollectionUtil.isEmpty(actTaskNodeList)) {
-                actTaskNode.setOrderNo(0);
-                actTaskNode.setIsBack(true);
-            } else {
-                ActNodeAssignee actNodeAssignee = actNodeAssignees.stream().filter(e -> e.getNodeId().equals(task.getTaskDefinitionKey())).findFirst().orElse(null);
-                //如果为设置流程定义配置默认 当前环节可以回退
-                if(ObjectUtil.isEmpty(actNodeAssignee)){
-                    actTaskNode.setIsBack(true);
-                    actTaskNode.setOrderNo(actTaskNodeList.get(0).getOrderNo() + 1);
-                }else{
-                    actTaskNode.setIsBack(actNodeAssignee.getIsBack());
-                    actTaskNode.setOrderNo(actTaskNodeList.get(0).getOrderNo() + 1);
-                }
-            }
+        ActTaskNode actTaskNode = new ActTaskNode();
+        actTaskNode.setNodeId(task.getTaskDefinitionKey());
+        actTaskNode.setNodeName(task.getName());
+        actTaskNode.setInstanceId(task.getProcessInstanceId());
+        if (CollectionUtil.isEmpty(actTaskNodeList)) {
+            actTaskNode.setOrderNo(0);
+            actTaskNode.setIsBack(true);
             iActTaskNodeService.save(actTaskNode);
+        } else {
+            ActNodeAssignee actNodeAssignee = actNodeAssignees.stream().filter(e -> e.getNodeId().equals(task.getTaskDefinitionKey())).findFirst().orElse(null);
+            //如果为设置流程定义配置默认 当前环节可以回退
+            if(ObjectUtil.isEmpty(actNodeAssignee)){
+                actTaskNode.setIsBack(true);
+            }else{
+                actTaskNode.setIsBack(actNodeAssignee.getIsBack());
+            }
+            iActTaskNodeService.saveTaskNode(actTaskNode);
         }
         // 更新业务状态为：办理中, 和流程实例id
         iActBusinessStatusService.updateState(processInstance.getBusinessKey(), BusinessStatusEnum.WAITING, task.getProcessInstanceId());
@@ -802,7 +798,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
      */
     @Override
     public List<ActTaskNode> getBackNodes(String processInstId) {
-        List<ActTaskNode> list = iActTaskNodeService.getListByInstanceId(processInstId);
+        List<ActTaskNode> list = iActTaskNodeService.getListByInstanceId(processInstId).stream().filter(e->e.getIsBack()).collect(Collectors.toList());
         return list;
     }
 
@@ -837,8 +833,8 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<Boolean> transmitTask(TaskREQ taskREQ) {
-        Task task = taskService.createTaskQuery().taskId(taskREQ.getTaskId())
+    public R<Boolean> transmitTask(TransmitREQ transmitREQ) {
+        Task task = taskService.createTaskQuery().taskId(transmitREQ.getTaskId())
             .taskCandidateOrAssigned(LoginHelper.getUserId().toString()).singleResult();
         if(ObjectUtil.isEmpty(task)){
             return R.fail("当前任务不存在或你不是任务办理人");
@@ -846,9 +842,9 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         try {
             TaskEntity subTask = createSubTask(task, new Date());
             taskService.addComment(subTask.getId(), task.getProcessInstanceId(),
-                StringUtils.isNotBlank(taskREQ.getComment())?taskREQ.getComment():LoginHelper.getUsername()+"转办了任务");
+                StringUtils.isNotBlank(transmitREQ.getComment())?transmitREQ.getComment():LoginHelper.getUsername()+"转办了任务");
             taskService.complete(subTask.getId());
-            taskService.setAssignee(task.getId(),taskREQ.getTransmitUserId());
+            taskService.setAssignee(task.getId(),transmitREQ.getTransmitUserId());
             return R.ok();
         }catch (Exception e){
             e.printStackTrace();
