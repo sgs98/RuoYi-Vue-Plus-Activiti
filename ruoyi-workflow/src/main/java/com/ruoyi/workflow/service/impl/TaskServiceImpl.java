@@ -12,7 +12,6 @@ import com.ruoyi.workflow.common.constant.ActConstant;
 import com.ruoyi.workflow.common.enums.BusinessStatusEnum;
 import com.ruoyi.workflow.domain.ActHiTaskInst;
 import com.ruoyi.workflow.domain.ActNodeAssignee;
-import com.ruoyi.workflow.domain.ActRuExecution;
 import com.ruoyi.workflow.domain.ActTaskNode;
 import com.ruoyi.workflow.domain.bo.NextNodeREQ;
 import com.ruoyi.workflow.domain.bo.TaskCompleteREQ;
@@ -25,7 +24,6 @@ import com.ruoyi.workflow.utils.WorkFlowUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.activiti.bpmn.model.*;
-import org.activiti.engine.ManagementService;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.history.HistoricTaskInstanceQuery;
@@ -67,12 +65,6 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
     private final IActNodeAssigneeService iActNodeAssigneeService;
 
     private final IActFullClassService iActFullClassService;
-
-    private final IActHiActInstService iActHiActInstService;
-
-    private final ManagementService managementService;
-
-    private final IActRuExecutionService iActRuExecutionService;
 
     private final IActHiTaskInstService iActHiTaskInstService;
 
@@ -682,7 +674,16 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
             } else {
                 taskService.complete(t.getId());
                 historyService.deleteHistoricTaskInstance(t.getId());
-                iActHiActInstService.deleteActHiActInstByActId(t.getTaskDefinitionKey());
+                if(!workFlowUtils.isMultiInstance(t.getProcessDefinitionId(),t.getTaskDefinitionKey())){
+                   // iActHiActInstService.deleteActHiActInstByExId(t.getExecutionId());
+                    historyService.createNativeHistoricActivityInstanceQuery()
+                        .sql("DELETE  FROM ACT_HI_ACTINST WHERE EXECUTION_ID_ = '" + t.getExecutionId() + "'").list();
+                    runtimeService.createNativeExecutionQuery()
+                        .sql("DELETE  FROM ACT_RU_EXECUTION WHERE ID_ = '" + t.getExecutionId() + "'").list();
+                    /*if(StringUtils.isNotBlank(actRuExecution.getActId())&&actRuExecution.getIsActive()==0){
+                        iActRuExecutionService.deleteWithValidByIds(Arrays.asList(actRuExecution.getId()),false);
+                    }*/
+                }
             }
         }
         // 11. 完成驳回功能后，将当前节点的原出口方向进行恢复
@@ -723,17 +724,30 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         }
         iActTaskNodeService.deleteBackTaskNode(processInstanceId, backProcessVo.getTargetActivityId());
         //删除未执行的流程执行实例
-        if(ObjectUtil.isNotEmpty(actNodeAssignee)&&!actNodeAssignee.getMultiple()){
+
+        /*if(ObjectUtil.isNotEmpty(actNodeAssignee)&&!actNodeAssignee.getMultiple()){
             List<ActRuExecution> actRuExecutions = iActRuExecutionService.selectRuExecutionByProcInstId(processInstanceId);
             for (ActRuExecution actRuExecution : actRuExecutions) {
                 if(StringUtils.isNotBlank(actRuExecution.getActId())&&actRuExecution.getIsActive()==0){
                     iActRuExecutionService.deleteWithValidByIds(Arrays.asList(actRuExecution.getId()),false);
                 }
             }
-        }
+        }*/
         return processInstanceId;
     }
-
+    /*DeleteTaskCmd deleteTaskCmd = new DeleteTaskCmd(t.getId());
+               managementService.executeCommand(deleteTaskCmd);
+                historyService.deleteHistoricTaskInstance(t.getId());
+    Boolean multiInstance = workFlowUtils.isMultiInstance(t.getProcessDefinitionId(), t.getTaskDefinitionKey());
+                if(multiInstance){
+        historyService.createNativeHistoricVariableInstanceQuery()
+            .sql("DELETE  FROM ACT_RU_VARIABLE WHERE EXECUTION_ID_ = '" + t.getExecutionId() + "'").list();
+        runtimeService.createNativeExecutionQuery()
+            .sql("DELETE  FROM ACT_RU_EXECUTION WHERE ID_ = '" + t.getExecutionId() + "'").list();
+    }else{
+        historyService.createNativeHistoricActivityInstanceQuery()
+            .sql("DELETE  FROM ACT_HI_ACTINST WHERE EXECUTION_ID_ = '" + t.getExecutionId() + "'").list();
+    }*/
     /**
      * 获取历史任务节点，用于驳回功能
      * @param processInstId

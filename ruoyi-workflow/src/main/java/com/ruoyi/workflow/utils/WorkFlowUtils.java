@@ -12,6 +12,8 @@ import com.ruoyi.system.domain.SysUserRole;
 import com.ruoyi.system.mapper.SysRoleMapper;
 import com.ruoyi.system.mapper.SysUserMapper;
 import com.ruoyi.system.mapper.SysUserRoleMapper;
+import com.ruoyi.workflow.activiti.cmd.DeleteExecutionCmd;
+import com.ruoyi.workflow.activiti.cmd.DeleteTaskCmd;
 import com.ruoyi.workflow.activiti.cmd.ExpressCmd;
 import com.ruoyi.workflow.common.constant.ActConstant;
 import com.ruoyi.workflow.common.enums.BusinessStatusEnum;
@@ -23,7 +25,7 @@ import com.ruoyi.workflow.service.IActBusinessStatusService;
 import lombok.SneakyThrows;
 import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.model.*;
-import org.activiti.engine.impl.cmd.DeleteTaskCmd;
+import org.activiti.engine.impl.bpmn.behavior.ParallelMultiInstanceBehavior;
 import org.activiti.engine.task.Task;
 import org.activiti.editor.language.json.converter.BpmnJsonConverter;
 import org.activiti.engine.*;
@@ -80,6 +82,9 @@ public class WorkFlowUtils {
 
     @Autowired
     private ManagementService managementService;
+
+    @Autowired
+    private  RepositoryService repositoryService;
 
 
     /**
@@ -416,5 +421,26 @@ public class WorkFlowUtils {
             throw new ServiceException(nodeName + "环节未设置审批人");
         }
         return list.stream().map(e -> e.getUserId()).collect(Collectors.toList());
+    }
+
+    /**
+     * @Description: 判断当前节点是否为会签节点
+     * @param: processDefinitionId 流程定义id
+     * @param: taskDefinitionKey 当前节点id
+     * @return: java.lang.Boolean
+     * @author: gssong
+     * @Date: 2022/4/16 13:31
+     */
+    public Boolean isMultiInstance(String processDefinitionId,String taskDefinitionKey) {
+        BpmnModel bpmnModel = repositoryService.getBpmnModel(processDefinitionId);
+        FlowNode flowNode = (FlowNode)bpmnModel.getFlowElement(taskDefinitionKey);
+        //判断是否为并行会签节点
+        if(flowNode.getBehavior()  instanceof ParallelMultiInstanceBehavior){
+            ParallelMultiInstanceBehavior behavior = (ParallelMultiInstanceBehavior) flowNode.getBehavior();
+            if (behavior != null && behavior.getCollectionExpression() != null) {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -8,7 +8,12 @@ import org.activiti.engine.impl.el.UelExpressionCondition;
 import org.activiti.engine.impl.interceptor.Command;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntityImpl;
-
+/**
+ * @program: ruoyi-vue-plus
+ * @description: 校验分支网关
+ * @author: gssong
+ * @created: 2021/10/10 11:13
+ */
 public class ExpressCmd implements Command<Boolean> {
 
     private SequenceFlow sequenceFlow;
