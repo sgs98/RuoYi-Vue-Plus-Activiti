@@ -12,21 +12,21 @@ import com.ruoyi.system.domain.SysUserRole;
 import com.ruoyi.system.mapper.SysRoleMapper;
 import com.ruoyi.system.mapper.SysUserMapper;
 import com.ruoyi.system.mapper.SysUserRoleMapper;
-import com.ruoyi.workflow.activiti.cmd.DeleteExecutionCmd;
-import com.ruoyi.workflow.activiti.cmd.DeleteTaskCmd;
 import com.ruoyi.workflow.activiti.cmd.ExpressCmd;
 import com.ruoyi.workflow.common.constant.ActConstant;
 import com.ruoyi.workflow.common.enums.BusinessStatusEnum;
 import com.ruoyi.workflow.domain.ActBusinessStatus;
 import com.ruoyi.workflow.domain.ActFullClassParam;
 import com.ruoyi.workflow.domain.vo.ActFullClassVo;
+import com.ruoyi.workflow.domain.vo.MultiVo;
 import com.ruoyi.workflow.domain.vo.ProcessNode;
 import com.ruoyi.workflow.service.IActBusinessStatusService;
 import lombok.SneakyThrows;
 import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.model.*;
+import org.activiti.engine.delegate.Expression;
 import org.activiti.engine.impl.bpmn.behavior.ParallelMultiInstanceBehavior;
-import org.activiti.engine.task.Task;
+import org.activiti.engine.impl.bpmn.behavior.SequentialMultiInstanceBehavior;
 import org.activiti.editor.language.json.converter.BpmnJsonConverter;
 import org.activiti.engine.*;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntityImpl;
@@ -431,16 +431,35 @@ public class WorkFlowUtils {
      * @author: gssong
      * @Date: 2022/4/16 13:31
      */
-    public Boolean isMultiInstance(String processDefinitionId,String taskDefinitionKey) {
+    public MultiVo isMultiInstance(String processDefinitionId, String taskDefinitionKey) {
         BpmnModel bpmnModel = repositoryService.getBpmnModel(processDefinitionId);
         FlowNode flowNode = (FlowNode)bpmnModel.getFlowElement(taskDefinitionKey);
+        MultiVo multiVo = new MultiVo();
         //判断是否为并行会签节点
         if(flowNode.getBehavior()  instanceof ParallelMultiInstanceBehavior){
             ParallelMultiInstanceBehavior behavior = (ParallelMultiInstanceBehavior) flowNode.getBehavior();
             if (behavior != null && behavior.getCollectionExpression() != null) {
-                return true;
+                Expression collectionExpression = behavior.getCollectionExpression();
+                String assigneeList = collectionExpression.getExpressionText();
+                String assignee = behavior.getCollectionElementVariable();
+                multiVo.setType(behavior);
+                multiVo.setAssignee(assignee);
+                multiVo.setAssigneeList(assigneeList);
+                return multiVo;
+            }
+            //判断是否为串行会签节点
+        }else if(flowNode.getBehavior()  instanceof SequentialMultiInstanceBehavior){
+            SequentialMultiInstanceBehavior behavior = (SequentialMultiInstanceBehavior) flowNode.getBehavior();
+            if (behavior != null && behavior.getCollectionExpression() != null) {
+                Expression collectionExpression = behavior.getCollectionExpression();
+                String assigneeList = collectionExpression.getExpressionText();
+                String assignee = behavior.getCollectionElementVariable();
+                multiVo.setType(behavior);
+                multiVo.setAssignee(assignee);
+                multiVo.setAssigneeList(assigneeList);
+                return multiVo;
             }
         }
-        return false;
+        return null;
     }
 }
