@@ -18,6 +18,7 @@ import com.ruoyi.workflow.domain.ActTaskNode;
 import com.ruoyi.workflow.domain.bo.NextNodeREQ;
 import com.ruoyi.workflow.domain.bo.TaskCompleteREQ;
 import com.ruoyi.workflow.domain.bo.TaskREQ;
+import com.ruoyi.workflow.domain.bo.TransmitREQ;
 import com.ruoyi.workflow.domain.vo.*;
 import com.ruoyi.workflow.factory.WorkflowService;
 import com.ruoyi.workflow.service.*;
