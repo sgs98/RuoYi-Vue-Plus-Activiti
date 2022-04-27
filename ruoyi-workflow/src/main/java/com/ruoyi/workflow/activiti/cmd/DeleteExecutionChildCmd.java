@@ -6,8 +6,11 @@ import org.activiti.engine.impl.interceptor.Command;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntityManager;
+import org.activiti.engine.impl.persistence.entity.VariableInstanceEntity;
+import org.activiti.engine.impl.persistence.entity.VariableInstanceEntityManager;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 /**
  * @program: ruoyi-vue-plus
