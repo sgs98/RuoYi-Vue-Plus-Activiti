@@ -10,6 +10,7 @@ import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.helper.LoginHelper;
 import com.ruoyi.workflow.activiti.cmd.DeleteExecutionChildCmd;
 import com.ruoyi.workflow.activiti.cmd.DeleteExecutionCmd;
+import com.ruoyi.workflow.activiti.cmd.DeleteTaskCmd;
 import com.ruoyi.workflow.common.constant.ActConstant;
 import com.ruoyi.workflow.common.enums.BusinessStatusEnum;
 import com.ruoyi.workflow.domain.ActHiTaskInst;
@@ -679,8 +680,8 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
                 taskService.addComment(task.getId(), processInstanceId, StringUtils.isNotBlank(backProcessVo.getComment()) ? backProcessVo.getComment() : "驳回");
                 // 完成任务，就会进行驳回到目标节点，产生目标节点的任务数据
                 taskService.complete(task.getId());
-                DeleteExecutionChildCmd deleteExecutionChildCmd = new DeleteExecutionChildCmd(task.getExecutionId());
-                managementService.executeCommand(deleteExecutionChildCmd);
+                //DeleteExecutionChildCmd deleteExecutionChildCmd = new DeleteExecutionChildCmd(task.getExecutionId());
+                //managementService.executeCommand(deleteExecutionChildCmd);
             }else if(list.size() > 1){
                 for (Task t : list) {
                     if (backProcessVo.getTaskId().equals(t.getId())) {
@@ -689,16 +690,17 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
                         // 完成任务，就会进行驳回到目标节点，产生目标节点的任务数据
                         taskService.complete(backProcessVo.getTaskId());
                     } else {
-                        taskService.complete(t.getId());
+                        /*taskService.complete(t.getId());
                         historyService.deleteHistoricTaskInstance(t.getId());
                         historyService.createNativeHistoricActivityInstanceQuery()
                             .sql("DELETE  FROM ACT_HI_ACTINST WHERE EXECUTION_ID_ = '" + t.getExecutionId() + "'").list();
                         runtimeService.createNativeExecutionQuery()
-                            .sql("DELETE  FROM ACT_RU_EXECUTION WHERE ID_ = '" + t.getExecutionId() + "'").list();
+                            .sql("DELETE  FROM ACT_RU_EXECUTION WHERE ID_ = '" + t.getExecutionId() + "'").list();*/
+                        workFlowUtils.deleteRuntimeTask(t);
                     }
                 }
-                DeleteExecutionChildCmd deleteExecutionChildCmd = new DeleteExecutionChildCmd(task.getExecutionId());
-                managementService.executeCommand(deleteExecutionChildCmd);
+                //DeleteExecutionChildCmd deleteExecutionChildCmd = new DeleteExecutionChildCmd(task.getExecutionId());
+                //managementService.executeCommand(deleteExecutionChildCmd);
             }
         }else if(ObjectUtil.isNotEmpty(multiInstance) && multiInstance.getType() instanceof ParallelMultiInstanceBehavior){
             if(list.size() == 1){
@@ -706,8 +708,8 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
                 taskService.addComment(task.getId(), processInstanceId, StringUtils.isNotBlank(backProcessVo.getComment()) ? backProcessVo.getComment() : "驳回");
                 // 完成任务，就会进行驳回到目标节点，产生目标节点的任务数据
                 taskService.complete(task.getId());
-                DeleteExecutionChildCmd deleteExecutionChildCmd = new DeleteExecutionChildCmd(task.getExecutionId());
-                managementService.executeCommand(deleteExecutionChildCmd);
+                //DeleteExecutionChildCmd deleteExecutionChildCmd = new DeleteExecutionChildCmd(task.getExecutionId());
+                //managementService.executeCommand(deleteExecutionChildCmd);
             }else if(list.size() > 1){
                 Task taskComplete = list.stream().filter(e -> e.getId().equals(backProcessVo.getTaskId())).findFirst().orElse(null);
                 if(ObjectUtil.isEmpty(taskComplete)){
@@ -721,35 +723,23 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
                 List<Task> otherTaskList = list.stream().filter(e -> e.getId().equals(taskComplete.getId())).collect(Collectors.toList());
                 if(CollectionUtil.isNotEmpty(otherTaskList)){
                     otherTaskList.forEach(t->{
+                        workFlowUtils.deleteRuntimeTask(t);
                         // 当前任务，完成当前任务
-                        taskService.addComment(t.getId(), processInstanceId, StringUtils.isNotBlank(backProcessVo.getComment()) ? backProcessVo.getComment() : "驳回");
+                        //taskService.addComment(t.getId(), processInstanceId, StringUtils.isNotBlank(backProcessVo.getComment()) ? backProcessVo.getComment() : "驳回");
                         // 完成任务，就会进行驳回到目标节点，产生目标节点的任务数据
-                        taskService.complete(backProcessVo.getTaskId());
-                        taskService.complete(t.getId());
-                        historyService.deleteHistoricTaskInstance(t.getId());
-                        historyService.createNativeHistoricActivityInstanceQuery()
-                            .sql("DELETE  FROM ACT_HI_ACTINST WHERE EXECUTION_ID_ = '" + t.getExecutionId() + "'").list();
-                        runtimeService.createNativeExecutionQuery()
-                            .sql("DELETE  FROM ACT_RU_EXECUTION WHERE ID_ = '" + t.getExecutionId() + "'").list();
-                        DeleteExecutionCmd deleteExecutionCmd = new DeleteExecutionCmd(t.getExecutionId());
-                        managementService.executeCommand(deleteExecutionCmd);
+                        //taskService.complete(backProcessVo.getTaskId());
+                        //taskService.complete(t.getId());
+                        //historyService.deleteHistoricTaskInstance(t.getId());
+                       // historyService.createNativeHistoricActivityInstanceQuery()
+                      //      .sql("DELETE  FROM ACT_HI_ACTINST WHERE EXECUTION_ID_ = '" + t.getExecutionId() + "'").list();
+                      //  runtimeService.createNativeExecutionQuery()
+                      //      .sql("DELETE  FROM ACT_RU_EXECUTION WHERE ID_ = '" + t.getExecutionId() + "'").list();
+                       // DeleteTaskCmd deleteTaskCmd = new DeleteTaskCmd(t.getId());
+                        //managementService.executeCommand(deleteTaskCmd);
+                        //DeleteExecutionCmd deleteExecutionCmd = new DeleteExecutionCmd(t.getExecutionId());
+                        //managementService.executeCommand(deleteExecutionCmd);
                     });
                 }
-                /*for (Task t : list) {
-                    if (backProcessVo.getTaskId().equals(t.getId())) {
-                        // 当前任务，完成当前任务
-                        taskService.addComment(t.getId(), processInstanceId, StringUtils.isNotBlank(backProcessVo.getComment()) ? backProcessVo.getComment() : "驳回");
-                        // 完成任务，就会进行驳回到目标节点，产生目标节点的任务数据
-                        taskService.complete(backProcessVo.getTaskId());
-                    } else {
-                        taskService.complete(t.getId());
-                        historyService.deleteHistoricTaskInstance(t.getId());
-                        historyService.createNativeHistoricActivityInstanceQuery()
-                            .sql("DELETE  FROM ACT_HI_ACTINST WHERE EXECUTION_ID_ = '" + t.getExecutionId() + "'").list();
-                        runtimeService.createNativeExecutionQuery()
-                            .sql("DELETE  FROM ACT_RU_EXECUTION WHERE ID_ = '" + t.getExecutionId() + "'").list();
-                    }
-                }*/
             }
         }
         // 11. 完成驳回功能后，将当前节点的原出口方向进行恢复
@@ -801,19 +791,6 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         }*/
         return processInstanceId;
     }
-    /*DeleteTaskCmd deleteTaskCmd = new DeleteTaskCmd(t.getId());
-               managementService.executeCommand(deleteTaskCmd);
-                historyService.deleteHistoricTaskInstance(t.getId());
-    Boolean multiInstance = workFlowUtils.isMultiInstance(t.getProcessDefinitionId(), t.getTaskDefinitionKey());
-                if(multiInstance){
-        historyService.createNativeHistoricVariableInstanceQuery()
-            .sql("DELETE  FROM ACT_RU_VARIABLE WHERE EXECUTION_ID_ = '" + t.getExecutionId() + "'").list();
-        runtimeService.createNativeExecutionQuery()
-            .sql("DELETE  FROM ACT_RU_EXECUTION WHERE ID_ = '" + t.getExecutionId() + "'").list();
-    }else{
-        historyService.createNativeHistoricActivityInstanceQuery()
-            .sql("DELETE  FROM ACT_HI_ACTINST WHERE EXECUTION_ID_ = '" + t.getExecutionId() + "'").list();
-    }*/
     /**
      * 获取历史任务节点，用于驳回功能
      * @param processInstId

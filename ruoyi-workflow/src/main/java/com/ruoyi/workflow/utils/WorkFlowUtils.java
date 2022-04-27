@@ -12,6 +12,8 @@ import com.ruoyi.system.domain.SysUserRole;
 import com.ruoyi.system.mapper.SysRoleMapper;
 import com.ruoyi.system.mapper.SysUserMapper;
 import com.ruoyi.system.mapper.SysUserRoleMapper;
+import com.ruoyi.workflow.activiti.cmd.DeleteExecutionCmd;
+import com.ruoyi.workflow.activiti.cmd.DeleteTaskCmd;
 import com.ruoyi.workflow.activiti.cmd.ExpressCmd;
 import com.ruoyi.workflow.common.constant.ActConstant;
 import com.ruoyi.workflow.common.enums.BusinessStatusEnum;
@@ -34,7 +36,7 @@ import org.activiti.engine.impl.persistence.entity.VariableInstance;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
+import org.activiti.engine.task.Task;
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -423,6 +425,23 @@ public class WorkFlowUtils {
         return list.stream().map(e -> e.getUserId()).collect(Collectors.toList());
     }
 
+    /**
+     * @Description: 删除正在执行的任务
+     * @param: task
+     * @return: void
+     * @author: gssong
+     * @Date: 2022/4/11 13:36
+     */
+
+    public void deleteRuntimeTask(Task task){
+        DeleteTaskCmd deleteTaskCmd = new DeleteTaskCmd(task.getId());
+        managementService.executeCommand(deleteTaskCmd);
+        DeleteExecutionCmd deleteExecutionCmd = new DeleteExecutionCmd(task.getExecutionId());
+        managementService.executeCommand(deleteExecutionCmd);
+        historyService.deleteHistoricTaskInstance(task.getId());
+       /* historyService.createNativeHistoricActivityInstanceQuery()
+            .sql("DELETE  FROM ACT_HI_ACTINST WHERE EXECUTION_ID_ = '" + task.getExecutionId() + "'").list();*/
+    }
     /**
      * @Description: 判断当前节点是否为会签节点
      * @param: processDefinitionId 流程定义id
