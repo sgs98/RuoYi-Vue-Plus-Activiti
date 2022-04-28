@@ -67,7 +67,13 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
     private final ProcessEngine processEngine;
 
 
-
+    /**
+     * @Description: 提交申请，启动流程实例
+     * @param: startReq
+     * @return: java.util.Map<java.lang.String,java.lang.Object>
+     * @author: gssong
+     * @Date: 2021/10/10
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Map<String,Object> startWorkFlow(StartREQ startReq) {
@@ -169,6 +175,14 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
         return collect;
     }
 
+    /**
+     * @Description: 通过流程实例id获取历史流程图
+     * @param: processInstId
+     * @param: response
+     * @return: void
+     * @Author: gssong
+     * @Date: 2021/10/16
+     */
     @Override
     public void getHistoryProcessImage(String processInstanceId, HttpServletResponse response) {
         // 设置页面不缓存
@@ -290,8 +304,11 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
     }
 
     /**
-     * 挂起或激活流程实例
-     * @param processInstId
+     * @Description: 挂起或激活流程实例
+     * @param: processInstId
+     * @return: void
+     * @Author: gssong
+     * @Date: 2021/10/16
      */
     @Override
     public void updateProcInstState(String processInstId) {
@@ -311,9 +328,11 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
     }
 
     /**
-     * 作废流程实例，不会删除历史记录
-     * @param processInstId
-     * @return
+     * @Description: 作废流程实例，不会删除历史记录
+     * @param: processInstId
+     * @return: boolean
+     * @Author: gssong
+     * @Date: 2021/10/16
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -328,9 +347,11 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
     }
 
     /**
-     * 删除程实例，删除历史记录，删除业务与流程关联信息
-     * @param processInstId
-     * @return
+     * @Description: 运行中的实例 删除程实例，删除历史记录，删除业务与流程关联信息
+     * @param: processInstId
+     * @return: boolean
+     * @Author: gssong
+     * @Date: 2021/10/16
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -352,9 +373,11 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
     }
 
     /**
-     * 删除已完成的实例，删除历史记录，删除业务与流程关联信息
-     * @param processInstId
-     * @return
+     * @Description: 已完成的实例 删除程实例，删除历史记录，删除业务与流程关联信息
+     * @param: processInstId
+     * @return: boolean
+     * @Author: gssong
+     * @Date: 2021/10/16
      */
     @Override
     public boolean deleteFinishProcessAndHisInst(String processInstId) {
@@ -370,9 +393,11 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
     }
 
     /**
-     * 查询已结束的流程实例
-     * @param req
-     * @return
+     * @Description: 查询已结束的流程实例
+     * @param: req
+     * @return: com.ruoyi.common.core.page.TableDataInfo<com.ruoyi.workflow.domain.vo.ProcessInstFinishVo>
+     * @Author: gssong
+     * @Date: 2021/10/23
      */
     @Override
     public TableDataInfo<ProcessInstFinishVo> getProcessInstFinishByPage(ProcessInstFinishREQ req) {
@@ -421,9 +446,11 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
     }
 
     /**
-     * 撤销申请
+     * @Description: 撤销申请
      * @param processInstId
-     * @return
+     * @return: boolean
+     * @author: gssong
+     * @Date: 2022/1/21
      */
     @Override
     @Transactional(rollbackFor = Exception.class)

@@ -2,6 +2,7 @@ package com.ruoyi.workflow.service;
 
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.workflow.domain.bo.SysUserBo;
+import com.ruoyi.workflow.domain.bo.SysUserMultiBo;
 
 import java.util.List;
 import java.util.Map;
@@ -25,9 +26,16 @@ public interface IUserService {
     SysUser selectUserById(Long userId);
 
     /**
-     * 分页查询
+     * 分页查询工作流选人,角色，部门等
      * @param sysUserBo
      * @return
      */
     Map<String,Object> getWorkflowUserListByPage(SysUserBo sysUserBo);
+
+    /**
+     * 分页查询工作流选择加签人员
+     * @param sysUserMultiBo
+     * @return
+     */
+    Map<String, Object> getWorkflowAddMultiListByPage(SysUserMultiBo sysUserMultiBo);
 }

@@ -41,7 +41,7 @@ public class DefinitionController extends BaseController {
     /**
      * @Description: 查询流程定义列表
      * @param: defReq
-     * @return: com.ruoyi.common.core.page.TableDataInfo<org.activiti.engine.repository.Model>
+     * @return: com.ruoyi.common.core.domain.R<java.util.List<com.ruoyi.workflow.domain.vo.ProcessDefinitionVo>>
      * @Author: gssong
      * @Date: 2021/10/7
      */
@@ -54,7 +54,7 @@ public class DefinitionController extends BaseController {
     /**
      * @Description: 查询历史流程定义列表
      * @param: defReq
-     * @return: com.ruoyi.common.core.page.TableDataInfo<org.activiti.engine.repository.Model>
+     * @return: com.ruoyi.common.core.domain.R<java.util.List<com.ruoyi.workflow.domain.vo.ProcessDefinitionVo>>
      * @Author: gssong
      * @Date: 2021/10/7
      */
@@ -70,7 +70,7 @@ public class DefinitionController extends BaseController {
      * @Description: 删除流程定义
      * @param: deploymentId
      * @param: definitionId
-     * @return: com.ruoyi.common.core.domain.R
+     * @return: com.ruoyi.common.core.domain.R<java.lang.Void>
      * @Author: gssong
      * @Date: 2021/10/7
      */
@@ -82,6 +82,14 @@ public class DefinitionController extends BaseController {
         return iDefinitionService.deleteDeployment(deploymentId,definitionId);
     }
 
+
+    /**
+     * @Description: 通过zip或xml部署流程定义
+     * @param: file
+     * @return: com.ruoyi.common.core.domain.R<java.lang.Void>
+     * @author: gssong
+     * @Date: 2022/4/12 13:32
+     */
     @ApiOperation("通过zip或xml部署流程定义")
     @PostMapping("/deployByFile")
     @Log(title = "流程定义", businessType = BusinessType.INSERT)
@@ -112,7 +120,7 @@ public class DefinitionController extends BaseController {
     /**
      * @Description: 激活或者挂起流程定义
      * @param: definitionId 流程定义id
-     * @return: com.ruoyi.common.core.domain.R
+     * @return: com.ruoyi.common.core.domain.R<java.lang.Boolean>
      * @Author: gssong
      * @Date: 2021/10/10
      */
@@ -125,7 +133,7 @@ public class DefinitionController extends BaseController {
 
     /**
      * @Description: 查询流程环节
-     * @param processDefinitionId
+     * @param: processDefinitionId
      * @return: com.ruoyi.common.core.domain.R<java.util.List<com.ruoyi.workflow.domain.vo.ActProcessNodeVo>>
      * @author: gssong
      * @Date: 2021/11/19

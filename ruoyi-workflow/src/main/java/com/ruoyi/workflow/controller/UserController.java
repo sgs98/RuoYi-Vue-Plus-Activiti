@@ -2,6 +2,7 @@ package com.ruoyi.workflow.controller;
 
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.workflow.domain.bo.SysUserBo;
+import com.ruoyi.workflow.domain.bo.SysUserMultiBo;
 import com.ruoyi.workflow.service.IUserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -32,6 +33,20 @@ public class UserController {
     @PostMapping("/getWorkflowUserListByPage")
     public R<Map<String,Object>> getWorkflowUserListByPage(@RequestBody SysUserBo sysUserBo){
         Map<String,Object> map = iUserService.getWorkflowUserListByPage(sysUserBo);
+        return R.ok(map);
+    }
+
+    /**
+     * @Description: 分页查询工作流选择加签人员
+     * @param: sysUserMultiBo
+     * @return: com.ruoyi.common.core.domain.R<java.util.Map<java.lang.String,java.lang.Object>>
+     * @author: gssong
+     * @Date: 2022/4/22 21:17
+     */
+    @ApiOperation("分页查询工作流选择加签人员")
+    @PostMapping("/getWorkflowAddMultiListByPage")
+    public R<Map<String,Object>> getWorkflowAddMultiListByPage(@RequestBody SysUserMultiBo sysUserMultiBo){
+        Map<String,Object> map = iUserService.getWorkflowAddMultiListByPage(sysUserMultiBo);
         return R.ok(map);
     }
 }

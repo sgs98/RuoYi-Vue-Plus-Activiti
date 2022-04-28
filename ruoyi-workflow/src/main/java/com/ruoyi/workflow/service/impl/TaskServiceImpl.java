@@ -11,6 +11,7 @@ import com.ruoyi.common.helper.LoginHelper;
 import com.ruoyi.workflow.activiti.cmd.DeleteExecutionChildCmd;
 import com.ruoyi.workflow.common.constant.ActConstant;
 import com.ruoyi.workflow.common.enums.BusinessStatusEnum;
+import com.ruoyi.workflow.domain.ActBusinessStatus;
 import com.ruoyi.workflow.domain.ActHiTaskInst;
 import com.ruoyi.workflow.domain.ActNodeAssignee;
 import com.ruoyi.workflow.domain.ActTaskNode;
@@ -75,10 +76,13 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
 
 
 
+
     /**
-     * 查询当前用户的待办任务
-     * @param req
-     * @return
+     * @Description: 查询当前用户的待办任务
+     * @param: req
+     * @return: com.ruoyi.common.core.page.TableDataInfo<com.ruoyi.workflow.domain.vo.TaskWaitingVo>
+     * @author: gssong
+     * @Date: 2021/10/17
      */
     @Override
     public TableDataInfo<TaskWaitingVo> getTaskWaitByPage(TaskREQ req) {
@@ -128,13 +132,28 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
             taskWaitingVo.setBusinessKey(pi.getBusinessKey());
             list.add(taskWaitingVo);
         }
+        if(CollectionUtil.isNotEmpty(list)){
+            List<String> businessKeyList = list.stream().map(TaskWaitingVo::getBusinessKey).collect(Collectors.toList());
+            List<ActBusinessStatus> infoList = iActBusinessStatusService.getListInfoByBusinessKey(businessKeyList);
+            if(CollectionUtil.isNotEmpty(infoList)){
+                list.forEach(e->{
+                    ActBusinessStatus businessStatus = infoList.stream().filter(t -> t.getBusinessKey().equals(e.getBusinessKey())).findFirst().orElse(null);
+                    if(ObjectUtil.isNotEmpty(businessStatus)){
+                        e.setActBusinessStatus(businessStatus);
+                    }
+                });
+            }
+        }
         return new TableDataInfo(list, total);
     }
 
+
     /**
-     * 完成任务
-     * @param req
-     * @return
+     * @Description: 办理任务
+     * @param: req
+     * @return: java.lang.Boolean
+     * @author: gssong
+     * @Date: 2021/10/21
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -193,16 +212,6 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         // 4. 完成任务
         taskService.setVariables(req.getTaskId(), req.getVariables());
         taskService.complete(req.getTaskId());
-        //这里有时候办理完任务后查询列表还是会有该任务
-        while (true){
-            Task checkTask = taskService.createTaskQuery().taskId(req.getTaskId()).singleResult();
-            if(ObjectUtil.isNotEmpty(checkTask)&&task.getId().equals(checkTask.getId())) {
-                taskService.addComment(checkTask.getId(), task.getProcessInstanceId(), req.getMessage());
-                taskService.complete(checkTask.getId());
-            }else{
-                break;
-            }
-        }
         // 5. 记录执行过的流程任务
         List<ActTaskNode> actTaskNodeList = iActTaskNodeService.getListByInstanceId(task.getProcessInstanceId());
         ActTaskNode actTaskNode = new ActTaskNode();
@@ -305,10 +314,14 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         return true;
     }
 
+
     /**
-     * 设置下一环节人员
-     * @param task
-     * @param assignees
+     * @Description: 设置下一环节人员
+     * @param: task 任务
+     * @param: assignees 办理人
+     * @return: void
+     * @author: gssong
+     * @Date: 2021/10/21
      */
     public void settingAssignee(Task task,List<Long> assignees){
         if (assignees.size() == 1) {
@@ -321,10 +334,13 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         }
     }
 
+
     /**
-     * 查询当前用户的已办任务
-     * @param req
-     * @return
+     * @Description: 查询当前用户的已办任务
+     * @param: req
+     * @return: com.ruoyi.common.core.page.TableDataInfo<com.ruoyi.workflow.domain.vo.TaskFinishVo>
+     * @author: gssong
+     * @Date: 2021/10/23
      */
     @Override
     public TableDataInfo<TaskFinishVo> getTaskFinishByPage(TaskREQ req) {
@@ -365,10 +381,13 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         return new TableDataInfo(taskFinishVoList, total);
     }
 
+
     /**
-     * 获取目标节点（下一个节点）
-     * @param req
-     * @return
+     * @Description: 获取目标节点（下一个节点）
+     * @param: req
+     * @return: java.util.Map<java.lang.String,java.lang.Object>
+     * @author: gssong
+     * @Date: 2021/10/23
      */
     @Override
     public List<ProcessNode> getNextNodeInfo(NextNodeREQ req) {
@@ -447,10 +466,12 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
     }
 
     /**
-     * 设置节点审批人员
-     * @param nodeList
-     * @param definitionId
-     * @return
+     * @Description: 设置节点审批人员
+     * @param: nodeList 节点列表
+     * @param: definitionId 流程定义id
+     * @return: java.util.List<com.ruoyi.workflow.domain.vo.ProcessNode>
+     * @author: gssong
+     * @Date: 2021/10/23
      */
     private List<ProcessNode> getProcessNodeAssigneeList(List<ProcessNode> nodeList, String definitionId) {
         List<ActNodeAssignee> actNodeAssignees = iActNodeAssigneeService.getInfoByProcessDefinitionId(definitionId);
@@ -524,9 +545,11 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
     }
 
     /**
-     * 查询所有用户的已办任务
-     * @param req
-     * @return
+     * @Description: 查询所有用户的已办任务
+     * @param: req
+     * @return: com.ruoyi.common.core.page.TableDataInfo<com.ruoyi.workflow.domain.vo.TaskFinishVo>
+     * @author: gssong
+     * @Date: 2021/10/23
      */
     @Override
     public TableDataInfo<TaskFinishVo> getAllTaskFinishByPage(TaskREQ req) {
@@ -566,9 +589,11 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
     }
 
     /**
-     * 查询所有用户的待办任务
-     * @param req
-     * @return
+     * @Description: 查询所有用户的待办任务
+     * @param: req
+     * @return: com.ruoyi.common.core.page.TableDataInfo<com.ruoyi.workflow.domain.vo.TaskWaitingVo>
+     * @author: gssong
+     * @Date: 2021/10/17
      */
     @Override
     public TableDataInfo<TaskWaitingVo> getAllTaskWaitByPage(TaskREQ req) {
@@ -619,9 +644,11 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
     }
 
     /**
-     * 驳回审批
-     * @param backProcessVo
-     * @return
+     * @Description: 驳回审批
+     * @param: backProcessVo
+     * @return: java.lang.String
+     * @author: gssong
+     * @Date: 2021/11/6
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -781,6 +808,13 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         return list;
     }
 
+    /**
+     * @Description: 委派任务
+     * @param: taskREQ
+     * @return: java.lang.Boolean
+     * @author: gssong
+     * @Date: 2022/3/4
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean delegateTask(TaskREQ taskREQ) {
@@ -810,6 +844,13 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         }
     }
 
+    /**
+     * @Description: 转办任务
+     * @param: transmitREQ
+     * @return: com.ruoyi.common.core.domain.R<java.lang.Boolean>
+     * @author: gssong
+     * @Date: 2022/3/13 13:18
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public R<Boolean> transmitTask(TransmitREQ transmitREQ) {
@@ -832,10 +873,11 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
     }
 
     /**
-     * 创建流程任务
-     * @param parentTask
-     * @param createTime
-     * @return
+     * @Description: 创建流程任务
+     * @param: parentTask  @param: createTime
+     * @return: org.flowable.task.service.impl.persistence.entity.TaskEntity
+     * @author: gssong
+     * @Date: 2022/3/13
      */
     private TaskEntity createSubTask(Task parentTask,Date createTime){
         TaskEntity task = null;

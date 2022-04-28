@@ -13,8 +13,14 @@ import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.domain.SysUserRole;
 import com.ruoyi.system.mapper.*;
 import com.ruoyi.workflow.domain.bo.SysUserBo;
+import com.ruoyi.workflow.domain.bo.SysUserMultiBo;
+import com.ruoyi.workflow.domain.vo.MultiVo;
 import com.ruoyi.workflow.service.IUserService;
+import com.ruoyi.workflow.utils.WorkFlowUtils;
 import lombok.RequiredArgsConstructor;
+import org.activiti.engine.RuntimeService;
+import org.activiti.engine.TaskService;
+import org.activiti.engine.task.Task;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -25,7 +31,12 @@ import java.util.stream.Collectors;
 
 import static com.ruoyi.workflow.common.constant.ActConstant.*;
 
-
+/**
+ * @program: ruoyi-vue-plus
+ * @description: 选人业务层
+ * @author: gssong
+ * @created: 2021/10/17 14:57
+ */
 @RequiredArgsConstructor
 @Service
 public class UserServiceImpl implements IUserService {
@@ -33,6 +44,16 @@ public class UserServiceImpl implements IUserService {
     private final SysRoleMapper roleMapper;
     private final SysDeptMapper deptMapper;
     private final SysUserRoleMapper userRoleMapper;
+    private final TaskService taskService;
+    private final RuntimeService runtimeService;
+    private final WorkFlowUtils workFlowUtils;
+    /**
+     * @Description: 按照用户id查询用户集合
+     * @param: userIds
+     * @return: java.util.List<com.ruoyi.common.core.domain.entity.SysUser>
+     * @author: gssong
+     * @Date: 2021/12/10
+     */
     @Override
     public List<SysUser> selectListUserByIds(List<Long> userIds) {
         List<SysUser> userList = userMapper.selectList(new LambdaQueryWrapper<SysUser>().in(SysUser::getUserId, userIds));
@@ -164,5 +185,37 @@ public class UserServiceImpl implements IUserService {
         });
         page.setRecords(records);
         return page;
+    }
+
+    /**
+     * @Description: 分页查询工作流选择加签人员
+     * @param: sysUserMultiBo
+     * @return: java.util.Map<java.lang.String,java.lang.Object>
+     * @author: gssong
+     * @Date: 2022/4/22 21:17
+     */
+    @Override
+    public Map<String, Object> getWorkflowAddMultiListByPage(SysUserMultiBo sysUserMultiBo) {
+        Map<String, Object> map = new HashMap<>();
+        Task task = taskService.createTaskQuery().taskId(sysUserMultiBo.getTaskId()).singleResult();
+        MultiVo multiInstance = workFlowUtils.isMultiInstance(task.getProcessDefinitionId(), task.getTaskDefinitionKey());
+        LambdaQueryWrapper<SysUser> queryWrapper = new LambdaQueryWrapper<>();
+        //检索条件
+        queryWrapper.eq(StringUtils.isNotEmpty(sysUserMultiBo.getDeptId()),SysUser::getDeptId,sysUserMultiBo.getDeptId());
+        queryWrapper.eq(SysUser::getStatus,UserStatus.OK.getCode());
+        if(ObjectUtil.isNotEmpty(multiInstance)){
+            List<Long> assigneeList = (List)runtimeService.getVariable(task.getExecutionId(), multiInstance.getAssigneeList());
+            queryWrapper.notIn(CollectionUtil.isNotEmpty(assigneeList),SysUser::getUserId,assigneeList);
+        }
+        queryWrapper.like(StringUtils.isNotEmpty(sysUserMultiBo.getUserName()),SysUser::getUserName,sysUserMultiBo.getUserName());
+        queryWrapper.like(StringUtils.isNotEmpty(sysUserMultiBo.getPhonenumber()),SysUser::getPhonenumber,sysUserMultiBo.getPhonenumber());
+        Page<SysUser> page = new Page<>(sysUserMultiBo.getPageNum(), sysUserMultiBo.getPageSize());
+        Page<SysUser> userPage = userMapper.selectPage(page, queryWrapper);
+        if(CollectionUtil.isNotEmpty(sysUserMultiBo.getIds())){
+            List<SysUser> list = userMapper.selectList(new LambdaQueryWrapper<SysUser>().in(SysUser::getUserId, sysUserMultiBo.getIds()));
+            map.put("list",list);
+        }
+        map.put("page",TableDataInfo.build(recordPage(userPage)));
+        return map;
     }
 }

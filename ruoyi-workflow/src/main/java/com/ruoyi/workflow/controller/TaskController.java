@@ -178,7 +178,7 @@ public class TaskController extends BaseController {
 
     /**
      * @Description: 归还（拾取的）任务
-     * @param taskId
+     * @param: taskId
      * @return: com.ruoyi.common.core.domain.R<java.lang.Void>
      * @author: gssong
      * @Date: 2022/01/01
@@ -198,7 +198,7 @@ public class TaskController extends BaseController {
 
     /**
      * @Description: 委派任务
-     * @param taskREQ
+     * @param: taskREQ
      * @return: com.ruoyi.common.core.domain.R<java.lang.Void>
      * @author: gssong
      * @Date: 2022/3/4 13:18
@@ -212,8 +212,8 @@ public class TaskController extends BaseController {
 
     /**
      * @Description: 转办任务
-     * @param transmitREQ
-     * @return: com.ruoyi.common.core.domain.R<java.lang.Void>
+     * @param: transmitREQ
+     * @return: com.ruoyi.common.core.domain.R<java.lang.Boolean>
      * @author: gssong
      * @Date: 2022/3/13 13:18
      */

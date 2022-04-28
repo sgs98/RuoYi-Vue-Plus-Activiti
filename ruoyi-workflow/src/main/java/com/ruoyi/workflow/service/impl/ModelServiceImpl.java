@@ -36,7 +36,12 @@ import java.net.URLEncoder;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-
+/**
+ * @program: ruoyi-vue-plus
+ * @description: 模型业务层
+ * @author: gssong
+ * @created: 2021/10/17 15:59
+ */
 @Service
 @Slf4j
 public class ModelServiceImpl extends WorkflowService implements IModelService {
@@ -44,6 +49,13 @@ public class ModelServiceImpl extends WorkflowService implements IModelService {
     @Autowired
     private WorkFlowUtils workFlowUtils;
 
+    /**
+     * @Description: 查询模型列表
+     * @param: modelReq 请求参数
+     * @return: com.ruoyi.common.core.page.TableDataInfo<org.activiti.engine.repository.Model>
+     * @Author: gssong
+     * @Date: 2021/10/3
+     */
     @Override
     public TableDataInfo<Model> getByPage(ModelREQ modelReq) {
         ModelQuery query = repositoryService.createModelQuery();
@@ -72,6 +84,13 @@ public class ModelServiceImpl extends WorkflowService implements IModelService {
         return new TableDataInfo(modelList, total);
     }
 
+    /**
+     * @Description: 新建模型
+     * @param: modelAdd
+     * @return: com.ruoyi.common.core.domain.R<org.activiti.engine.repository.Model>
+     * @Author: gssong
+     * @Date: 2021/10/3
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public R<Model> add(ModelAdd modelAdd) throws UnsupportedEncodingException {
@@ -112,6 +131,13 @@ public class ModelServiceImpl extends WorkflowService implements IModelService {
         return R.ok(model);
     }
 
+    /**
+     * @Description: 通过流程定义模型id部署流程定义
+     * @param: id 模型id
+     * @return: com.ruoyi.common.core.domain.R
+     * @Author: gssong
+     * @Date: 2021/10/3
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public R deploy(String id) throws IOException {
@@ -152,6 +178,14 @@ public class ModelServiceImpl extends WorkflowService implements IModelService {
         return R.ok();
     }
 
+    /**
+     * @Description: 导出流程定义模型zip压缩包
+     * @param: modelId
+     * @param: response
+     * @return: void
+     * @Author: gssong
+     * @Date: 2021/10/7
+     */
     @Override
     public void exportZip(String modelId, HttpServletResponse response) {
         ZipOutputStream zipos = null;
@@ -200,6 +234,13 @@ public class ModelServiceImpl extends WorkflowService implements IModelService {
         }
     }
 
+    /**
+     * @Description: 将流程定义转换为模型
+     * @param: processDefinitionId 流程定义id
+     * @return: java.lang.Boolean
+     * @Author: gssong
+     * @Date: 2021/11/6
+     */
     @Override
     public Boolean convertToModel(String processDefinitionId) {
         ProcessDefinition pd = repositoryService.createProcessDefinitionQuery()
