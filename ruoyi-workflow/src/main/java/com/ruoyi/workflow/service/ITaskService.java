@@ -69,7 +69,6 @@ public interface ITaskService {
      * @return
      */
     String backProcess(BackProcessVo backProcessVo);
-    Boolean backProcess2(BackProcessVo backProcessVo);
 
     /**
      * 获取历史任务节点，用于驳回功能

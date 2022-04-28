@@ -26,6 +26,11 @@ public interface ActConstant {
      String EXCLUSIVEGATEWAY = "exclusiveGateway";
 
     /**
+     * 包含网关
+     */
+    String INCLUSIVEGATEWAY = "InclusiveGateway";
+
+    /**
      *结束
      */
     String ENDTASK = "endTask";
