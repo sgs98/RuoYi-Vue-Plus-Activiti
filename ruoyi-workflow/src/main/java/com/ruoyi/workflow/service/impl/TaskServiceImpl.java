@@ -728,6 +728,9 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
                 }
             }
         }else if(ObjectUtil.isNotEmpty(multiInstance)){
+            TaskEntity subTask = createSubTask(task, task.getCreateTime());
+            taskService.addComment(subTask.getId(), processInstanceId, StringUtils.isNotBlank(backProcessVo.getComment()) ? backProcessVo.getComment() : "驳回");
+            taskService.complete(subTask.getId());
             MoveMultiInstanceOutCmd moveMultiInstanceOutCmd = new MoveMultiInstanceOutCmd(task.getId(),backProcessVo.getTargetActivityId());
             managementService.executeCommand(moveMultiInstanceOutCmd);
         }
@@ -848,8 +851,9 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
 
     /**
      * @Description: 创建流程任务
-     * @param: parentTask  @param: createTime
-     * @return: org.flowable.task.service.impl.persistence.entity.TaskEntity
+     * @param: parentTask 
+     * @param: createTime
+     * @return: org.activiti.engine.impl.persistence.entity.TaskEntity
      * @author: gssong
      * @Date: 2022/3/13
      */
@@ -875,6 +879,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
                 hiTaskInst.setProcDefId(task.getProcessDefinitionId());
                 hiTaskInst.setProcInstId(task.getProcessInstanceId());
                 hiTaskInst.setTaskDefKey(task.getTaskDefinitionKey());
+                hiTaskInst.setStartTime(createTime);
                 iActHiTaskInstService.updateById(hiTaskInst);
             }
         }
