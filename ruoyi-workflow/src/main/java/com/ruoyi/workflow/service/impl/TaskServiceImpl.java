@@ -9,7 +9,8 @@ import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.helper.LoginHelper;
 import com.ruoyi.workflow.activiti.cmd.DeleteExecutionChildCmd;
-import com.ruoyi.workflow.activiti.cmd.MoveMultiInstanceOutCmd;
+import com.ruoyi.workflow.activiti.cmd.MoveMultiInstanceSingleCmd;
+import com.ruoyi.workflow.activiti.cmd.MoveSingleCmd;
 import com.ruoyi.workflow.common.constant.ActConstant;
 import com.ruoyi.workflow.common.enums.BusinessStatusEnum;
 import com.ruoyi.workflow.domain.ActBusinessStatus;
@@ -663,51 +664,16 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         }
         //流程实例id
         String processInstanceId = task.getProcessInstanceId();
-        // 1. 获取流程模型实例 BpmnModel
-        BpmnModel bpmnModel = repositoryService.getBpmnModel(task.getProcessDefinitionId());
-        // 2.当前节点信息
-        FlowNode curFlowNode = (FlowNode) bpmnModel.getFlowElement(task.getTaskDefinitionKey());
-        // 3.获取当前节点原出口连线
-        List<SequenceFlow> sequenceFlowList = curFlowNode.getOutgoingFlows();
-        // 4. 临时存储当前节点的原出口连线
-        List<SequenceFlow> oriSequenceFlows = new ArrayList<>();
-        oriSequenceFlows.addAll(sequenceFlowList);
-        // 5. 将当前节点的原出口清空
-        sequenceFlowList.clear();
-        // 6. 获取目标节点信息
-        FlowNode targetFlowNode = (FlowNode) bpmnModel.getFlowElement(backProcessVo.getTargetActivityId());
-        // 7. 获取目标节点的入口连线
-        List<SequenceFlow> incomingFlows = targetFlowNode.getIncomingFlows();
-        // 8. 存储所有目标出口
-        List<SequenceFlow> targetSequenceFlow = new ArrayList<>();
-        for (SequenceFlow incomingFlow : incomingFlows) {
-            // 找到入口连线的源头（获取目标节点的父节点）
-            FlowNode source = (FlowNode) incomingFlow.getSourceFlowElement();
-            List<SequenceFlow> sequenceFlows;
-            if (source instanceof ParallelGateway) {
-                // 并行网关: 获取目标节点的父节点（并行网关）的所有出口，
-                sequenceFlows = source.getOutgoingFlows();
-            } else {
-                // 其他类型父节点, 则获取目标节点的入口连续
-                sequenceFlows = targetFlowNode.getIncomingFlows();
-            }
-            targetSequenceFlow.addAll(sequenceFlows);
-        }
-        // 9. 将当前节点的出口设置为新节点
-        curFlowNode.setOutgoingFlows(targetSequenceFlow);
-        // 10. 完成当前任务，流程就会流向目标节点创建新目标任务
         List<Task> list = taskService.createTaskQuery().processInstanceId(processInstanceId).list();
         MultiVo multiInstance = workFlowUtils.isMultiInstance(task.getProcessDefinitionId(), task.getTaskDefinitionKey());
-
         //非会签
         if(ObjectUtil.isEmpty(multiInstance)){
             if(list.size() == 1){
-                DeleteExecutionChildCmd deleteExecutionChildCmd = new DeleteExecutionChildCmd(task.getExecutionId());
-                managementService.executeCommand(deleteExecutionChildCmd);
-                // 当前任务，完成当前任务
-                taskService.addComment(task.getId(), processInstanceId, StringUtils.isNotBlank(backProcessVo.getComment()) ? backProcessVo.getComment() : "驳回");
-                // 完成任务，就会进行驳回到目标节点，产生目标节点的任务数据
-                taskService.complete(task.getId());
+                TaskEntity subTask = createSubTask(task, task.getCreateTime());
+                taskService.addComment(subTask.getId(), processInstanceId, StringUtils.isNotBlank(backProcessVo.getComment()) ? backProcessVo.getComment() : "驳回");
+                taskService.complete(subTask.getId());
+                MoveSingleCmd moveSingleCmd = new MoveSingleCmd(task.getId(),backProcessVo.getTargetActivityId());
+                managementService.executeCommand(moveSingleCmd);
             }else if(list.size() > 1){
                 for (Task t : list) {
                     if (backProcessVo.getTaskId().equals(t.getId())) {
@@ -731,12 +697,12 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
             TaskEntity subTask = createSubTask(task, task.getCreateTime());
             taskService.addComment(subTask.getId(), processInstanceId, StringUtils.isNotBlank(backProcessVo.getComment()) ? backProcessVo.getComment() : "驳回");
             taskService.complete(subTask.getId());
-            MoveMultiInstanceOutCmd moveMultiInstanceOutCmd = new MoveMultiInstanceOutCmd(task.getId(),backProcessVo.getTargetActivityId());
-            managementService.executeCommand(moveMultiInstanceOutCmd);
+            MoveMultiInstanceSingleCmd moveMultiInstanceSingleCmd = new MoveMultiInstanceSingleCmd(task.getId(),backProcessVo.getTargetActivityId());
+            managementService.executeCommand(moveMultiInstanceSingleCmd);
         }
 
         // 11. 完成驳回功能后，将当前节点的原出口方向进行恢复
-        curFlowNode.setOutgoingFlows(oriSequenceFlows);
+        //curFlowNode.setOutgoingFlows(oriSequenceFlows);
        // 判断是否会签
         LambdaQueryWrapper<ActNodeAssignee> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(ActNodeAssignee::getNodeId,backProcessVo.getTargetActivityId());

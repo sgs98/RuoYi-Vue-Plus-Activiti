@@ -2,7 +2,6 @@ package com.ruoyi.workflow.activiti.cmd;
 
 import org.activiti.bpmn.model.FlowElement;
 import org.activiti.bpmn.model.Process;
-import org.activiti.engine.ActivitiEngineAgenda;
 import org.activiti.engine.impl.interceptor.Command;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.persistence.entity.*;
@@ -14,11 +13,11 @@ import java.util.Set;
 
 /**
  * @program: ruoyi-vue-plus
- * @description: 会签节点驳回
+ * @description: 会签节点驳回单个普通节点
  * @author: gssong
  * @created: 2022/04/29 13:13
  */
-public class MoveMultiInstanceOutCmd implements Command<Object> {
+public class MoveMultiInstanceSingleCmd implements Command<Void> {
     /**
      * 当前任务id
      */
@@ -29,20 +28,20 @@ public class MoveMultiInstanceOutCmd implements Command<Object> {
      */
     private String targetNodeId;
 
-    public MoveMultiInstanceOutCmd(String currentTaskId, String targetNodeId) {
+    public MoveMultiInstanceSingleCmd(String currentTaskId, String targetNodeId) {
         this.currentTaskId = currentTaskId;
         this.targetNodeId = targetNodeId;
     }
 
     @Override
-    public Object execute(CommandContext commandContext) {
+    public Void execute(CommandContext commandContext) {
         //获得用到的Manager
         ExecutionEntityManager executionEntityManager = commandContext.getExecutionEntityManager();
         TaskEntityManager taskEntityManager = commandContext.getTaskEntityManager();
         IdentityLinkEntityManager identityLinkEntityManager = commandContext.getIdentityLinkEntityManager();
         VariableInstanceEntityManager variableInstanceEntityManager = commandContext.getVariableInstanceEntityManager();
         //获得当前流程处于的Task信息
-        TaskEntity taskEntity = taskEntityManager.findById(this.currentTaskId);
+        TaskEntity taskEntity = taskEntityManager.findById(currentTaskId);
         //获得流程实例信息
         ExecutionEntity executionEntity = executionEntityManager.findById(taskEntity.getExecutionId());
         ExecutionEntity parentExecutionEntity = executionEntityManager.findById(executionEntity.getParentId());
@@ -70,8 +69,7 @@ public class MoveMultiInstanceOutCmd implements Command<Object> {
         //移动节点
         FlowElement targetFlowElement = process.getFlowElement(targetNodeId);
         parentExecutionEntity.setCurrentFlowElement(targetFlowElement);
-        ActivitiEngineAgenda agenda = commandContext.getAgenda();
-        agenda.planContinueProcessInCompensation(parentExecutionEntity);
+        commandContext.getAgenda().planContinueProcessInCompensation(parentExecutionEntity);
 
         return null;
     }
