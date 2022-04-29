@@ -753,6 +753,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
                             .sql("DELETE  FROM ACT_RU_EXECUTION WHERE ID_ = '" + t.getExecutionId() + "'").list();
                         DeleteExecutionChildCmd deleteExecutionChildCmd = new DeleteExecutionChildCmd(t.getExecutionId());
                         managementService.executeCommand(deleteExecutionChildCmd);
+                        workFlowUtils.deleteVariables(t.getExecutionId());
                     });
                 }
             }

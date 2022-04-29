@@ -2,6 +2,9 @@ package com.ruoyi.workflow.utils;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.db.Db;
+import cn.hutool.db.DbUtil;
+import cn.hutool.db.sql.SqlExecutor;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,6 +25,7 @@ import com.ruoyi.workflow.domain.vo.MultiVo;
 import com.ruoyi.workflow.domain.vo.ProcessNode;
 import com.ruoyi.workflow.service.IActBusinessStatusService;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.model.*;
 import org.activiti.engine.delegate.Expression;
@@ -39,6 +43,8 @@ import javax.annotation.Resource;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -50,6 +56,7 @@ import static com.ruoyi.workflow.common.constant.ActConstant.*;
  * @author: gssong
  * @created: 2021/10/03 19:31
  */
+@Slf4j
 @Component
 public class WorkFlowUtils {
     @Resource
@@ -451,5 +458,27 @@ public class WorkFlowUtils {
             }
         }
         return null;
+    }
+
+    /**
+     * @Description: 删除流程变量
+     * @param: executionId
+     * @return: void
+     * @author: gssong
+     * @Date: 2022/4/29 12:30
+     */
+    public void deleteVariables(String executionId){
+        Connection connection = null;
+        try {
+            connection = Db.use().getConnection();
+            int executeRuVariable = SqlExecutor.execute(connection, "DELETE  FROM ACT_RU_VARIABLE WHERE EXECUTION_ID_ = ?", executionId);
+            int executeHiVariable = SqlExecutor.execute(connection, "DELETE  FROM ACT_HI_VARINST WHERE EXECUTION_ID_ = ?", executionId);
+            log.info("影响行数：{}", executeRuVariable,executeHiVariable);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            log.error(e.getMessage(), "SQL error!");
+        } finally {
+            DbUtil.close(connection);
+        }
     }
 }
