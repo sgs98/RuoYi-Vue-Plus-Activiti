@@ -34,22 +34,6 @@ public class MoveMultiInstanceOutCmd implements Command<Object> {
         this.targetNodeId = targetNodeId;
     }
 
-    public String getCurrentTaskId() {
-        return currentTaskId;
-    }
-
-    public void setCurrentTaskId(String currentTaskId) {
-        this.currentTaskId = currentTaskId;
-    }
-
-    public String getTargetNodeId() {
-        return targetNodeId;
-    }
-
-    public void setTargetNodeId(String targetNodeId) {
-        this.targetNodeId = targetNodeId;
-    }
-
     @Override
     public Object execute(CommandContext commandContext) {
         //获得用到的Manager
