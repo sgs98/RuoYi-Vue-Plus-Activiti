@@ -4,7 +4,6 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.db.Db;
 import cn.hutool.db.DbUtil;
-import cn.hutool.db.sql.SqlExecutor;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,7 +27,6 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.model.*;
-import org.activiti.engine.delegate.Expression;
 import org.activiti.engine.impl.bpmn.behavior.ParallelMultiInstanceBehavior;
 import org.activiti.engine.impl.bpmn.behavior.SequentialMultiInstanceBehavior;
 import org.activiti.editor.language.json.converter.BpmnJsonConverter;
@@ -37,13 +35,13 @@ import org.activiti.engine.impl.persistence.entity.ExecutionEntityImpl;
 import org.activiti.engine.impl.persistence.entity.VariableInstance;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -83,7 +81,8 @@ public class WorkFlowUtils {
     @Autowired
     private  RepositoryService repositoryService;
 
-
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
     /**
      * @Description: bpmnModel转为xml
      * @param: jsonBytes
@@ -435,9 +434,8 @@ public class WorkFlowUtils {
         //判断是否为并行会签节点
         if(flowNode.getBehavior()  instanceof ParallelMultiInstanceBehavior){
             ParallelMultiInstanceBehavior behavior = (ParallelMultiInstanceBehavior) flowNode.getBehavior();
-            if (behavior != null && behavior.getCollectionExpression() != null) {
-                Expression collectionExpression = behavior.getCollectionExpression();
-                String assigneeList = collectionExpression.getExpressionText();
+            if (behavior != null && behavior.getCollectionVariable() != null) {
+                String assigneeList = behavior.getCollectionVariable();
                 String assignee = behavior.getCollectionElementVariable();
                 multiVo.setType(behavior);
                 multiVo.setAssignee(assignee);
@@ -447,9 +445,8 @@ public class WorkFlowUtils {
             //判断是否为串行会签节点
         }else if(flowNode.getBehavior()  instanceof SequentialMultiInstanceBehavior){
             SequentialMultiInstanceBehavior behavior = (SequentialMultiInstanceBehavior) flowNode.getBehavior();
-            if (behavior != null && behavior.getCollectionExpression() != null) {
-                Expression collectionExpression = behavior.getCollectionExpression();
-                String assigneeList = collectionExpression.getExpressionText();
+            if (behavior != null && behavior.getCollectionVariable() != null) {
+                String assigneeList = behavior.getCollectionVariable();
                 String assignee = behavior.getCollectionElementVariable();
                 multiVo.setType(behavior);
                 multiVo.setAssignee(assignee);
@@ -463,22 +460,17 @@ public class WorkFlowUtils {
     /**
      * @Description: 删除流程变量
      * @param: executionId
+     * @param: parentId
      * @return: void
      * @author: gssong
      * @Date: 2022/4/29 12:30
      */
-    public void deleteVariables(String executionId){
-        Connection connection = null;
-        try {
-            connection = Db.use().getConnection();
-            int executeRuVariable = SqlExecutor.execute(connection, "DELETE  FROM ACT_RU_VARIABLE WHERE EXECUTION_ID_ = ?", executionId);
-            int executeHiVariable = SqlExecutor.execute(connection, "DELETE  FROM ACT_HI_VARINST WHERE EXECUTION_ID_ = ?", executionId);
-            log.info("影响行数：{}", executeRuVariable,executeHiVariable);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            log.error(e.getMessage(), "SQL error!");
-        } finally {
-            DbUtil.close(connection);
+    public void deleteVariables(String executionId,String parentId){
+        jdbcTemplate.execute("DELETE  FROM ACT_RU_VARIABLE WHERE EXECUTION_ID_ =" +executionId);
+        jdbcTemplate.execute("DELETE  FROM ACT_HI_VARINST  WHERE EXECUTION_ID_ =" +executionId);
+        if(StringUtils.isNotBlank(parentId)){
+            jdbcTemplate.execute("DELETE  FROM ACT_RU_VARIABLE WHERE EXECUTION_ID_ =" +parentId);
+            jdbcTemplate.execute("DELETE  FROM ACT_HI_VARINST  WHERE EXECUTION_ID_ =" +parentId);
         }
     }
 }

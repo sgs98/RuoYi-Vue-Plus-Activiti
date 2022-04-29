@@ -34,6 +34,7 @@ import org.activiti.engine.impl.bpmn.behavior.ParallelMultiInstanceBehavior;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntityImpl;
 import org.activiti.engine.impl.persistence.entity.TaskEntity;
 import org.activiti.engine.repository.ProcessDefinition;
+import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskQuery;
@@ -736,16 +737,11 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
                 DeleteExecutionChildCmd deleteExecutionChildCmd = new DeleteExecutionChildCmd(task.getExecutionId());
                 managementService.executeCommand(deleteExecutionChildCmd);
             }else if(list.size() > 1){
-                Task taskComplete = list.stream().filter(e -> e.getId().equals(backProcessVo.getTaskId())).findFirst().orElse(null);
-                if(ObjectUtil.isEmpty(taskComplete)){
-                    throw new ServiceException("当前任务不存在");
-                }
                 // 当前任务，完成当前任务
-                taskService.addComment(taskComplete.getId(), processInstanceId, StringUtils.isNotBlank(backProcessVo.getComment()) ? backProcessVo.getComment() : "驳回");
+                taskService.addComment(task.getId(), processInstanceId, StringUtils.isNotBlank(backProcessVo.getComment()) ? backProcessVo.getComment() : "驳回");
                 // 完成任务，就会进行驳回到目标节点，产生目标节点的任务数据
-                taskService.complete(backProcessVo.getTaskId());
-
-                List<Task> otherTaskList = list.stream().filter(e -> e.getId().equals(taskComplete.getId())).collect(Collectors.toList());
+                taskService.complete(task.getId());
+                List<Task> otherTaskList = list.stream().filter(e -> !e.getId().equals(task.getId())).collect(Collectors.toList());
                 if(CollectionUtil.isNotEmpty(otherTaskList)){
                     otherTaskList.forEach(t->{
                         taskService.complete(t.getId());
@@ -753,7 +749,6 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
                             .sql("DELETE  FROM ACT_RU_EXECUTION WHERE ID_ = '" + t.getExecutionId() + "'").list();
                         DeleteExecutionChildCmd deleteExecutionChildCmd = new DeleteExecutionChildCmd(t.getExecutionId());
                         managementService.executeCommand(deleteExecutionChildCmd);
-                        workFlowUtils.deleteVariables(t.getExecutionId());
                     });
                 }
             }
