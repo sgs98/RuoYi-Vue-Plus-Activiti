@@ -2,8 +2,6 @@ package com.ruoyi.workflow.utils;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.db.Db;
-import cn.hutool.db.DbUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -42,7 +40,6 @@ import javax.annotation.Resource;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -455,22 +452,5 @@ public class WorkFlowUtils {
             }
         }
         return null;
-    }
-
-    /**
-     * @Description: 删除流程变量
-     * @param: executionId
-     * @param: parentId
-     * @return: void
-     * @author: gssong
-     * @Date: 2022/4/29 12:30
-     */
-    public void deleteVariables(String executionId,String parentId){
-        jdbcTemplate.execute("DELETE  FROM ACT_RU_VARIABLE WHERE EXECUTION_ID_ =" +executionId);
-        jdbcTemplate.execute("DELETE  FROM ACT_HI_VARINST  WHERE EXECUTION_ID_ =" +executionId);
-        if(StringUtils.isNotBlank(parentId)){
-            jdbcTemplate.execute("DELETE  FROM ACT_RU_VARIABLE WHERE EXECUTION_ID_ =" +parentId);
-            jdbcTemplate.execute("DELETE  FROM ACT_HI_VARINST  WHERE EXECUTION_ID_ =" +parentId);
-        }
     }
 }

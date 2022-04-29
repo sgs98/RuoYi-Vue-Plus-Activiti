@@ -9,6 +9,7 @@ import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.helper.LoginHelper;
 import com.ruoyi.workflow.activiti.cmd.DeleteExecutionChildCmd;
+import com.ruoyi.workflow.activiti.cmd.MoveMultiInstanceOutCmd;
 import com.ruoyi.workflow.common.constant.ActConstant;
 import com.ruoyi.workflow.common.enums.BusinessStatusEnum;
 import com.ruoyi.workflow.domain.ActBusinessStatus;
@@ -30,11 +31,9 @@ import org.activiti.engine.ManagementService;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.history.HistoricTaskInstanceQuery;
-import org.activiti.engine.impl.bpmn.behavior.ParallelMultiInstanceBehavior;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntityImpl;
 import org.activiti.engine.impl.persistence.entity.TaskEntity;
 import org.activiti.engine.repository.ProcessDefinition;
-import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskQuery;
@@ -728,30 +727,9 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
                     }
                 }
             }
-        }else if(ObjectUtil.isNotEmpty(multiInstance) && multiInstance.getType() instanceof ParallelMultiInstanceBehavior){
-            if(list.size() == 1){
-                // 当前任务，完成当前任务
-                taskService.addComment(task.getId(), processInstanceId, StringUtils.isNotBlank(backProcessVo.getComment()) ? backProcessVo.getComment() : "驳回");
-                // 完成任务，就会进行驳回到目标节点，产生目标节点的任务数据
-                taskService.complete(task.getId());
-                DeleteExecutionChildCmd deleteExecutionChildCmd = new DeleteExecutionChildCmd(task.getExecutionId());
-                managementService.executeCommand(deleteExecutionChildCmd);
-            }else if(list.size() > 1){
-                // 当前任务，完成当前任务
-                taskService.addComment(task.getId(), processInstanceId, StringUtils.isNotBlank(backProcessVo.getComment()) ? backProcessVo.getComment() : "驳回");
-                // 完成任务，就会进行驳回到目标节点，产生目标节点的任务数据
-                taskService.complete(task.getId());
-                List<Task> otherTaskList = list.stream().filter(e -> !e.getId().equals(task.getId())).collect(Collectors.toList());
-                if(CollectionUtil.isNotEmpty(otherTaskList)){
-                    otherTaskList.forEach(t->{
-                        taskService.complete(t.getId());
-                        runtimeService.createNativeExecutionQuery()
-                            .sql("DELETE  FROM ACT_RU_EXECUTION WHERE ID_ = '" + t.getExecutionId() + "'").list();
-                        DeleteExecutionChildCmd deleteExecutionChildCmd = new DeleteExecutionChildCmd(t.getExecutionId());
-                        managementService.executeCommand(deleteExecutionChildCmd);
-                    });
-                }
-            }
+        }else if(ObjectUtil.isNotEmpty(multiInstance)){
+            MoveMultiInstanceOutCmd moveMultiInstanceOutCmd = new MoveMultiInstanceOutCmd(task.getId(),backProcessVo.getTargetActivityId());
+            managementService.executeCommand(moveMultiInstanceOutCmd);
         }
 
         // 11. 完成驳回功能后，将当前节点的原出口方向进行恢复
