@@ -12,11 +12,11 @@ import org.activiti.engine.impl.util.ProcessDefinitionUtil;
 
 /**
  * @program: ruoyi-vue-plus
- * @description: 单节点驳回普通节点
+ * @description: 单节点驳回普通单个节点
  * @author: gssong
  * @created: 2022/4/29 14:42:35
  */
-public class MoveSingleCmd implements Command<Void> {
+public class MoveActivityIdToActivityIdCmd implements Command<Void> {
     /**
      * 当前任务id
      */
@@ -27,7 +27,7 @@ public class MoveSingleCmd implements Command<Void> {
      */
     private String targetNodeId;
 
-    public MoveSingleCmd(String currentTaskId, String targetNodeId) {
+    public MoveActivityIdToActivityIdCmd(String currentTaskId, String targetNodeId) {
         this.currentTaskId = currentTaskId;
         this.targetNodeId = targetNodeId;
     }
