@@ -1058,10 +1058,10 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         }
         try {
             if(multiVo.getType() instanceof ParallelMultiInstanceBehavior){
-                throw new ServiceException("当前环节不是会签节点");
-                /*for (Long assignee : addMultiREQ.getAssignees()) {
-                    runtimeService.addMultiInstanceExecution(taskDefinitionKey, processInstanceId, Collections.singletonMap(multiVo.getAssignee(), assignee));
-                }*/
+                for (Long assignee : addMultiREQ.getAssignees()) {
+                    AddMultiInstanceExecutionCmd addMultiInstanceExecutionCmd = new AddMultiInstanceExecutionCmd(taskDefinitionKey, processInstanceId, Collections.singletonMap(multiVo.getAssignee(), assignee));
+                    managementService.executeCommand(addMultiInstanceExecutionCmd);
+                }
             }else if(multiVo.getType() instanceof SequentialMultiInstanceBehavior){
                 AddSequenceMultiInstanceCmd addSequenceMultiInstanceCmd = new AddSequenceMultiInstanceCmd(task.getExecutionId(),multiVo.getAssigneeList(),addMultiREQ.getAssignees());
                 managementService.executeCommand(addSequenceMultiInstanceCmd);
@@ -1096,13 +1096,13 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         }
         try {
             if(multiVo.getType() instanceof ParallelMultiInstanceBehavior){
-                throw new ServiceException("当前环节不是会签节点");
-                /*for (String executionId : deleteMultiREQ.getExecutionIds()) {
-                    runtimeService.deleteMultiInstanceExecution(executionId, false);
+                for (String executionId : deleteMultiREQ.getExecutionIds()) {
+                    DeleteMultiInstanceExecutionCmd deleteMultiInstanceExecutionCmd = new DeleteMultiInstanceExecutionCmd(executionId,false);
+                    managementService.executeCommand(deleteMultiInstanceExecutionCmd);
                 }
                 for (String taskId : deleteMultiREQ.getTaskIds()) {
                     historyService.deleteHistoricTaskInstance(taskId);
-                }*/
+                }
             }else if(multiVo.getType() instanceof SequentialMultiInstanceBehavior){
                 DeleteSequenceMultiInstanceCmd deleteSequenceMultiInstanceCmd = new DeleteSequenceMultiInstanceCmd(task.getAssignee(),task.getExecutionId(),multiVo.getAssigneeList(),deleteMultiREQ.getAssigneeIds());
                 managementService.executeCommand(deleteSequenceMultiInstanceCmd);
