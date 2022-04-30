@@ -18,45 +18,51 @@ public interface ActConstant {
     /**
      * 并行网关
      */
-     String PARALLELGATEWAY = "parallelGateway";
+     String PARALLEL_GATEWAY = "parallelGateway";
 
     /**
      *排它网关
      */
-     String EXCLUSIVEGATEWAY = "exclusiveGateway";
+     String EXCLUSIVE_GATEWAY = "exclusiveGateway";
 
     /**
-     * 包含网关
+     *包含网关
      */
-    String INCLUSIVEGATEWAY = "InclusiveGateway";
+    String INCLUSIVE_GATEWAY = "InclusiveGateway";
 
     /**
-     *结束
+     *连线
      */
-    String ENDTASK = "endTask";
+    String SEQUENCE_FLOW = "sequenceFlow";
 
     /**
      * 用户任务
      */
      String USER_TASK = "userTask";
 
-     String JSON = "json";
+    /**
+     *  会签任务总数
+     */
+    String NUMBER_OF_INSTANCES = "nrOfInstances";
 
-     Boolean TRUE=true;
+    /**
+     *  正在执行的会签总数
+     */
+    String NUMBER_OF_ACTIVE_INSTANCES = "nrOfActiveInstances";
 
-     Boolean FALSE=false;
+    /**
+     *  已完成的会签任务总数
+     */
+    String NUMBER_OF_COMPLETED_INSTANCES = "nrOfCompletedInstances";
 
-     String STRING = "string";
+    /**
+     *  循环的索引值，可以使用elementIndexVariable属性修改loopCounter的变量名
+     */
+    String LOOP_COUNTER = "loopCounter";
 
-     String INTEGER = "integer";
+    Boolean TRUE=true;
 
-     String SHORT = "short";
-
-     String LONG = "long";
-
-     String DOUBLE = "double";
-
-     String DATE = "date";
+    Boolean FALSE=false;
 
     /**
      * 流程自定义人员
@@ -113,10 +119,5 @@ public interface ActConstant {
     String PARAM_BOOLEAN = "Boolean";
 
     String PARAM_CHARACTER = "Character";
-
-
-
-
-
 
 }

@@ -91,7 +91,6 @@
   import verify from "@/components/Process/Verify";
   import history from "@/components/Process/History";
   import Back from "@/components/Process/Back";
-  import { getLeave} from "@/api/demo/leave";
   import  approvalForm from "@/views/components/approvalForm";
 
   export default {
@@ -136,7 +135,8 @@
         taskVariables: undefined,
         processInstanceId: undefined,
         businessKey: undefined, // 业务唯一标识
-        visible: false
+        visible: false,
+        currProcessForm: '' //表单组件名称
       }
     },
     created() {
@@ -174,21 +174,20 @@
         this.getList()
       },
       //办理任务弹出层
-      /* clickTaskPop(row){
-          getLeave(row.businessKey).then(response => {
-            this.taskVariables = {
-                 entity: response.data,
-                 userId :1
-            };
-          });
-          this.taskId = row.id;
-          this.$refs.verifyRef.visible = true
-      }, */
       clickTaskPop(row){
           this.businessKey = row.businessKey
           this.processInstanceId = row.processInstanceId
           this.taskId = row.id
-          this.$refs.approvalForm.visible = true
+          if(row.actBusinessStatus){
+               if(row.actBusinessStatus.classFullName === 'com.ruoyi.demo.domain.BsLeave'){
+                  this.currProcessForm = 'leaveForm'
+               }else if(row.actBusinessStatus.classFullName === '其他业务全类名'){
+                  this.currProcessForm = 'xxxForm'
+               }
+               this.$refs.approvalForm.visible = true
+          }else{
+              this.$modal.msgError("业务不存在");
+          }
       },
       clickHistPop(row){
          this.processInstanceId = row.processInstanceId

@@ -41,4 +41,19 @@ public enum  BusinessStatusEnum {
             throw new ServiceException("该单据已删除");
         }
     }
+
+    public static void checkCancel(String status){
+       if(status.equals(FINISH.getStatus())){
+            throw new ServiceException("该单据已完成申请");
+        }else if(status.equals(INVALID.getStatus())){
+            throw new ServiceException("该单据已作废");
+        }else if(status.equals(DELETE.getStatus())){
+            throw new ServiceException("该单据已删除");
+        }else if(status.equals(CANCEL.getStatus())){
+            throw new ServiceException("该单据已撤回");
+        }else if(status.equals(BACK.getStatus())){
+            throw new ServiceException("该单据已退回");
+        }
+    }
 }
+

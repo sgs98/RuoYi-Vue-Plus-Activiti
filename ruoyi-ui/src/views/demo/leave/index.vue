@@ -465,7 +465,8 @@ export default {
         const data = {
             processKey: 'test', // key
             businessKey: entity.id, // 业务id
-            variables: variables
+            variables: variables,
+            classFullName: 'com.ruoyi.demo.domain.BsLeave'
         }
         // 启动流程
         let assigneeList = []

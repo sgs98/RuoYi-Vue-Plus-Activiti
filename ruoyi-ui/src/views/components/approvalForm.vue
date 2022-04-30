@@ -35,6 +35,7 @@ export default {
       processInstanceId: String, // 流程实例id
       businessKey: String, // 业务唯一标识
       taskId: String, // 任务id
+      currProcessForm: String // 当前流程表单组件
     },
 
     components: {
@@ -45,8 +46,7 @@ export default {
         loading: false,
         visible: false,
         url: null,
-        list: [],
-        currProcessForm: 'leaveForm', // 当前流程表单组件
+        list: []
       }
     },
 

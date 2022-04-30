@@ -101,7 +101,7 @@ export default {
       data: data
     })
   },
-  // 委托任务
+  // 转办任务
   transmitTask(data) {
     return request({
       url: '/workflow/task/transmitTask',

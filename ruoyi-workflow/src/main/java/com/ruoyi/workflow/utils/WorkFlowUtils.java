@@ -104,16 +104,15 @@ public class WorkFlowUtils {
     }
 
     /**
-     * 获取下一审批节点信息
-     *
-     * @param flowElement
-     * @param nextNodes
-     * @param tempNodes
-     * @param taskId
-     * @param gateway
+     * @Description: 获取下一审批节点信息
+     * @param: flowElement 节点信息
+     * @param: nextNodes 下一节点信息
+     * @param: tempNodes 保存没有表达式的节点信息
+     * @param: taskId 任务id
+     * @param: gateway 网关
      * @return: void
      * @author: gssong
-     * @Date: 2022/4/11 10:31
+     * @Date: 2022/4/11 13:37
      */
     public void getNextNodes(FlowElement flowElement, ExecutionEntityImpl executionEntity, List<ProcessNode> nextNodes, List<ProcessNode> tempNodes, String taskId, String gateway) {
         // 获取当前节点的连线信息
@@ -127,11 +126,11 @@ public class WorkFlowUtils {
             if (outFlowElement instanceof UserTask) {
                 buildNode(executionEntity, nextNodes, tempNodes, taskId, gateway, sequenceFlow, processNode, tempNode, outFlowElement);
             }else if (outFlowElement instanceof ExclusiveGateway) { // 排他网关
-                getNextNodes(outFlowElement, executionEntity, nextNodes, tempNodes, taskId, ActConstant.EXCLUSIVEGATEWAY);
+                getNextNodes(outFlowElement, executionEntity, nextNodes, tempNodes, taskId, ActConstant.EXCLUSIVE_GATEWAY);
             }else if (outFlowElement instanceof ParallelGateway) { //并行网关
-                getNextNodes(outFlowElement,executionEntity, nextNodes, tempNodes, taskId, ActConstant.PARALLELGATEWAY);
+                getNextNodes(outFlowElement,executionEntity, nextNodes, tempNodes, taskId, ActConstant.PARALLEL_GATEWAY);
             }else if(outFlowElement instanceof InclusiveGateway){ //包含网关
-                getNextNodes(outFlowElement,executionEntity, nextNodes, tempNodes, taskId, ActConstant.INCLUSIVEGATEWAY);
+                getNextNodes(outFlowElement,executionEntity, nextNodes, tempNodes, taskId, ActConstant.INCLUSIVE_GATEWAY);
             }else if (outFlowElement instanceof EndEvent) {
                 continue;
             }else if(outFlowElement instanceof SubProcess) {
@@ -149,24 +148,24 @@ public class WorkFlowUtils {
     }
 
     /**
-     * 构建下一审批节点
-     * @param executionEntity
-     * @param nextNodes 下一节点信息
-     * @param tempNodes 保存没有表达式的节点信息
-     * @param taskId 任务id
-     * @param gateway 网关
-     * @param sequenceFlow  节点
-     * @param processNode 下一节点的目标元素
-     * @param tempNode  保存没有表达式的节点
-     * @param outFlowElement 目标节点
+     * @Description: 构建下一审批节点
+     * @param: executionEntity
+     * @param: nextNodes 下一节点信息
+     * @param: tempNodes 保存没有表达式的节点信息
+     * @param: taskId 任务id
+     * @param: gateway 网关
+     * @param: sequenceFlow  节点
+     * @param: processNode 下一节点的目标元素
+     * @param: tempNode  保存没有表达式的节点
+     * @param: outFlowElement 目标节点
      * @return: void
      * @author: gssong
-     * @Date: 2022/4/11 10:31
+     * @Date: 2022/4/11 13:35
      */
     private void buildNode(ExecutionEntityImpl executionEntity, List<ProcessNode> nextNodes, List<ProcessNode> tempNodes, String taskId, String gateway, SequenceFlow sequenceFlow, ProcessNode processNode, ProcessNode tempNode, FlowElement outFlowElement) {
         // 用户任务，则获取响应给前端设置办理人或者候选人
         // 判断是否为排它网关
-        if (ActConstant.EXCLUSIVEGATEWAY.equals(gateway)) {
+        if (ActConstant.EXCLUSIVE_GATEWAY.equals(gateway)) {
             String conditionExpression = sequenceFlow.getConditionExpression();
             //判断是否有条件
             if (StringUtils.isNotBlank(conditionExpression)) {
@@ -175,7 +174,7 @@ public class WorkFlowUtils {
                 if (condition ) {
                     processNode.setNodeId(outFlowElement.getId());
                     processNode.setNodeName(outFlowElement.getName());
-                    processNode.setNodeType(ActConstant.EXCLUSIVEGATEWAY);
+                    processNode.setNodeType(ActConstant.EXCLUSIVE_GATEWAY);
                     processNode.setTaskId(taskId);
                     processNode.setExpression(true);
                     processNode.setChooseWay(ActConstant.WORKFLOW_ASSIGNEE);
@@ -185,7 +184,7 @@ public class WorkFlowUtils {
                 } else {
                     processNode.setNodeId(outFlowElement.getId());
                     processNode.setNodeName(outFlowElement.getName());
-                    processNode.setNodeType(ActConstant.EXCLUSIVEGATEWAY);
+                    processNode.setNodeType(ActConstant.EXCLUSIVE_GATEWAY);
                     processNode.setTaskId(taskId);
                     processNode.setExpression(false);
                     processNode.setChooseWay(ActConstant.WORKFLOW_ASSIGNEE);
@@ -196,7 +195,7 @@ public class WorkFlowUtils {
             } else {
                 tempNode.setNodeId(outFlowElement.getId());
                 tempNode.setNodeName(outFlowElement.getName());
-                tempNode.setNodeType(ActConstant.EXCLUSIVEGATEWAY);
+                tempNode.setNodeType(ActConstant.EXCLUSIVE_GATEWAY);
                 tempNode.setTaskId(taskId);
                 tempNode.setExpression(true);
                 tempNode.setChooseWay(ActConstant.WORKFLOW_ASSIGNEE);
@@ -204,13 +203,13 @@ public class WorkFlowUtils {
                 tempNode.setAssigneeId(((UserTask) outFlowElement).getAssignee());
                 tempNodes.add(tempNode);
             }
-        // 判断是否为包含网关
-        } else if(ActConstant.INCLUSIVEGATEWAY.equals(gateway)){
+        //包含网关
+        } else if(ActConstant.INCLUSIVE_GATEWAY.equals(gateway)){
             String conditionExpression = sequenceFlow.getConditionExpression();
             if(StringUtils.isBlank(conditionExpression)){
                 processNode.setNodeId(outFlowElement.getId());
                 processNode.setNodeName(outFlowElement.getName());
-                processNode.setNodeType(ActConstant.EXCLUSIVEGATEWAY);
+                processNode.setNodeType(ActConstant.EXCLUSIVE_GATEWAY);
                 processNode.setTaskId(taskId);
                 processNode.setExpression(true);
                 processNode.setChooseWay(ActConstant.WORKFLOW_ASSIGNEE);
@@ -223,7 +222,7 @@ public class WorkFlowUtils {
                 if (condition) {
                     processNode.setNodeId(outFlowElement.getId());
                     processNode.setNodeName(outFlowElement.getName());
-                    processNode.setNodeType(ActConstant.EXCLUSIVEGATEWAY);
+                    processNode.setNodeType(ActConstant.EXCLUSIVE_GATEWAY);
                     processNode.setTaskId(taskId);
                     processNode.setExpression(true);
                     processNode.setChooseWay(ActConstant.WORKFLOW_ASSIGNEE);
@@ -245,15 +244,14 @@ public class WorkFlowUtils {
         }
     }
 
-
     /**
-     *
-     * @param actFullClass 业务规则对象
-     * @param taskId 任务id
-     * @return 查询业务规则
+     * @Description: 查询业务规则中的人员id
+     * @param: actFullClass 业务规则对象
+     * @param: taskId 任务id
+     * @return: 查询业务规则
      * @return: java.lang.Object
      * @author: gssong
-     * @Date: 2022/4/11 10:31
+     * @Date: 2022/4/11 13:35
      */
     @SneakyThrows
     public Object assignList(ActFullClassVo actFullClass, String taskId) {
@@ -304,9 +302,9 @@ public class WorkFlowUtils {
 
     /**
      * @Description: 设置业务流程参数
-     * @param o 对象
-     * @param idList 主键集合
-     * @param id 主键id
+     * @param: o 对象
+     * @param: idList 主键集合
+     * @param: id 主键id
      * @Author: gssong
      * @Date: 2022/1/16
      */
@@ -340,9 +338,10 @@ public class WorkFlowUtils {
 
     /**
      * @Description: 设置流程实例id
-     * @param o 对象
-     * @param idList 主键集合
-     * @param id 主键id
+     * @param: o 对象
+     * @param: idList 主键集合
+     * @param: id 主键id
+     * @return: void
      * @Author: gssong
      * @Date: 2022/1/16
      */
@@ -375,14 +374,13 @@ public class WorkFlowUtils {
     }
 
     /**
-     * 查询审批人
-     *
-     * @param params
-     * @param chooseWay
-     * @param nodeName
+     * @Description: 查询审批人
+     * @param: params
+     * @param: chooseWay
+     * @param: nodeName
      * @return: java.util.List<java.lang.Long>
      * @author: gssong
-     * @Date: 2022/4/11 10:32
+     * @Date: 2022/4/11 13:36
      */
     public List<Long> assignees(String params, String chooseWay, String nodeName) {
         List<Long> paramList = new ArrayList<>();

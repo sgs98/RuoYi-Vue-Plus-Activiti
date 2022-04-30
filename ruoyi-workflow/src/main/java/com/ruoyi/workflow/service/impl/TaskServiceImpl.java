@@ -428,7 +428,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
             }
         }
         //排它网关  如果下已审批节点变量判断都为false  将保存的临时的节点赋予下一节点
-        List<String> exclusiveLists = nextNodes.stream().filter(e -> e.getNodeType().equals(ActConstant.EXCLUSIVEGATEWAY) && e.getExpression().equals(ActConstant.TRUE)).
+        List<String> exclusiveLists = nextNodes.stream().filter(e -> e.getNodeType().equals(ActConstant.EXCLUSIVE_GATEWAY) && e.getExpression().equals(ActConstant.TRUE)).
             map(ProcessNode::getNodeType).collect(Collectors.toList());
         if (CollectionUtil.isEmpty(nextNodes) && CollectionUtil.isEmpty(exclusiveLists)) {
             nextNodes.addAll(tempNodes);
@@ -437,17 +437,17 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         List<ProcessNode> nodeList = new ArrayList<>();
         if (CollectionUtil.isNotEmpty(nextNodes)) {
             //排它网关  如果下已审批节点变量判断都为false  将保存的临时的节点赋予下一节点
-            List<String> exclusiveList = nextNodes.stream().filter(e -> e.getNodeType().equals(ActConstant.EXCLUSIVEGATEWAY) && e.getExpression().equals(ActConstant.TRUE)).
+            List<String> exclusiveList = nextNodes.stream().filter(e -> e.getNodeType().equals(ActConstant.EXCLUSIVE_GATEWAY) && e.getExpression().equals(ActConstant.TRUE)).
                 map(ProcessNode::getNodeType).collect(Collectors.toList());
             if (!CollectionUtil.isEmpty(nextNodes) && CollectionUtil.isEmpty(exclusiveList)) {
                 nextNodes.addAll(tempNodes);
             }
             //排它网关
-            List<String> exclusiveGatewayList = nextNodes.stream().filter(e -> e.getNodeType().equals(ActConstant.EXCLUSIVEGATEWAY) && e.getExpression().equals(ActConstant.TRUE)).
+            List<String> exclusiveGatewayList = nextNodes.stream().filter(e -> e.getNodeType().equals(ActConstant.EXCLUSIVE_GATEWAY) && e.getExpression().equals(ActConstant.TRUE)).
                 map(ProcessNode::getNodeType).collect(Collectors.toList());
             if (CollectionUtil.isNotEmpty(exclusiveGatewayList)) {
                 nextNodes.forEach(node -> {
-                    if ((ActConstant.EXCLUSIVEGATEWAY.equals(node.getNodeType()) && node.getExpression())) {
+                    if ((ActConstant.EXCLUSIVE_GATEWAY.equals(node.getNodeType()) && node.getExpression())) {
                         nodeList.add(node);
                     }
                 });
@@ -804,7 +804,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
                         nodeListId.add(element.getId());
                     }
                 }
-                //包容网关
+             //包容网关
             }/*else if(sourceFlowElement instanceof InclusiveGateway){
                 List<SequenceFlow> inclusiveGatewayOutgoingFlow = ((InclusiveGateway) sourceFlowElement).getOutgoingFlows();
                 for (SequenceFlow sequenceFlow : inclusiveGatewayOutgoingFlow) {
@@ -832,8 +832,8 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
     /**
      * @Description: 获取历史任务节点，用于驳回功能
      * @param: processInstId
-     * @return: com.ruoyi.common.core.domain.R<java.util.List<com.ruoyi.workflow.domain.ActTaskNode>>
-     * @Author: gssong
+     * @return: java.util.List<com.ruoyi.workflow.domain.ActTaskNode>
+     * @author: gssong
      * @Date: 2021/11/6
      */
     @Override
@@ -908,7 +908,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
 
     /**
      * @Description: 创建流程任务
-     * @param: parentTask 
+     * @param: parentTask
      * @param: createTime
      * @return: org.activiti.engine.impl.persistence.entity.TaskEntity
      * @author: gssong

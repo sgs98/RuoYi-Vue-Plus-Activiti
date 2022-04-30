@@ -22,12 +22,7 @@ const permission = {
       state.defaultRoutes = constantRoutes.concat(routes)
     },
     SET_TOPBAR_ROUTES: (state, routes) => {
-      // 顶部导航菜单默认添加统计报表栏指向首页
-      const index = [{
-        path: 'index',
-        meta: { title: '统计报表', icon: 'dashboard' }
-      }]
-      state.topbarRouters = routes.concat(index);
+      state.topbarRouters = routes
     },
     SET_SIDEBAR_ROUTERS: (state, routes) => {
       state.sidebarRouters = routes
@@ -131,8 +126,7 @@ export const loadView = (view) => {
     return (resolve) => require([`@/views/${view}`], resolve)
   } else {
     // 使用 import 实现生产环境的路由懒加载
-    //return () => import(`@/views/${view}`)
-    return (resolve) => require([`@/views/${view}`], resolve)
+    return () => import(`@/views/${view}`)
   }
 }
 

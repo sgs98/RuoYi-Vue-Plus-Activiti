@@ -1,11 +1,11 @@
 ## 平台简介
-[![码云Gitee](https://gitee.com/JavaLionLi/RuoYi-Vue-Plus/badge/star.svg?theme=blue)](https://gitee.com/JavaLionLi/RuoYi-Vue-Plus)
-[![GitHub](https://img.shields.io/github/stars/JavaLionLi/RuoYi-Vue-Plus.svg?style=social&label=Stars)](https://github.com/JavaLionLi/RuoYi-Vue-Plus)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://gitee.com/JavaLionLi/RuoYi-Vue-Plus/blob/master/LICENSE)
+[![码云Gitee](https://gitee.com/sgs98/RuoYi-Vue-Plus-Activiti/badge/star.svg?theme=blue)](https://gitee.com/sgs98/RuoYi-Vue-Plus-Activiti)
+[![GitHub](https://img.shields.io/github/stars/sgs98/RuoYi-Vue-Plus-Activiti.svg?style=social&label=Stars)](https://gitee.com/sgs98/RuoYi-Vue-Plus-Activiti)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://gitee.com/sgs98/RuoYi-Vue-Plus-Activiti/blob/master/LICENSE)
 [![使用IntelliJ IDEA开发维护](https://img.shields.io/badge/IntelliJ%20IDEA-提供支持-blue.svg)](https://www.jetbrains.com/?from=RuoYi-Vue-Plus)
 <br>
-[![RuoYi-Vue-Plus](https://img.shields.io/badge/RuoYi_Vue_Plus-4.0.1-success.svg)](https://gitee.com/JavaLionLi/RuoYi-Vue-Plus)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-2.5-blue.svg)]()
+[![RuoYi-Vue-Plus-Activiti](https://img.shields.io/badge/RuoYi_Vue_Plus_Activiti-4.1.0-success.svg)](https://gitee.com/sgs98/RuoYi-Vue-Plus-Activiti)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-2.6-blue.svg)]()
 [![JDK-8+](https://img.shields.io/badge/JDK-8-green.svg)]()
 [![JDK-11](https://img.shields.io/badge/JDK-11-green.svg)]()
 
@@ -16,16 +16,16 @@
 
 | 功能介绍     | 使用技术                | 文档地址                                                                                              | 特性注意事项                     |
 |----------|---------------------|---------------------------------------------------------------------------------------------------|----------------------------|
-| 当前框架     | RuoYi-Vue-Plus      | [RuoYi-Vue-Plus文档](https://gitee.com/JavaLionLi/RuoYi-Vue-Plus/wikis/pages)                       | 重写RuoYi-Vue全方位升级(不兼容原框架)   |
-| 微服务分支    | RuoYi-Cloud-Plus    | [微服务分支地址](https://gitee.com/JavaLionLi/RuoYi-Cloud-Plus)                                          | 重写RuoYi-Cloud全方位升级(不兼容原框架) |
-| 单体分支     | RuoYi-Vue-Plus-fast | [fast分支地址](https://gitee.com/JavaLionLi/RuoYi-Vue-Plus/tree/fast/)                                | 单体应用结构                     |
-| Vue3分支   | RuoYi-Vue-Plus-UI   | [UI地址](https://gitee.com/JavaLionLi/RuoYi-Vue-Plus-UI)                                            | 由于组件还未完善 仅供学习              |
-| 原框架      | RuoYi-Vue           | [RuoYi-Vue官网](http://ruoyi.vip/)                                                                  | 定期同步需要的功能                  |
+| 当前框架     | RuoYi-Vue-Plus-Activiti      | [RuoYi-Vue-Plus-Activiti文档](https://gitee.com/sgs98/RuoYi-Vue-Plus-Activiti/wikis/pages)                       | 重写RuoYi-Vue全方位升级(不兼容原框架)   |
+| 原框架      | RuoYi-Vue-Plus           | [RuoYi-Vue-Plus](https://gitee.com/JavaLionLi/RuoYi-Vue-Plus)                                                                  | 定期同步需要的功能                  |
 | 前端开发框架   | Vue、Element UI      | [Element UI官网](https://element.eleme.cn/#/zh-CN)                                                  |                            |
 | 后端开发框架   | SpringBoot          | [SpringBoot官网](https://spring.io/projects/spring-boot/#learn)                                     |                            |
 | 容器框架     | Undertow            | [Undertow官网](https://undertow.io/)                                                                | 基于 XNIO 的高性能容器             |
 | 权限认证框架   | Sa-Token、Jwt        | [Sa-Token官网](https://sa-token.dev33.cn/)                                                          | 强解耦、强扩展                    |
 | 关系数据库    | MySQL               | [MySQL官网](https://dev.mysql.com/)                                                                 | 适配 8.X 最低 5.7              |
+| 关系数据库    | Oracle              | [Oracle官网](https://www.oracle.com/cn/database/)                                                   | 适配 11g 12c                 |
+| 关系数据库    | PostgreSQL          | [PostgreSQL官网](https://www.postgresql.org/)                                                       | 适配 13 14                   |
+| 关系数据库    | SQLServer           | [SQLServer官网](https://docs.microsoft.com/zh-cn/sql/sql-server)                                    | 适配 2017 2019               |
 | 缓存数据库    | Redis               | [Redis官网](https://redis.io/)                                                                      | 适配 6.X 最低 4.X              |
 | 数据库框架    | Mybatis-Plus        | [Mybatis-Plus文档](https://baomidou.com/guide/)                                                     | 快速 CRUD 增加开发效率             |
 | 数据库框架    | p6spy               | [p6spy官网](https://p6spy.readthedocs.io/)                                                          | 更强劲的 SQL 分析                |
@@ -59,8 +59,8 @@
 >[部署项目 必看](https://gitee.com/JavaLionLi/RuoYi-Vue-Plus/wikis/关于应用部署?sort_id=4219382)
 >>[https://gitee.com/JavaLionLi/RuoYi-Vue-Plus/wikis/关于应用部署?sort_id=4219382](https://gitee.com/JavaLionLi/RuoYi-Vue-Plus/wikis/关于应用部署?sort_id=4219382)
 > 
->[参考文档 Wiki](https://gitee.com/JavaLionLi/RuoYi-Vue-Plus/wikis/pages)
->>[https://gitee.com/JavaLionLi/RuoYi-Vue-Plus/wikis/pages](https://gitee.com/JavaLionLi/RuoYi-Vue-Plus/wikis/pages)
+>[参考文档 Wiki](https://gitee.com/sgs98/RuoYi-Vue-Plus-Activiti/wikis/pages)
+>>[https://gitee.com/sgs98/RuoYi-Vue-Plus-Activiti/wikis/pages](https://gitee.com/sgs98/RuoYi-Vue-Plus-Activiti/wikis/pages)
 
 ## 软件架构图
 
@@ -73,11 +73,8 @@
 
 ### 其他
 
-* 同步升级 RuoYi-Vue
-* GitHub 地址 [RuoYi-Vue-Plus-github](https://github.com/JavaLionLi/RuoYi-Vue-Plus)
-* 单模块 分支 [RuoYi-Vue-Plus-fast](https://gitee.com/JavaLionLi/RuoYi-Vue-Plus/tree/fast/)
-* 微服务 分支 [RuoYi-Cloud-Plus](https://gitee.com/JavaLionLi/RuoYi-Cloud-Plus)
-* 用户扩展项目 [扩展项目列表](https://gitee.com/JavaLionLi/RuoYi-Vue-Plus/wikis/pages?sort_id=4478302&doc_id=1469725)
+* 同步升级 RuoYi-Vue-Plus
+* GitHub 地址 [RuoYi-Vue-Plus-Activiti-github](https://github.com/sgs98/RuoYi-Vue-Plus-Activiti)
 
 
 ## 业务功能
@@ -103,6 +100,7 @@
 | 在线构建器 | 拖动表单元素生成相应的HTML代码。 |
 | 连接池监视 | 监视当前系统数据库连接池状态，可进行分析SQL找出系统性能瓶颈。 |
 | 使用案例 | 系统的一些功能案例 |
+| 工作流 | Flowable与Activiti工作流 |
 
 ## 演示图例
 

@@ -120,7 +120,13 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
         return map;
     }
 
-
+    /**
+     * @Description: 通过流程实例id查询流程审批记录
+     * @param: processInstanceId
+     * @return: java.util.List<com.ruoyi.workflow.domain.vo.ActHistoryInfoVo>
+     * @Author: gssong
+     * @Date: 2021/10/16
+     */
     @Override
     public List<ActHistoryInfoVo> getHistoryInfoList(String processInstanceId) {
         //查询任务办理记录

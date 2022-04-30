@@ -8,4 +8,11 @@ export function getWorkflowUserListByPage(data) {
       data: data
     })
 }
-
+// 分页查询工作流选择加签人员
+export function getWorkflowAddMultiListByPage(data) {
+  return request({
+    url: '/workflow/user/getWorkflowAddMultiListByPage',
+    method: 'post',
+    data: data
+  })
+}

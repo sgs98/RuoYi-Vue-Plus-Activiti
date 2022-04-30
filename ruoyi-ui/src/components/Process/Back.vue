@@ -1,5 +1,5 @@
 <template>
-    <el-dialog title="审批驳回" :visible.sync="visible" width="600px" destroy-on-close>
+    <el-dialog title="审批驳回" :visible.sync="visible" :close-on-click-modal="false" width="600px" append-to-body destroy-on-close>
         <el-form v-loading="loading" :rules="rules" ref="formData" :model="formData" status-icon>
             <el-form-item label="审批意见" prop="message" label-width="120px">
                 <el-input type="textarea" v-model="formData.comment" maxlength="300"  placeholder="请输入审批意见" :autosize="{ minRows: 4}" show-word-limit></el-input>
