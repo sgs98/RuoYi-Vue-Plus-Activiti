@@ -15,10 +15,7 @@ import com.ruoyi.workflow.domain.ActBusinessStatus;
 import com.ruoyi.workflow.domain.ActHiTaskInst;
 import com.ruoyi.workflow.domain.ActNodeAssignee;
 import com.ruoyi.workflow.domain.ActTaskNode;
-import com.ruoyi.workflow.domain.bo.NextNodeREQ;
-import com.ruoyi.workflow.domain.bo.TaskCompleteREQ;
-import com.ruoyi.workflow.domain.bo.TaskREQ;
-import com.ruoyi.workflow.domain.bo.TransmitREQ;
+import com.ruoyi.workflow.domain.bo.*;
 import com.ruoyi.workflow.domain.vo.*;
 import com.ruoyi.workflow.factory.WorkflowService;
 import com.ruoyi.workflow.service.*;
@@ -30,6 +27,8 @@ import org.activiti.engine.ManagementService;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.history.HistoricTaskInstanceQuery;
+import org.activiti.engine.impl.bpmn.behavior.ParallelMultiInstanceBehavior;
+import org.activiti.engine.impl.bpmn.behavior.SequentialMultiInstanceBehavior;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntityImpl;
 import org.activiti.engine.impl.persistence.entity.TaskEntity;
 import org.activiti.engine.repository.ProcessDefinition;
@@ -390,15 +389,39 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
      * @Date: 2021/10/23
      */
     @Override
-    public List<ProcessNode> getNextNodeInfo(NextNodeREQ req) {
+    public Map<String,Object> getNextNodeInfo(NextNodeREQ req) {
+        Map<String, Object> map = new HashMap<>();
         //设置变量
         TaskEntity task = (TaskEntity)taskService.createTaskQuery().taskId(req.getTaskId()).singleResult();
+        //可驳回的节点
+        List<ActTaskNode> taskNodeList = iActTaskNodeService.getListByInstanceId(task.getProcessInstanceId()).stream().filter(e->e.getIsBack()).collect(Collectors.toList());
+        map.put("backNodeList",taskNodeList);
         //委托流程
         if(ObjectUtil.isNotEmpty(task.getDelegationState())&&ActConstant.PENDING.equals(task.getDelegationState().name())){
-            return null;
+            map.put("list",new ArrayList<>());
+            map.put("isMultiInstance",false);
+            return map;
+        }
+        //判断当前是否为会签
+        MultiVo isMultiInstance = workFlowUtils.isMultiInstance(task.getProcessDefinitionId(), task.getTaskDefinitionKey());
+        if(ObjectUtil.isEmpty(isMultiInstance)){
+            map.put("isMultiInstance",false);
+        }else{
+            map.put("isMultiInstance",true);
         }
         //查询任务
         List<Task> taskList = taskService.createTaskQuery().processInstanceId(task.getProcessInstanceId()).list();
+        //可以减签的人员
+        if(ObjectUtil.isNotEmpty(isMultiInstance)){
+            if(isMultiInstance.getType() instanceof ParallelMultiInstanceBehavior){
+                map.put("multiList",multiList(task, taskList,isMultiInstance.getType(),null));
+            }else if(isMultiInstance.getType() instanceof SequentialMultiInstanceBehavior){
+                List<Long> assigneeList = (List)runtimeService.getVariable(task.getExecutionId(), isMultiInstance.getAssigneeList());
+                map.put("multiList",multiList(task, taskList,isMultiInstance.getType(),assigneeList));
+            }
+        }else{
+            map.put("multiList",new ArrayList<>());
+        }
         //如果是会签最后一个人员审批选人
         if(CollectionUtil.isNotEmpty(taskList)&&taskList.size()>1){
             //return null;
@@ -406,14 +429,13 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         taskService.setVariables(task.getId(),req.getVariables());
         //流程定义
         String processDefinitionId = task.getProcessDefinitionId();
-        ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceId(task.getProcessInstanceId()).singleResult();
         //查询bpmn信息
         BpmnModel bpmnModel = repositoryService.getBpmnModel(processDefinitionId);
         //通过任务节点id，来获取当前节点信息
         FlowElement flowElement = bpmnModel.getFlowElement(task.getTaskDefinitionKey());
         // 封装下一个用户任务节点信息
         List<ProcessNode> nextNodes = new ArrayList<>();
-        //  保存没有表达式的节点
+        // 保存没有表达式的节点
         List<ProcessNode> tempNodes = new ArrayList<>();
         ExecutionEntityImpl executionEntity = (ExecutionEntityImpl) runtimeService.createExecutionQuery()
             .executionId(task.getExecutionId()).singleResult();
@@ -453,14 +475,82 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
                 });
                 //设置节点审批人员
                 List<ProcessNode> processNodeList = getProcessNodeAssigneeList(nodeList, task.getProcessDefinitionId());
-                return processNodeList;
+                map.put("list",processNodeList);
+                return map;
             } else {
                 //设置节点审批人员
                 List<ProcessNode> processNodeList = getProcessNodeAssigneeList(nextNodes, task.getProcessDefinitionId());
-                return processNodeList;
+                map.put("list",processNodeList);
+                return map;
             }
         }
-        return nextNodes;
+        map.put("list",nextNodes);
+        return map;
+    }
+
+
+    /**
+     * @Description: 可减签人员集合
+     * @param: task  当前任务
+     * @param: taskList  当前实例所有任务
+     * @param: type  会签类型
+     * @param: assigneeList 串行会签人员
+     * @return: java.util.List<com.ruoyi.workflow.domain.vo.TaskVo>
+     * @author: gssong
+     * @Date: 2022/4/24 11:17
+     */
+    private List<TaskVo> multiList(TaskEntity task, List<Task> taskList,Object type,List<Long> assigneeList) {
+        List<TaskVo> taskListVo = new ArrayList<>();
+        if(type instanceof SequentialMultiInstanceBehavior){
+            List<Long> userIds = assigneeList.stream().filter(userId -> !userId.toString().equals(task.getAssignee())).collect(Collectors.toList());
+            List<SysUser> sysUsers = null;
+            if(CollectionUtil.isNotEmpty(userIds)){
+                sysUsers = iUserService.selectListUserByIds(userIds);
+            }
+            for (Long userId : userIds) {
+                TaskVo taskVo = new TaskVo();
+                taskVo.setId("串行会签");
+                taskVo.setExecutionId("串行会签");
+                taskVo.setProcessInstanceId(task.getProcessInstanceId());
+                taskVo.setName(task.getName());
+                taskVo.setAssigneeId(String.valueOf(userId));
+                if(CollectionUtil.isNotEmpty(sysUsers)&&sysUsers.size()>0){
+                    SysUser sysUser = sysUsers.stream().filter(u -> u.getUserId().toString().equals(userId.toString())).findFirst().orElse(null);
+                    if(ObjectUtil.isNotEmpty(sysUser)){
+                        taskVo.setAssignee(sysUser.getUserName());
+                    }
+                }
+                taskListVo.add(taskVo);
+            }
+            return taskListVo;
+        }else if(type instanceof ParallelMultiInstanceBehavior){
+            List<Task> tasks = taskList.stream().filter(e -> !e.getExecutionId().equals(task.getExecutionId())
+                &&e.getTaskDefinitionKey().equals(task.getTaskDefinitionKey())).collect(Collectors.toList());
+            if(CollectionUtil.isNotEmpty(tasks)){
+                List<Long> userIds = tasks.stream().map(e -> Long.valueOf(e.getAssignee())).collect(Collectors.toList());
+                List<SysUser> sysUsers = null;
+                if(CollectionUtil.isNotEmpty(userIds)){
+                    sysUsers = iUserService.selectListUserByIds(userIds);
+                }
+                for (Task t : tasks) {
+                    TaskVo taskVo = new TaskVo();
+                    taskVo.setId(t.getId());
+                    taskVo.setExecutionId(t.getExecutionId());
+                    taskVo.setProcessInstanceId(t.getProcessInstanceId());
+                    taskVo.setName(t.getName());
+                    taskVo.setAssigneeId(t.getAssignee());
+                    if(CollectionUtil.isNotEmpty(sysUsers)){
+                        SysUser sysUser = sysUsers.stream().filter(u -> u.getUserId().toString().equals(t.getAssignee())).findFirst().orElse(null);
+                        if(ObjectUtil.isNotEmpty(sysUser)){
+                            taskVo.setAssignee(sysUser.getUserName());
+                        }
+                    }
+                    taskListVo.add(taskVo);
+                }
+               return taskListVo;
+            }
+        }
+        return new ArrayList<>();
     }
 
     /**
@@ -943,4 +1033,84 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         return  task;
     }
 
+    /**
+     * @Description: 会签任务加签
+     * @param: addMultiREQ
+     * @return: com.ruoyi.common.core.domain.R<java.lang.Boolean>
+     * @author: gssong
+     * @Date: 2022/4/15 13:06
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public R<Boolean> addMultiInstanceExecution(AddMultiREQ addMultiREQ) {
+        String taskId = addMultiREQ.getTaskId();
+        Task task = taskService.createTaskQuery().taskId(taskId)
+            .taskCandidateOrAssigned(LoginHelper.getUserId().toString()).singleResult();
+        if(ObjectUtil.isEmpty(task)){
+            throw new ServiceException("当前任务不存在或你不是任务办理人");
+        }
+        String taskDefinitionKey = task.getTaskDefinitionKey();
+        String processInstanceId = task.getProcessInstanceId();
+        String processDefinitionId = task.getProcessDefinitionId();
+        MultiVo multiVo = workFlowUtils.isMultiInstance(processDefinitionId, taskDefinitionKey);
+        if(ObjectUtil.isEmpty(multiVo)){
+            throw new ServiceException("当前环节不是会签节点");
+        }
+        try {
+            if(multiVo.getType() instanceof ParallelMultiInstanceBehavior){
+                throw new ServiceException("当前环节不是会签节点");
+                /*for (Long assignee : addMultiREQ.getAssignees()) {
+                    runtimeService.addMultiInstanceExecution(taskDefinitionKey, processInstanceId, Collections.singletonMap(multiVo.getAssignee(), assignee));
+                }*/
+            }else if(multiVo.getType() instanceof SequentialMultiInstanceBehavior){
+                AddSequenceMultiInstanceCmd addSequenceMultiInstanceCmd = new AddSequenceMultiInstanceCmd(task.getExecutionId(),multiVo.getAssigneeList(),addMultiREQ.getAssignees());
+                managementService.executeCommand(addSequenceMultiInstanceCmd);
+            }
+            return R.ok();
+        }catch (Exception e){
+            e.printStackTrace();
+            return R.fail();
+        }
+    }
+
+    /**
+     * @Description: 会签任务减签
+     * @param: deleteMultiREQ
+     * @return: com.ruoyi.common.core.domain.R<java.lang.Boolean>
+     * @author: gssong
+     * @Date: 2022/4/16 10:59
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public R<Boolean> deleteMultiInstanceExecution(DeleteMultiREQ deleteMultiREQ) {
+        Task task = taskService.createTaskQuery().taskId(deleteMultiREQ.getTaskId())
+            .taskCandidateOrAssigned(LoginHelper.getUserId().toString()).singleResult();
+        if(ObjectUtil.isEmpty(task)){
+            throw new ServiceException("当前任务不存在或你不是任务办理人");
+        }
+        String taskDefinitionKey = task.getTaskDefinitionKey();
+        String processDefinitionId = task.getProcessDefinitionId();
+        MultiVo multiVo = workFlowUtils.isMultiInstance(processDefinitionId, taskDefinitionKey);
+        if(ObjectUtil.isEmpty(multiVo)){
+            throw new ServiceException("当前环节不是会签节点");
+        }
+        try {
+            if(multiVo.getType() instanceof ParallelMultiInstanceBehavior){
+                throw new ServiceException("当前环节不是会签节点");
+                /*for (String executionId : deleteMultiREQ.getExecutionIds()) {
+                    runtimeService.deleteMultiInstanceExecution(executionId, false);
+                }
+                for (String taskId : deleteMultiREQ.getTaskIds()) {
+                    historyService.deleteHistoricTaskInstance(taskId);
+                }*/
+            }else if(multiVo.getType() instanceof SequentialMultiInstanceBehavior){
+                DeleteSequenceMultiInstanceCmd deleteSequenceMultiInstanceCmd = new DeleteSequenceMultiInstanceCmd(task.getAssignee(),task.getExecutionId(),multiVo.getAssigneeList(),deleteMultiREQ.getAssigneeIds());
+                managementService.executeCommand(deleteSequenceMultiInstanceCmd);
+            }
+            return R.ok();
+        }catch (Exception e){
+            e.printStackTrace();
+            return R.fail();
+        }
+    }
 }

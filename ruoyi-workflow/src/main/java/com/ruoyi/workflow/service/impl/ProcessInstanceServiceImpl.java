@@ -248,9 +248,11 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
     }
 
     /**
-     * 查询正在运行的流程实例
-     * @param req
-     * @return
+     * @Description: 查询正在运行的流程实例
+     * @param: req
+     * @return: com.ruoyi.common.core.page.TableDataInfo<com.ruoyi.workflow.domain.vo.ProcessInstRunningVo>
+     * @Author: gssong
+     * @Date: 2021/10/16
      */
     @Override
     public TableDataInfo<ProcessInstRunningVo> getProcessInstRunningByPage(ProcessInstRunningREQ req) {

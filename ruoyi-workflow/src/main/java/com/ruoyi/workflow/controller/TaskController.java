@@ -8,10 +8,7 @@ import com.ruoyi.common.core.validate.AddGroup;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.helper.LoginHelper;
 import com.ruoyi.workflow.domain.ActTaskNode;
-import com.ruoyi.workflow.domain.bo.NextNodeREQ;
-import com.ruoyi.workflow.domain.bo.TaskCompleteREQ;
-import com.ruoyi.workflow.domain.bo.TaskREQ;
-import com.ruoyi.workflow.domain.bo.TransmitREQ;
+import com.ruoyi.workflow.domain.bo.*;
 import com.ruoyi.workflow.domain.vo.BackProcessVo;
 import com.ruoyi.workflow.domain.vo.ProcessNode;
 import com.ruoyi.workflow.domain.vo.TaskFinishVo;
@@ -25,6 +22,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @program: ruoyi-vue-plus
@@ -120,13 +118,13 @@ public class TaskController extends BaseController {
     /**
      * @Description: 获取目标节点（下一个节点）
      * @param: taskId
-     * @return: com.ruoyi.common.core.domain.R<java.util.List <com.ruoyi.workflow.domain.vo.ProcessNode>>
+     * @return: com.ruoyi.common.core.domain.R<java.util.Map<java.lang.String,java.lang.Object>>
      * @Author: gssong
      * @Date: 2021/10/23
      */
     @ApiOperation("获取目标节点（下一个节点）")
     @PostMapping("/getNextNodeInfo")
-    public R<List<ProcessNode>> getNextNodeInfo(@RequestBody NextNodeREQ req) {
+    public R<Map<String,Object>> getNextNodeInfo(@RequestBody NextNodeREQ req) {
         return R.ok(iTaskService.getNextNodeInfo(req));
     }
 
@@ -223,6 +221,35 @@ public class TaskController extends BaseController {
     public R<Boolean> transmit(@Validated({AddGroup.class}) @RequestBody TransmitREQ transmitREQ) {
         return iTaskService.transmitTask(transmitREQ);
     }
+
+    /**
+     * @Description: 会签任务加签
+     * @param: addMultiREQ
+     * @return: com.ruoyi.common.core.domain.R<java.lang.Boolean>
+     * @author: gssong
+     * @Date: 2022/4/15 13:06
+     */
+    @ApiOperation("会签任务加签")
+    @PostMapping("/addMultiInstanceExecution")
+    @Log(title = "任务管理", businessType = BusinessType.INSERT)
+    public R<Boolean> addMultiInstanceExecution(@Validated({AddGroup.class}) @RequestBody AddMultiREQ addMultiREQ) {
+        return iTaskService.addMultiInstanceExecution(addMultiREQ);
+    }
+
+    /**
+     * @Description: 会签任务减签
+     * @param: deleteMultiREQ
+     * @return: com.ruoyi.common.core.domain.R<java.lang.Boolean>
+     * @author: gssong
+     * @Date: 2022/4/16 10:59
+     */
+    @ApiOperation("会签任务减签")
+    @PostMapping("/deleteMultiInstanceExecution")
+    @Log(title = "任务管理", businessType = BusinessType.INSERT)
+    public R<Boolean> deleteMultiInstanceExecution(@Validated({AddGroup.class}) @RequestBody DeleteMultiREQ deleteMultiREQ) {
+        return iTaskService.deleteMultiInstanceExecution(deleteMultiREQ);
+    }
+
 }
 
 

@@ -3,16 +3,14 @@ package com.ruoyi.workflow.service;
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.workflow.domain.ActTaskNode;
-import com.ruoyi.workflow.domain.bo.NextNodeREQ;
-import com.ruoyi.workflow.domain.bo.TaskCompleteREQ;
-import com.ruoyi.workflow.domain.bo.TaskREQ;
-import com.ruoyi.workflow.domain.bo.TransmitREQ;
+import com.ruoyi.workflow.domain.bo.*;
 import com.ruoyi.workflow.domain.vo.BackProcessVo;
 import com.ruoyi.workflow.domain.vo.ProcessNode;
 import com.ruoyi.workflow.domain.vo.TaskFinishVo;
 import com.ruoyi.workflow.domain.vo.TaskWaitingVo;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @program: ruoyi-vue-plus
@@ -47,7 +45,7 @@ public interface ITaskService {
      * @param req
      * @return
      */
-    List<ProcessNode> getNextNodeInfo(NextNodeREQ req);
+    Map<String,Object> getNextNodeInfo(NextNodeREQ req);
 
     /**
      * 查询所有用户的已办任务
@@ -90,4 +88,18 @@ public interface ITaskService {
      * @return
      */
     R<Boolean> transmitTask(TransmitREQ transmitREQ);
+
+    /**
+     * 会签任务加签
+     * @param addMultiREQ
+     * @return
+     */
+    R<Boolean> addMultiInstanceExecution(AddMultiREQ addMultiREQ);
+
+    /**
+     * 会签任务减签
+     * @param deleteMultiREQ
+     * @return
+     */
+    R<Boolean> deleteMultiInstanceExecution(DeleteMultiREQ deleteMultiREQ);
 }
