@@ -21,9 +21,15 @@ public class DeleteVariableCmd implements Command<Void> {
      */
     private Boolean isParent;
 
-    public DeleteVariableCmd(String executionId,Boolean isParent) {
+    /**
+     * 是否删除流程实例
+     */
+    private Boolean isDelete;
+
+    public DeleteVariableCmd(String executionId,Boolean isParent,Boolean isDelete) {
         this.executionId=executionId;
         this.isParent=isParent;
+        this.isDelete=isDelete;
     }
 
     @Override
@@ -41,10 +47,12 @@ public class DeleteVariableCmd implements Command<Void> {
                 variableInstanceEntityManager.delete(variableInstanceEntity, true);
             }
             //删除流程实例
-            if(isParent){
-                executionEntityManager.findChildExecutionsByParentExecutionId(executionId);
-            }else{
-                executionEntityManager.delete(executionId);
+            if(isDelete){
+                if(isParent){
+                    executionEntityManager.findChildExecutionsByParentExecutionId(executionId);
+                }else{
+                    executionEntityManager.delete(executionId);
+                }
             }
         }
         return null;

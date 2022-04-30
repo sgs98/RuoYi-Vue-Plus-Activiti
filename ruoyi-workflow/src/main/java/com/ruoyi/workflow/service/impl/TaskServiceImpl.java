@@ -799,7 +799,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
             // 完成任务，就会进行驳回到目标节点，产生目标节点的任务数据
             taskService.complete(backProcessVo.getTaskId());
             if(ObjectUtil.isNotEmpty(currentMultiInstance)&&ObjectUtil.isEmpty(targetMultiInstance)){
-                DeleteVariableCmd deleteVariableCmd = new DeleteVariableCmd(execution.getParentId(),true);
+                DeleteVariableCmd deleteVariableCmd = new DeleteVariableCmd(execution.getParentId(),true,true);
                 managementService.executeCommand(deleteVariableCmd);
             }
         }else{
@@ -817,12 +817,12 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
                     taskService.complete(t.getId());
                     historyService.deleteHistoricTaskInstance(t.getId());
                     if(ObjectUtil.isEmpty(currentMultiInstance)){
-                        DeleteVariableCmd deleteVariableCmd = new DeleteVariableCmd(execution.getId(),false);
+                        DeleteVariableCmd deleteVariableCmd = new DeleteVariableCmd(execution.getId(),false,true);
                         managementService.executeCommand(deleteVariableCmd);
                         historyService.createNativeHistoricActivityInstanceQuery()
                             .sql("DELETE  FROM ACT_HI_ACTINST WHERE EXECUTION_ID_ = '" + t.getExecutionId() + "'").list();
                     }else if(ObjectUtil.isEmpty(targetMultiInstance)){
-                        DeleteVariableCmd deleteVariableCmd = new DeleteVariableCmd(execution.getParentId(),true);
+                        DeleteVariableCmd deleteVariableCmd = new DeleteVariableCmd(execution.getParentId(),true,true);
                         managementService.executeCommand(deleteVariableCmd);
                     }
                 }

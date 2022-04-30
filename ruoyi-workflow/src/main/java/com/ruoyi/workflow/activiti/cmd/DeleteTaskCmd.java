@@ -46,7 +46,7 @@ public class DeleteTaskCmd extends NeedsActiveTaskCmd<Void> {
                 variableInstanceEntityManager.delete(variableInstanceEntity, true);
             }
         }
-        taskEntityManager.deleteTasksByProcessInstanceId(taskEntity.getProcessInstanceId(), "删除任务", true);
+        taskEntityManager.deleteTask(taskEntity, "删除任务", true,true);
         for (ExecutionEntity child : childExecutions) {
             //删除相关的办理人
             identityLinkEntityManager.deleteIdentityLink(executionEntity, null, null, null);
