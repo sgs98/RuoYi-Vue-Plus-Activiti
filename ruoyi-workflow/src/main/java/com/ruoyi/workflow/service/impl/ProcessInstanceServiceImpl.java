@@ -467,6 +467,15 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
         if (task.isSuspended()) {
             throw new ServiceException("当前任务已被挂起");
         }
+
+        List<ActTaskNode> listActTaskNode = iActTaskNodeService.getListByInstanceId(processInstId);
+        if(CollectionUtil.isEmpty(listActTaskNode)){
+            throw new ServiceException("未查询到撤回节点信息");
+        }
+        ActTaskNode actTaskNode = listActTaskNode.stream().filter(e -> e.getOrderNo()==0).findFirst().orElse(null);
+        if(ObjectUtil.isNull(actTaskNode)){
+            throw new ServiceException("未查询到撤回节点信息");
+        }
         // 1. 获取流程模型实例 BpmnModel
         BpmnModel bpmnModel = repositoryService.getBpmnModel(task.getProcessDefinitionId());
         // 2.当前节点信息
@@ -479,14 +488,6 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
         // 5. 将当前节点的原出口清空
         sequenceFlowList.clear();
         // 6. 获取目标节点信息
-        List<ActTaskNode> listActTaskNode = iActTaskNodeService.getListByInstanceId(processInstId);
-        if(CollectionUtil.isEmpty(listActTaskNode)){
-            throw new ServiceException("未查询到撤回节点信息");
-        }
-        ActTaskNode actTaskNode = listActTaskNode.stream().filter(e -> e.getOrderNo()==0).findFirst().orElse(null);
-        if(ObjectUtil.isNull(actTaskNode)){
-            throw new ServiceException("未查询到撤回节点信息");
-        }
         FlowNode targetFlowNode = (FlowNode) bpmnModel.getFlowElement(actTaskNode.getNodeId());
         // 7. 获取目标节点的入口连线
         List<SequenceFlow> incomingFlows = targetFlowNode.getIncomingFlows();
