@@ -1,13 +1,13 @@
 <template>
 <div v-if="visible">
   <!-- 提交申请开始 -->
-  <el-dialog  title="提交申请" :visible.sync="visible"  width="800px" :close-on-click-modal="false"
+  <el-dialog  v-if="visible"  title="提交申请" :visible.sync="visible"  width="800px" :close-on-click-modal="false"
   append-to-body destroy-on-close @close="closeDialog" >
     <el-form v-loading="loading"  :rules="rules" ref="formData" :model="formData" status-icon >
       <el-form-item label="审批意见" prop="message" label-width="120px">
         <el-input  type="textarea" v-model="formData.message" maxlength="300" placeholder="请输入审批意见" :autosize="{ minRows: 4 }" show-word-limit ></el-input>
       </el-form-item>
-      <el-form-item v-if="!isDelegate&&nextNodes && nextNodes.length > 0" label="下一步审批人"  prop="assigneeMap" label-width="120px" >
+      <el-form-item v-if="nextNodes && nextNodes.length > 0" label="下一步审批人"  prop="assigneeMap" label-width="120px" >
         <div v-for="(item, index) in nextNodes" :key="index">
           <span>【{{ item.nodeName }}】：</span>
           <el-input v-show="false" v-model="formData.assigneeMap[item.nodeId]" />
@@ -16,20 +16,20 @@
           </el-input>
         </div>
       </el-form-item>
-       <el-form-item label="是否委托" prop="delegate" label-width="120px" >
+      <el-form-item label="是否抄送" prop="isCopy" label-width="120px" >
          <el-col :span="12">
            <div class="grid-content bg-purple">
-             <el-radio-group v-model="delegate" @change="changeDelegate" size="small">
-              <el-radio label="1" border>是</el-radio>
-              <el-radio label="2" border>否</el-radio>
+             <el-radio-group v-model="formData.isCopy" size="small">
+              <el-radio :label="true" border>是</el-radio>
+              <el-radio :label="false" border>否</el-radio>
             </el-radio-group>
            </div>
         </el-col>
-         <el-col :span="12" v-show="isDelegate">
+         <el-col :span="12" v-if="formData.isCopy">
            <div class="grid-content bg-purple">
-             <el-input v-show="false" v-model="formData.delegateUserId"/>
-             <el-input size="small" v-model="formData.delegateUserName" readonly placeholder="请选择人员" class="input-with-select">
-              <el-button slot="append" @click="chooseUser" icon="el-icon-search"></el-button>
+             <el-input v-show="false" v-model="formData.assigneeIds"/>
+             <el-input size="small" v-model="formData.assigneeNames" readonly placeholder="请选择人员" class="input-with-select">
+              <el-button slot="append" @click="chooseCopyUser" icon="el-icon-search"></el-button>
             </el-input>
            </div>
         </el-col>
@@ -39,8 +39,9 @@
         <el-button type="primary" v-if="backNodeList && backNodeList.length>0" @click="openBack()" size="small">退回</el-button>
         <el-button type="primary" v-if="isMultiInstance" @click="addMultiClick()" size="small">加签</el-button>
         <el-button type="primary" v-if="multiList && multiList.length>0" @click="deleteMultiClick()" size="small">减签</el-button>
+        <el-button type="primary" @click="delegateClick()" size="small">委托</el-button>
         <el-button type="primary" @click="transmitClick()" size="small">转办</el-button>
-        <el-button size="small" @click="visible = false">取消</el-button>
+        <el-button size="small" @click="closeDialog()">取消</el-button>
       </el-form-item>
     </el-form>
   </el-dialog>
@@ -48,9 +49,27 @@
 
   <!-- 选择人员组件开始 -->
   <chooseWorkflowUser :dataObj="dataObj" :nodeId="nodeId" @confirmUser="clickUser" ref="wfUserRef"/>
-  <sys-user :propUserList="delegateUserList" :multiple = false ref="userRef" @confirmUser="confirmUser"/>
+  <sys-user :propUserList="copyUserList" ref="userCopyRef" @confirmUser="confirmCopyUser"/>
   <!-- 选择人员组件结束 -->
-
+  <!-- 委托申请开始 -->
+  <el-dialog :close-on-click-modal="false" title="委托申请" :visible.sync="delegateVisible" width="500px"  append-to-body>
+    <el-form  ref="delegateData" :model="delegateForm" status-icon >
+      <!-- <el-form-item label-width="80px" label="审批意见">
+        <el-input  type="textarea" v-model="delegateForm.message" maxlength="300"  placeholder="请输入审批意见" :autosize="{ minRows: 4 }" show-word-limit ></el-input>
+      </el-form-item> -->
+      <el-form-item label-width="80px" label="委托人" prop="userName">
+        <el-input  placeholder="请选择委托人" readonly v-model="delegateForm.delegateUserName" >
+            <el-button  @click="delegatePeople() " slot="append" icon="el-icon-search" >选择</el-button>
+        </el-input>
+      </el-form-item>
+      <el-form-item align="center">
+        <el-button type="primary" @click="delegateSubmit()" size="small">提交</el-button>
+        <el-button size="small" @click="delegateVisible = false">取消</el-button>
+      </el-form-item>
+    </el-form>
+    <sys-user :propUserList="delegateUserList" :multiple = false ref="delegateUserRef" @confirmUser="confirmDelegateUser"/>
+  </el-dialog>
+  <!-- 委托申请结束 -->
   <!-- 转办申请开始 -->
   <el-dialog :close-on-click-modal="false" title="转发申请" :visible.sync="transmitVisible" width="500px"  append-to-body>
     <el-form  ref="transmitData" :model="transmitForm" :rules="transmitRules"  status-icon >
@@ -73,11 +92,8 @@
   <!-- 加签开始 -->
   <el-dialog  :close-on-click-modal="false" title="加签" :visible.sync="addMultiVisible" width="500px"  append-to-body>
     <el-form  :model="addMultiForm" status-icon >
-      <!-- <el-form-item label-width="80px" label="审批意见">
-        <el-input  type="textarea" v-model="transmitForm.message" maxlength="300"  placeholder="请输入审批意见" :autosize="{ minRows: 4 }" show-word-limit ></el-input>
-      </el-form-item> -->
-      <el-form-item label-width="80px" label="加签人" prop="userName">
-        <el-input placeholder="请选择加签人" readonly v-model="addMultiForm.userName" >
+      <el-form-item label-width="80px" label="加签人" prop="nickNames">
+        <el-input placeholder="请选择加签人" readonly v-model="addMultiForm.nickNames" >
             <el-button  @click="addMultiPeople() " slot="append" icon="el-icon-search" >选择</el-button>
         </el-input>
       </el-form-item>
@@ -95,7 +111,7 @@
       <el-table-column type="selection" width="55"/>
       <el-table-column prop="name" label="任务名称" width="180"/>
       <el-table-column prop="assignee" label="办理人" width="180"/>
-      <el-table-column prop="assigneeId" v-show="true" label="办理人ID" width="180"/>
+      <el-table-column prop="assigneeId" v-show="false" label="办理人ID" width="180"/>
     </el-table>
     <span slot="footer" class="dialog-footer">
       <el-button size="small" type="primary" @click="deleteMultiSubmit()">确定</el-button>
@@ -127,25 +143,40 @@ export default {
   },
   data() {
     return {
-      visible: false, // 弹出窗口，true弹出
+      //弹出窗口，true弹出
+      visible: false,
       loading: false,
       transmitVisible: false,
+      delegateVisible: false,
       addMultiVisible: false,
       deleteMultiVisible: false,
+      //提交表单数据
       formData: {
-        // 提交表单数据
         message: null,
         assigneeMap: {},
-        delegateUserId: undefined,
-        delegateUserName: undefined
+        //是否抄送
+        isCopy: false,
+        //抄送人id
+        assigneeIds: undefined,
+        //抄送人名称
+        assigneeNames: undefined
       },
+      //转办
       transmitForm: {
         message: null,
         userId: null,
         userName: null
       },
-      delegate: '2',//是否委托
-      nextNodes: [], // 下一节点是否为结束节点
+      //委托
+      delegateForm:{
+        delegateUserId: null,
+        delegateUserName: null,
+        taskId: null
+      },
+      //是否抄送
+      isCopy: '2',
+      //下一节点
+      nextNodes: [],
       rules: {
         assigneeMap: [
           { required: true, message: "请输入下一步审批人", trigger: "blur" },
@@ -157,25 +188,28 @@ export default {
         ],
       },
       nickName: {},
-      // 查询审批人条件
+      //查询审批人条件
       dataObj: {},
-      // 节点id
+      //节点id
       nodeId: undefined,
-      // 委托用户反选
+      //委托用户反选
       delegateUserList: [],
-      // 转发用户反选
+      //抄送用户反选
+      copyUserList: [],
+      //转发用户反选
       transmitUserList: [],
-      // 加签用户反选
+      //加签用户反选
       addMultiUserList: [],
-      isDelegate: false, //是否委托
-      isMultiInstance: false, //是否为并行会签
-      addMultiForm: {},//加签
-      multiList: {},//可以减签的集合
-      selectionMultiExecutionIds: [], //选中的减签执行ID
-      selectionMultiTaskIds: [], //选中的减签任务ID
-      selectionMultiAssigneeIds: [], //选中的减签人员ID
-      backNodeList: [] //可驳回的节点
-
+      //是否为并行会签
+      isMultiInstance: false,
+      //加签
+      addMultiForm: {},
+      //减签
+      deleteMultiForm: {},
+      //可以减签的集合
+      multiList: [],
+      //可驳回的集合
+      backNodeList: []
     };
   },
 
@@ -206,16 +240,6 @@ export default {
     async submitForm(formName) {
       this.$refs[formName].validate(async (valid) => {
         if (valid) {
-          if(this.delegate === '1'){
-             let data = {
-                taskId: this.taskId,
-                delegateUserId: this.formData.delegateUserId,
-                delegateUserName: this.formData.delegateUserName
-             }
-             this.delegateTaskFn(formName,data)
-             return false
-          }
-          // 校验通过，提交表单数据
           this.loading = true;
           let obj = this.formData.assigneeMap
           let objData = JSON.stringify(obj)
@@ -225,14 +249,9 @@ export default {
             return
           } */
           try {
-            // 审批人转为数组
-             const data = {
-              taskId: this.taskId,
-              message: this.formData.message,
-              variables: this.taskVariables, // 变量
-              assigneeMap: this.formData.assigneeMap, // 审批人转为数组
-            };
-             let response = await api.completeTask(data);
+            this.formData.variables = this.taskVariables
+            this.formData.taskId = this.taskId
+            let response = await api.completeTask(this.formData);
             if (response.code === 200) {
               // 刷新数据
               this.$message.success("办理成功");
@@ -250,29 +269,14 @@ export default {
         }
       });
     },
-    // 办理委托任务
-    async delegateTaskFn(formName,data){
-      let response = await api.delegateTask(data);
-      if(response.code === 200){
-        // 刷新数据
-        this.$message.success("办理成功");
-        // 将表单清空
-        this.$refs[formName].resetFields();
-        // 关闭窗口
-        this.visible = false;
-        // 回调事件
-        this.$emit("callSubmit")
-      }
-      this.loading = false;
-    },
-
     // 关闭
     closeDialog() {
       // 将表单清空
       this.$refs["formData"].resetFields();
       this.formData = {
           message: null,
-          assigneeMap: {}
+          assigneeMap: {},
+          isCopy: false
       }
       this.visible = false;
     },
@@ -312,25 +316,57 @@ export default {
       this.nickName[nodeId] = arrNickName
       this.$forceUpdate();
     },
-    //选择委托人
-    chooseUser(){
+    //提交委托申请
+    async delegateSubmit(){
+      this.delegateForm.taskId = this.taskId
+      let response = await api.delegateTask(this.delegateForm);
+      if(response.code === 200){
+        // 刷新数据
+        this.$message.success("办理成功");
+        // 将表单清空
+        this.delegateForm = {};
+        // 关闭窗口
+        this.visible = false;
+        // 回调事件
+        this.$emit("callSubmit")
+      }
+      this.loading = false;
+    },
+    //打开委托申请
+    delegateClick(){
+      this.delegateForm = {}
+      this.delegateVisible = true
+    },
+    //打开委托人员组件
+    delegatePeople(){
       this.delegateUserList = []
-      this.delegateUserList.push(this.formData.delegateUserId)
-      this.$refs.userRef.visible = true
+      this.delegateUserList.push(this.delegateForm.delegateUserId)
+      this.$refs.delegateUserRef.visible = true
     },
     //确认委托人员
-    confirmUser(data){
-      this.formData.delegateUserId = data[0].userId
-      this.formData.delegateUserName = data[0].nickName
-      this.$refs.userRef.visible = false
+    confirmDelegateUser(data){
+      this.delegateForm.delegateUserId = data[0].userId
+      this.delegateForm.delegateUserName = data[0].nickName
+      this.$forceUpdate()
+      this.$refs.delegateUserRef.visible = false
     },
-    //是否显示选择委托人
-    changeDelegate(val){
-      if(val == 1){
-        this.isDelegate = true
-      }else{
-        this.isDelegate = false
-      }
+    //选择抄送人
+    chooseCopyUser(){
+      this.copyUserList = []
+      this.copyUserList.push(this.formData.delegateUserId)
+      this.$refs.userCopyRef.visible = true
+    },
+    //确认抄送人员
+    confirmCopyUser(data){
+      let assignee = data.map((item) => {
+        return item.userId;
+      });
+      let nickName = data.map((item) => {
+        return item.nickName;
+      });
+      this.formData.assigneeIds = assignee.join(",")
+      this.formData.assigneeNames = nickName.join(",")
+      this.$refs.userCopyRef.visible = false
     },
     //打开转发窗口
     transmitClick(){
@@ -388,21 +424,22 @@ export default {
       let assignees = data.map((item) => {
         return item.userId;
       });
-      let nickNames = data.map((item) => {
+      let assigneeNames = data.map((item) => {
         return item.nickName;
       });
-      this.addMultiForm.assignees = assignees
-      this.addMultiForm.userName = nickNames.join(",")
+      this.addMultiForm = {
+        taskId: this.taskId,
+        assignees: assignees,
+        assigneeNames: assigneeNames,
+        nickNames: assigneeNames.join(",")
+      }
+      console.log(this.addMultiForm)
       this.$forceUpdate()
       this.$refs.addMultiUserRef.visible = false
     },
     //加签
     addMultiSubmit(){
-      let params = {
-        taskId: this.taskId,
-        assignees: this.addMultiForm.assignees
-      }
-      api.addMultiInstanceExecution(params).then(response => {
+      api.addMultiInstanceExecution(this.addMultiForm).then(response => {
         if(response.code === 200){
           // 刷新数据
             this.$message.success("办理成功");
@@ -422,25 +459,29 @@ export default {
     },
     //减签复选框
     handleSelectionMultiList(val){
-      this.selectionMultiExecutionIds = val.map((item) => {
+      let executionIds = val.map((item) => {
         return item.executionId;
       });
-      this.selectionMultiTaskIds = val.map((item) => {
+      let taskIds = val.map((item) => {
         return item.id;
       });
-      this.selectionMultiAssigneeIds = val.map((item) => {
+      let assigneeIds = val.map((item) => {
         return item.assigneeId;
       });
+      let assigneeNames = val.map((item) => {
+        return item.assignee;
+      });
+      this.deleteMultiForm = {
+        taskId: this.taskId,
+        taskIds: taskIds,
+        executionIds: executionIds,
+        assigneeIds: assigneeIds,
+        assigneeNames: assigneeNames
+      }
     },
     //减签
     deleteMultiSubmit(){
-      let params = {
-        taskId: this.taskId,
-        executionIds: this.selectionMultiExecutionIds,
-        taskIds: this.selectionMultiTaskIds,
-        assigneeIds: this.selectionMultiAssigneeIds,
-      }
-      api.deleteMultiInstanceExecution(params).then(response => {
+      api.deleteMultiInstanceExecution(this.deleteMultiForm).then(response => {
         if(response.code === 200){
           // 刷新数据
             this.$message.success("办理成功");
@@ -465,13 +506,13 @@ export default {
     },
     //重置表单
     reset(){
-        this.isDelegate = false
+        this.isCopy = false
         this.delegate = '2'
         this.transmitForm = {}
         this.formData.message = null
         this.formData.assigneeMap = {}
         this.nickName = {}
     }
-  },
+  }
 };
 </script>

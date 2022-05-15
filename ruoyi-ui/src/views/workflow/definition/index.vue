@@ -123,8 +123,8 @@
     <!-- 部署流程文件 -->
     <process-deploy ref="deployProcess" />
 
-    <!-- 预览图片 -->
-    <process-preview ref="previewRef" :url="url" />
+    <!-- 预览图片或xml -->
+    <process-preview ref="previewRef" :url="url" :type="type"/>
 
      <!-- 历史版本 -->
     <process-his-list ref="hisListRef" :propKey="propKey" :definitionId="definitionId" />
@@ -136,7 +136,7 @@
   </div>
 </template>
 <script>
-import {list,del,updateProcDefState} from "@/api/workflow/definition";
+import {list,del,updateProcDefState,getXml} from "@/api/workflow/definition";
 import {convertToModel} from "@/api/workflow/model";
 import processDeploy from './components/processDeploy'
 import processPreview from './components/processPreview'
@@ -183,7 +183,8 @@ export default {
                 name: undefined,
                 key : undefined
             },
-            settingVisible: false
+            settingVisible: false,
+            type: '',//png,xml
         }
     },
     created() {
@@ -249,11 +250,16 @@ export default {
       },
       // 导出xml流程文件
       clickExportXML(id) {
-         window.open(process.env.VUE_APP_BASE_API+'/workflow/definition/export/xml/'+id)
+        this.type = 'xml'
+        getXml(id).then(response => {
+          this.url = response.data
+          this.$refs.previewRef.visible = true
+        })
       },
 
       // 预览图片 downFile
       clickPreviewImg(id) {
+        this.type = 'png'
         this.url = process.env.VUE_APP_BASE_API+'/workflow/definition/export/png/'+id
         this.$refs.previewRef.visible = true
       },

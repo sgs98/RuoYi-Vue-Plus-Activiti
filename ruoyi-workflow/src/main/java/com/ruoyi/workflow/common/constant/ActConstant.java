@@ -1,5 +1,6 @@
 package com.ruoyi.workflow.common.constant;
 
+
 public interface ActConstant {
 
      String PNG = "png";
@@ -59,10 +60,6 @@ public interface ActConstant {
      *  循环的索引值，可以使用elementIndexVariable属性修改loopCounter的变量名
      */
     String LOOP_COUNTER = "loopCounter";
-
-    Boolean TRUE=true;
-
-    Boolean FALSE=false;
 
     /**
      * 流程自定义人员

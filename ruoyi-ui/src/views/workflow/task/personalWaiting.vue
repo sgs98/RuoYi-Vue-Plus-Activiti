@@ -74,7 +74,7 @@
            <history :processInstanceId="processInstanceId"></history>
         </el-dialog>
          <!-- 审批记录结束 -->
-        <approvalForm ref="approvalForm" :businessKey = 'businessKey' :taskId = 'taskId'
+        <approvalForm ref="approvalForm" :businessKey = 'businessKey' :taskId = 'taskId' :parentTaskId = 'parentTaskId'
         @refresh = 'refresh' :currProcessForm = 'currProcessForm' :processInstanceId = 'processInstanceId'/>
     </div>
 </template>
@@ -123,6 +123,7 @@
         taskId:undefined,
         taskVariables: undefined,
         processInstanceId: undefined,
+        parentTaskId: undefined,
         businessKey: undefined, // 业务唯一标识
         visible: false,
         currProcessForm: '' //表单组件名称
@@ -167,6 +168,7 @@
           this.businessKey = row.businessKey
           this.processInstanceId = row.processInstanceId
           this.taskId = row.id
+          this.parentTaskId = row.parentTaskId
           if(row.actBusinessStatus){
                if(row.actBusinessStatus.classFullName === 'com.ruoyi.demo.domain.BsLeave'){
                   this.currProcessForm = 'leaveForm'

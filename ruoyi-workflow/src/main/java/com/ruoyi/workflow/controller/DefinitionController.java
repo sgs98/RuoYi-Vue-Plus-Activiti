@@ -114,7 +114,20 @@ public class DefinitionController extends BaseController {
                            @PathVariable String definitionId,
                            HttpServletResponse response) {
         iDefinitionService.exportFile(type,definitionId,response);
+    }
 
+    /**
+     * @Description: 查看xml文件
+     * @param: definitionId
+     * @return: com.ruoyi.common.core.domain.R<java.lang.String>
+     * @author: gssong
+     * @Date: 2022/5/3 19:25
+     */
+    @ApiOperation("查看xml文件")
+    @GetMapping("/getXml/{definitionId}")
+    public R<String> getXml(@PathVariable String definitionId) {
+        String  xmlStr = iDefinitionService.getXml(definitionId);
+        return R.ok("操作成功",xmlStr);
     }
 
     /**

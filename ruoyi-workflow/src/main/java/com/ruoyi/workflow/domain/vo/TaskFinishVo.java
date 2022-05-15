@@ -82,4 +82,10 @@ public class TaskFinishVo implements Serializable {
      */
     @ApiModelProperty("流程定义版本")
     private Integer version;
+
+    /**
+     * 父级任务id
+     */
+    @ApiModelProperty("父级任务id")
+    private String parentTaskId;
 }

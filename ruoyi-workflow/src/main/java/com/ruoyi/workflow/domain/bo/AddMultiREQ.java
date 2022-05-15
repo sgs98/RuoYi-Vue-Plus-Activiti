@@ -33,4 +33,8 @@ public class AddMultiREQ implements Serializable {
     @NotEmpty(message = "加签人员不能为空",groups = AddGroup.class)
     @ApiModelProperty("人员id")
     private List<Long> assignees;
+
+    @NotEmpty(message = "加签人员不能为空",groups = AddGroup.class)
+    @ApiModelProperty("人员名称")
+    private List<String> assigneeNames;
 }

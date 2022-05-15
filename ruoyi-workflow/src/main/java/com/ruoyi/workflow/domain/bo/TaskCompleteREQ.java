@@ -13,6 +13,15 @@ public class TaskCompleteREQ {
     @ApiModelProperty("任务ID")
     private String taskId;
 
+    @ApiModelProperty("是否抄送")
+    private Boolean isCopy = true;
+
+    @ApiModelProperty("抄送人员id")
+    private String assigneeIds;
+
+    @ApiModelProperty("抄送人员名称")
+    private String assigneeNames;
+
     @ApiModelProperty("审批意见")
     private String message;
 

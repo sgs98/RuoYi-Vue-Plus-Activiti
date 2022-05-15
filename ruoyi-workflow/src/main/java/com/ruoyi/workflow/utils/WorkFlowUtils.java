@@ -30,12 +30,13 @@ import org.activiti.engine.impl.bpmn.behavior.SequentialMultiInstanceBehavior;
 import org.activiti.editor.language.json.converter.BpmnJsonConverter;
 import org.activiti.engine.*;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntityImpl;
+import org.activiti.engine.impl.persistence.entity.TaskEntity;
 import org.activiti.engine.impl.persistence.entity.VariableInstance;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-
+import org.activiti.engine.task.Task;
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -450,5 +451,31 @@ public class WorkFlowUtils {
             }
         }
         return null;
+    }
+
+    /**
+     * @Description: 创建子任务
+     * @param: parentTask
+     * @return: org.flowable.task.api.Task
+     * @author: gssong
+     * @Date: 2022/5/6 19:18
+     */
+    public List<Task> createSubTask(List<Task> parentTaskList,String assignees){
+       List<Task> list = new ArrayList<>();
+        for (Task parentTask : parentTaskList) {
+            List<String> userIds = Arrays.asList(assignees.split(","));
+            for (String userId : userIds) {
+                TaskEntity newTask = (TaskEntity)taskService.newTask();
+                newTask.setParentTaskId(parentTask.getId());
+                newTask.setAssignee(userId);
+                newTask.setName("【抄送】-"+parentTask.getName());
+                newTask.setProcessDefinitionId(parentTask.getProcessDefinitionId());
+                newTask.setProcessInstanceId(parentTask.getProcessInstanceId());
+                newTask.setTaskDefinitionKey(parentTask.getTaskDefinitionKey());
+                taskService.saveTask(newTask);
+                list.add(newTask);
+            }
+        }
+        return list;
     }
 }

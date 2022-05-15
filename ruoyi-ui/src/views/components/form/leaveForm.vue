@@ -48,7 +48,7 @@
           </el-date-picker>
         </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
+      <div slot="footer" v-show="parentTaskId===null" class="dialog-footer">
         <el-button :loading="buttonLoading" size="mini" type="info" @click="submitForm">暂存</el-button>
         <el-button :loading="buttonLoading" size="mini" type="primary" @click="submitForm">提交</el-button>
         <el-button @click="cancel">取 消</el-button>
@@ -66,7 +66,8 @@ export default {
   dicts: ['bs_leave_type'],
   props: {
       businessKey: String, // 业务唯一标识
-      taskId: String // 业务唯一标识
+      parentTaskId: String, // 父级任务id
+      taskId: String // 任务id
   },
   components: {
       verify

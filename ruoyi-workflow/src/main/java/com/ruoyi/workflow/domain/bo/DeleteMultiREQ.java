@@ -40,4 +40,8 @@ public class DeleteMultiREQ implements Serializable {
 
     @ApiModelProperty("人员id")
     private List<Long> assigneeIds;
+
+    @NotEmpty(message = "减签人员不能为空",groups = AddGroup.class)
+    @ApiModelProperty("人员名称")
+    private List<String> assigneeNames;
 }

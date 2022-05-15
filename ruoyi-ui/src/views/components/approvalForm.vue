@@ -2,7 +2,7 @@
   <el-dialog title="流程审批进度跟踪" :visible.sync="visible" align="center" append-to-body>
       <el-tabs  type="border-card" >
         <el-tab-pane label="业务单据" v-loading="loading">
-            <component :is="currProcessForm" :businessKey="businessKey" @closeForm="closeForm" :taskId="taskId"></component>
+            <component :is="currProcessForm" :businessKey="businessKey" :parentTaskId="parentTaskId" @closeForm="closeForm" :taskId="taskId"></component>
         </el-tab-pane>
         <el-tab-pane label="流程进度">
           <el-table :data="list" border stripe style="width: 100%" max-height="300">
@@ -35,6 +35,7 @@ export default {
       processInstanceId: String, // 流程实例id
       businessKey: String, // 业务唯一标识
       taskId: String, // 任务id
+      parentTaskId: String, // 父级任务id
       currProcessForm: String // 当前流程表单组件
     },
 

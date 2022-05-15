@@ -33,7 +33,6 @@ export default {
         loading: false,
         url: null,
         list: [],
-        currProcessForm: null, // 当前流程表单组件
       }
     },
 
@@ -48,23 +47,11 @@ export default {
           }
         },
         immediate: true,
-    　　deep:true
+        deep:true
       }
     },
 
     methods: {
-        // 通过流程实例ID获取对应流程业务表单组件名
-        // async getFormNameByProcInstId() {
-        //   try {
-        //       this.loading = true
-        //       const {data} = await api.getFormNameByProcInstId(this.processInstanceId)
-        //       this.currProcessForm = data
-        //       this.loading = false
-        //   } catch (error) {
-        //       this.loading = false
-        //   }
-        // },
-
         // 查询审批历史记录
         async getHistoryInfoList() {
             const { data } = await api.getHistoryInfoList(this.processInstanceId)

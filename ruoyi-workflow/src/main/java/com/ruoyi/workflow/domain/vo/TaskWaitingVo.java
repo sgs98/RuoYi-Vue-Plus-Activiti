@@ -93,6 +93,12 @@ public class TaskWaitingVo implements Serializable {
     private String businessKey;
 
     /**
+     * 父级任务id
+     */
+    @ApiModelProperty("父级任务id")
+    private String parentTaskId;
+
+    /**
      * 业务状态
      */
     @ApiModelProperty("业务状态")

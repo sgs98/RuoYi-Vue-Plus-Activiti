@@ -61,10 +61,29 @@ export function deployProcessFile(data) {
   })
 }
 
+/**
+ *
+ * @param {流程定义设置} definitionId
+ * @returns
+ */
 export function setting(definitionId) {
   return request({
     url: '/workflow/definition/setting/'+definitionId,
     method: 'get'
   })
 }
+
+/**
+ *
+ * @param {查看xml} definitionId
+ * @returns
+ */
+export function getXml(definitionId) {
+  return request({
+    url: '/workflow/definition/getXml/'+definitionId,
+    method: 'get'
+  })
+}
+
+
 

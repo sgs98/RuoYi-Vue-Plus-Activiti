@@ -86,9 +86,9 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
     @Override
     public TableDataInfo<TaskWaitingVo> getTaskWaitByPage(TaskREQ req) {
         //当前登录人
-        String username = LoginHelper.getLoginUser().getUserId().toString();
+        String currentUserId = LoginHelper.getLoginUser().getUserId().toString();
         TaskQuery query = taskService.createTaskQuery()
-            .taskCandidateOrAssigned(String.valueOf(username)) // 候选人或者办理人
+            .taskCandidateOrAssigned(currentUserId) // 候选人或者办理人
             .orderByTaskCreateTime().asc();
         if (StringUtils.isNotEmpty(req.getTaskName())) {
             query.taskNameLikeIgnoreCase("%" + req.getTaskName() + "%");
@@ -169,10 +169,9 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         }
         //办理委托任务
         if(ObjectUtil.isNotEmpty(task.getDelegationState())&&ActConstant.PENDING.equals(task.getDelegationState().name())){
-            taskService.addComment(task.getId(),task.getProcessInstanceId(),req.getMessage());
             taskService.resolveTask(req.getTaskId());
             ActHiTaskInst hiTaskInst = iActHiTaskInstService.getById(task.getId());
-            TaskEntity subTask = createSubTask(task, hiTaskInst.getStartTime());
+            TaskEntity subTask = createNewTask(task, hiTaskInst.getStartTime());
             taskService.addComment(subTask.getId(), task.getProcessInstanceId(), req.getMessage());
             taskService.complete(subTask.getId());
             ActHiTaskInst actHiTaskInst = new ActHiTaskInst();
@@ -181,6 +180,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
             iActHiTaskInstService.updateById(actHiTaskInst);
             return true;
         }
+
         ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceId(task.getProcessInstanceId()).singleResult();
         //判断下一节点是否是会签 如果是会签 将选择的人员放到会签变量
         List<ActNodeAssignee> actNodeAssignees = iActNodeAssigneeService.getInfoByProcessDefinitionId(task.getProcessDefinitionId());
@@ -244,6 +244,17 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
             return b;
         }
 
+        //抄送
+        if(req.getIsCopy()){
+            if(StringUtils.isBlank(req.getAssigneeIds())){
+                throw new ServiceException("抄送人不能为空 ");
+            }
+            TaskEntity newTask = createNewTask(task, new Date());
+            taskService.addComment(newTask.getId(),task.getProcessInstanceId(),
+                LoginHelper.getUsername()+"【抄送】给"+req.getAssigneeNames());
+            taskService.complete(newTask.getId());
+            workFlowUtils.createSubTask(taskList,req.getAssigneeIds());
+        }
         // 8. 如果不为空 指定办理人
         if (CollectionUtil.isNotEmpty(taskList)) {
             // 9. 指定办理人
@@ -444,13 +455,13 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
             Iterator<ProcessNode> iterator = nextNodes.iterator();
             while (iterator.hasNext()) {
                 ProcessNode node = iterator.next();
-                if (ActConstant.FALSE.equals(node.getExpression())){
+                if (!node.getExpression()){
                     iterator.remove();
                 }
             }
         }
         //排它网关  如果下已审批节点变量判断都为false  将保存的临时的节点赋予下一节点
-        List<String> exclusiveLists = nextNodes.stream().filter(e -> e.getNodeType().equals(ActConstant.EXCLUSIVE_GATEWAY) && e.getExpression().equals(ActConstant.TRUE)).
+        List<String> exclusiveLists = nextNodes.stream().filter(e -> e.getNodeType().equals(ActConstant.EXCLUSIVE_GATEWAY) && e.getExpression()).
             map(ProcessNode::getNodeType).collect(Collectors.toList());
         if (CollectionUtil.isEmpty(nextNodes) && CollectionUtil.isEmpty(exclusiveLists)) {
             nextNodes.addAll(tempNodes);
@@ -459,13 +470,13 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         List<ProcessNode> nodeList = new ArrayList<>();
         if (CollectionUtil.isNotEmpty(nextNodes)) {
             //排它网关  如果下已审批节点变量判断都为false  将保存的临时的节点赋予下一节点
-            List<String> exclusiveList = nextNodes.stream().filter(e -> e.getNodeType().equals(ActConstant.EXCLUSIVE_GATEWAY) && e.getExpression().equals(ActConstant.TRUE)).
+            List<String> exclusiveList = nextNodes.stream().filter(e -> e.getNodeType().equals(ActConstant.EXCLUSIVE_GATEWAY) && e.getExpression()).
                 map(ProcessNode::getNodeType).collect(Collectors.toList());
             if (!CollectionUtil.isEmpty(nextNodes) && CollectionUtil.isEmpty(exclusiveList)) {
                 nextNodes.addAll(tempNodes);
             }
             //排它网关
-            List<String> exclusiveGatewayList = nextNodes.stream().filter(e -> e.getNodeType().equals(ActConstant.EXCLUSIVE_GATEWAY) && e.getExpression().equals(ActConstant.TRUE)).
+            List<String> exclusiveGatewayList = nextNodes.stream().filter(e -> e.getNodeType().equals(ActConstant.EXCLUSIVE_GATEWAY) && e.getExpression()).
                 map(ProcessNode::getNodeType).collect(Collectors.toList());
             if (CollectionUtil.isNotEmpty(exclusiveGatewayList)) {
                 nextNodes.forEach(node -> {
@@ -517,14 +528,14 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
                 if(CollectionUtil.isNotEmpty(sysUsers)&&sysUsers.size()>0){
                     SysUser sysUser = sysUsers.stream().filter(u -> u.getUserId().toString().equals(userId.toString())).findFirst().orElse(null);
                     if(ObjectUtil.isNotEmpty(sysUser)){
-                        taskVo.setAssignee(sysUser.getUserName());
+                        taskVo.setAssignee(sysUser.getNickName());
                     }
                 }
                 taskListVo.add(taskVo);
             }
             return taskListVo;
         }else if(type instanceof ParallelMultiInstanceBehavior){
-            List<Task> tasks = taskList.stream().filter(e -> !e.getExecutionId().equals(task.getExecutionId())
+            List<Task> tasks = taskList.stream().filter(e ->StringUtils.isBlank(e.getParentTaskId())&& !e.getExecutionId().equals(task.getExecutionId())
                 &&e.getTaskDefinitionKey().equals(task.getTaskDefinitionKey())).collect(Collectors.toList());
             if(CollectionUtil.isNotEmpty(tasks)){
                 List<Long> userIds = tasks.stream().map(e -> Long.valueOf(e.getAssignee())).collect(Collectors.toList());
@@ -542,7 +553,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
                     if(CollectionUtil.isNotEmpty(sysUsers)){
                         SysUser sysUser = sysUsers.stream().filter(u -> u.getUserId().toString().equals(t.getAssignee())).findFirst().orElse(null);
                         if(ObjectUtil.isNotEmpty(sysUser)){
-                            taskVo.setAssignee(sysUser.getUserName());
+                            taskVo.setAssignee(sysUser.getNickName());
                         }
                     }
                     taskListVo.add(taskVo);
@@ -951,7 +962,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
             throw new ServiceException("当前任务不存在或你不是任务办理人");
         }
         try{
-            TaskEntity subTask = this.createSubTask(task,new Date());
+            TaskEntity subTask = this.createNewTask(task,new Date());
             taskService.addComment(subTask.getId(), task.getProcessInstanceId(),"【"+LoginHelper.getUsername()+"】委派给【"+taskREQ.getDelegateUserName()+"】");
             //委托任务
             taskService.delegateTask(taskREQ.getTaskId(), taskREQ.getDelegateUserId());
@@ -984,7 +995,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
             return R.fail("当前任务不存在或你不是任务办理人");
         }
         try {
-            TaskEntity subTask = createSubTask(task, new Date());
+            TaskEntity subTask = createNewTask(task, new Date());
             taskService.addComment(subTask.getId(), task.getProcessInstanceId(),
                 StringUtils.isNotBlank(transmitREQ.getComment())?transmitREQ.getComment():LoginHelper.getUsername()+"转办了任务");
             taskService.complete(subTask.getId());
@@ -1004,19 +1015,19 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
      * @author: gssong
      * @Date: 2022/3/13
      */
-    private TaskEntity createSubTask(Task parentTask,Date createTime){
+    private TaskEntity createNewTask(Task currentTask, Date createTime){
         TaskEntity task = null;
-        if(ObjectUtil.isNotEmpty(parentTask)){
+        if(ObjectUtil.isNotEmpty(currentTask)){
             task = (TaskEntity) taskService.newTask();
-            task.setCategory(parentTask.getCategory());
-            task.setDescription(parentTask.getDescription());
-            task.setTenantId(parentTask.getTenantId());
-            task.setAssignee(parentTask.getAssignee());
-            task.setName(parentTask.getName());
-            task.setProcessDefinitionId(parentTask.getProcessDefinitionId());
-            task.setProcessInstanceId(parentTask.getProcessInstanceId());
-            task.setTaskDefinitionKey(parentTask.getTaskDefinitionKey());
-            task.setPriority(parentTask.getPriority());
+            task.setCategory(currentTask.getCategory());
+            task.setDescription(currentTask.getDescription());
+            task.setTenantId(currentTask.getTenantId());
+            task.setAssignee(currentTask.getAssignee());
+            task.setName(currentTask.getName());
+            task.setProcessDefinitionId(currentTask.getProcessDefinitionId());
+            task.setProcessInstanceId(currentTask.getProcessInstanceId());
+            task.setTaskDefinitionKey(currentTask.getTaskDefinitionKey());
+            task.setPriority(currentTask.getPriority());
             task.setCreateTime(createTime);
             taskService.saveTask(task);
         }
@@ -1066,6 +1077,11 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
                 AddSequenceMultiInstanceCmd addSequenceMultiInstanceCmd = new AddSequenceMultiInstanceCmd(task.getExecutionId(),multiVo.getAssigneeList(),addMultiREQ.getAssignees());
                 managementService.executeCommand(addSequenceMultiInstanceCmd);
             }
+            List<String> assigneeNames = addMultiREQ.getAssigneeNames();
+            String username = LoginHelper.getUsername();
+            TaskEntity subTask = createNewTask(task, new Date());
+            taskService.addComment(subTask.getId(),processInstanceId,username+"加签【"+String.join(",",assigneeNames)+"】");
+            taskService.complete(subTask.getId());
             return R.ok();
         }catch (Exception e){
             e.printStackTrace();
@@ -1089,6 +1105,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
             throw new ServiceException("当前任务不存在或你不是任务办理人");
         }
         String taskDefinitionKey = task.getTaskDefinitionKey();
+        String processInstanceId = task.getProcessInstanceId();
         String processDefinitionId = task.getProcessDefinitionId();
         MultiVo multiVo = workFlowUtils.isMultiInstance(processDefinitionId, taskDefinitionKey);
         if(ObjectUtil.isEmpty(multiVo)){
@@ -1107,6 +1124,11 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
                 DeleteSequenceMultiInstanceCmd deleteSequenceMultiInstanceCmd = new DeleteSequenceMultiInstanceCmd(task.getAssignee(),task.getExecutionId(),multiVo.getAssigneeList(),deleteMultiREQ.getAssigneeIds());
                 managementService.executeCommand(deleteSequenceMultiInstanceCmd);
             }
+            List<String> assigneeNames = deleteMultiREQ.getAssigneeNames();
+            String username = LoginHelper.getUsername();
+            TaskEntity subTask = createNewTask(task, new Date());
+            taskService.addComment(subTask.getId(),processInstanceId,username+"减签【"+String.join(",",assigneeNames)+"】");
+            taskService.complete(subTask.getId());
             return R.ok();
         }catch (Exception e){
             e.printStackTrace();

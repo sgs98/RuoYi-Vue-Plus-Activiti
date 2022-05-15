@@ -38,7 +38,7 @@ public class ProcessInstanceController {
 
     /**
      * @Description: 提交申请，启动流程实例
-     * @param startReq
+     * @param: startReq
      * @return: com.ruoyi.common.core.domain.R<java.util.Map<java.lang.String,java.lang.Object>>
      * @author: gssong
      * @Date: 2021/10/10
@@ -78,8 +78,8 @@ public class ProcessInstanceController {
     @ApiOperation("通过流程实例id获取历史流程图")
     @GetMapping("/getHistoryProcessImage")
     public void getHistoryProcessImage(@RequestParam String processInstanceId,
-                                       HttpServletResponse response) {
-        processInstanceService.getHistoryProcessImage(processInstanceId, response);
+                                              HttpServletResponse response) {
+         processInstanceService.getHistoryProcessImage(processInstanceId, response);
     }
 
     /**

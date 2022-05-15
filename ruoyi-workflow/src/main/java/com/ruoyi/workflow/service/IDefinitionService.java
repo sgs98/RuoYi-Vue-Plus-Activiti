@@ -42,6 +42,12 @@ public interface IDefinitionService {
     void exportFile(String type, String definitionId, HttpServletResponse response);
 
     /**
+     * 查看xml文件
+     * @param definitionId
+     */
+    String getXml(String definitionId);
+
+    /**
      * 查询历史流程定义列表
      * @param defReq
      * @return

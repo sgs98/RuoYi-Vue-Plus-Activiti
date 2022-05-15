@@ -60,12 +60,26 @@ public class UserServiceImpl implements IUserService {
         return userList;
     }
 
+    /**
+     * @Description: 按照用户id查询用户
+     * @param: userId
+     * @return: com.ruoyi.common.core.domain.entity.SysUser
+     * @author: gssong
+     * @Date: 2021/12/10
+     */
     @Override
     public SysUser selectUserById(Long userId) {
         SysUser sysUser = userMapper.selectUserById(userId);
         return sysUser;
     }
 
+    /**
+     * @Description: 分页查询工作流选人,角色，部门等
+     * @param: sysUserBo
+     * @return: java.util.Map<java.lang.String,java.lang.Object>
+     * @Author: gssong
+     * @Date: 2021/12/10
+     */
     @Override
     public Map<String,Object> getWorkflowUserListByPage(SysUserBo sysUserBo) {
         Map<String, Object> map = new HashMap<>();
