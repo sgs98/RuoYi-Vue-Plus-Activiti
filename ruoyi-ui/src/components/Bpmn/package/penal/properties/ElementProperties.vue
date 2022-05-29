@@ -104,7 +104,7 @@ export default {
     },
     saveAttribute() {
       const { name, value } = this.propertyForm;
-      console.log(this.bpmnElementPropertyList);
+      //console.log(this.bpmnElementPropertyList);
       if (this.editingPropertyIndex !== -1) {
         window.bpmnInstances.modeling.updateModdleProperties(this.bpmnElement, this.bpmnElementPropertyList[this.editingPropertyIndex], {
           name,

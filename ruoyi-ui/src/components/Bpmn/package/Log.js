@@ -34,19 +34,19 @@ Log.prototype.isArray = function(obj) {
 Log.prototype.print = function(text, type = "default", back = false) {
   if (typeof text === "object") {
     // 如果是對象則調用打印對象方式
-    this.isArray(text) ? console.table(text) : console.dir(text);
+    //this.isArray(text) ? console.table(text) : console.dir(text);
     return;
   }
   if (back) {
     // 如果是打印帶背景圖的
-    console.log(`%c ${text} `, `background:${this.typeColor(type)}; padding: 2px; border-radius: 4px; color: #fff;`);
+    //console.log(`%c ${text} `, `background:${this.typeColor(type)}; padding: 2px; border-radius: 4px; color: #fff;`);
   } else {
-    console.log(
+    /*console.log(
       `%c ${text} `,
       `border: 1px solid ${this.typeColor(type)};
         padding: 2px; border-radius: 4px;
         color: ${this.typeColor(type)};`
-    );
+    );*/
   }
 };
 
@@ -56,24 +56,24 @@ Log.prototype.printBack = function(type = "primary", title) {
 
 Log.prototype.pretty = function(type = "primary", title, text) {
   if (typeof text === "object") {
-    console.group("Console Group", title);
-    console.log(
+    //console.group("Console Group", title);
+    /*console.log(
       `%c ${title}`,
       `background:${this.typeColor(type)};border:1px solid ${this.typeColor(type)};
         padding: 1px; border-radius: 4px; color: #fff;`
-    );
-    this.isArray(text) ? console.table(text) : console.dir(text);
-    console.groupEnd();
+    );*/
+    //this.isArray(text) ? console.table(text) : console.dir(text);
+    //console.groupEnd();
     return;
   }
-  console.log(
+  /*console.log(
     `%c ${title} %c ${text} %c`,
     `background:${this.typeColor(type)};border:1px solid ${this.typeColor(type)};
       padding: 1px; border-radius: 4px 0 0 4px; color: #fff;`,
     `border:1px solid ${this.typeColor(type)};
       padding: 1px; border-radius: 0 4px 4px 0; color: ${this.typeColor(type)};`,
     "background:transparent"
-  );
+  );*/
 };
 
 Log.prototype.prettyPrimary = function(title, ...text) {
