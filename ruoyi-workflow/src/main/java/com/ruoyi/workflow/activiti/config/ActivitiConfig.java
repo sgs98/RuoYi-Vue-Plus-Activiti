@@ -1,5 +1,6 @@
 package com.ruoyi.workflow.activiti.config;
 
+import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import org.activiti.spring.SpringProcessEngineConfiguration;
 import org.activiti.spring.boot.ProcessEngineConfigurationConfigurer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,5 +23,10 @@ public class ActivitiConfig implements ProcessEngineConfigurationConfigurer {
         processEngineConfiguration.setAnnotationFontName("宋体");
         processEngineConfiguration.setLabelFontName("宋体");
         processEngineConfiguration.setProcessDiagramGenerator(customProcessDiagramGenerator);
+
+        /**
+         * 自定义id
+         */
+        processEngineConfiguration.setIdGenerator(() -> IdWorker.getIdStr());
     }
 }

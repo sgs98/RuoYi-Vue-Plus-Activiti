@@ -31,7 +31,7 @@
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
     <!-- 表格数据 -->
-    <el-table v-loading="loading" :data="dataList" @selection-change="handleSelectionChange">
+    <el-table :max-height="getTableHeight" v-loading="loading" :data="dataList" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column fixed align="center" type="index" label="序号" width="50"></el-table-column>
         <el-table-column fixed align="center" prop="name" label="模型名称"  min-width="160"></el-table-column>
@@ -185,10 +185,20 @@ export default {
             },
             settingVisible: false,
             type: '',//png,xml
+            screenHeight: document.body.clientHeight
         }
+    },
+    computed: {
+      getTableHeight() {
+        return this.screenHeight - 400
+      }
     },
     created() {
       this.getList();
+      window.onresize = () => {
+        //获取body的高度
+        this.screenHeight = document.body.clientHeight
+      }
     },
     methods: {
       /** 搜索按钮操作 */

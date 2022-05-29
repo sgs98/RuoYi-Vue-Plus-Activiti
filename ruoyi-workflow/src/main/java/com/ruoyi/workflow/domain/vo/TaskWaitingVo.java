@@ -64,7 +64,7 @@ public class TaskWaitingVo implements Serializable {
      * 办理人或候选人 （ 任务办理人: 如果是候选人则没有值，办理人才有）
      */
     @ApiModelProperty("办理人或候选人Id")
-    private String assigneeId;
+    private Long assigneeId;
     /**
      * 流程定义名称
      */
@@ -97,6 +97,12 @@ public class TaskWaitingVo implements Serializable {
      */
     @ApiModelProperty("父级任务id")
     private String parentTaskId;
+
+    /**
+     * 认领或归还 ture已认领，false未认领 ，空没有候选人
+     */
+    @ApiModelProperty("认领或归还")
+    private Boolean isClaim;
 
     /**
      * 业务状态

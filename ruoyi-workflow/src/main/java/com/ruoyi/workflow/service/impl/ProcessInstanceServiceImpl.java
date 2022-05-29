@@ -20,7 +20,7 @@ import com.ruoyi.workflow.domain.bo.StartREQ;
 import com.ruoyi.workflow.domain.vo.ActHistoryInfoVo;
 import com.ruoyi.workflow.domain.vo.ProcessInstFinishVo;
 import com.ruoyi.workflow.domain.vo.ProcessInstRunningVo;
-import com.ruoyi.workflow.factory.WorkflowService;
+import com.ruoyi.workflow.activiti.factory.WorkflowService;
 import com.ruoyi.workflow.service.*;
 import com.ruoyi.workflow.utils.WorkFlowUtils;
 import lombok.RequiredArgsConstructor;

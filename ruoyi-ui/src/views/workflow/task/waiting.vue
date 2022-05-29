@@ -38,35 +38,16 @@
             </el-table-column>
             <el-table-column  align="center" prop="businessKey" :show-overflow-tooltip="true" label="流程关联业务ID" width="160"/>
             <el-table-column  align="center" prop="createTime" label="创建时间" width="160"/>
-            <!-- <el-table-column label="操作" align="center" width="160" class-name="small-padding fixed-width">
-            <template slot-scope="scope">
-                <el-row :gutter="10" class="mb8">
-                  <el-col :span="1.5">
-                    <el-button size="mini" icon="el-icon-sort" v-if="!scope.row.assignee" type="text" @click="clickClaim(scope.row)">签收 &nbsp;</el-button>
-                    <el-button
-                        v-if="scope.row.assignee"
-                        type="text"
-                        @click="clickTaskPop(scope.row)"
-                        size="mini"
-                        icon="el-icon-sort"
-                    >办理</el-button>
-                    <el-button
-                        v-if="scope.row.assignee"
-                        type="text"
-                        @click="clickBackPop(scope.row)"
-                        size="mini"
-                        icon="el-icon-sort"
-                    >驳回</el-button>
-                    <el-button
-                        type="text"
-                        @click="clickHistPop(scope.row)"
-                        size="mini"
-                        icon="el-icon-tickets"
-                    >审批记录</el-button>
-                    </el-col>
-                </el-row>
-              </template>
-           </el-table-column> -->
+            <el-table-column label="操作" align="center" width="160" class-name="small-padding fixed-width">
+              <template slot-scope="scope">
+                  <el-button
+                      type="text"
+                      @click="clickHistPop(scope.row)"
+                      size="mini"
+                      icon="el-icon-tickets"
+                  >审批记录</el-button>
+                </template>
+            </el-table-column>
         </el-table>
 
         <pagination v-show="total>0"
@@ -74,10 +55,7 @@
           :page.sync="queryParams.pageNum"
           :limit.sync="queryParams.pageSize"
           @pagination="getList" />
-        <!-- 通过 -->
-        <verify ref="verifyRef" :taskId="taskId" :taskVariables="taskVariables"></verify>
         <!-- 驳回 -->
-        <back ref="backRef" :task="task"></back>
         <el-dialog title="审批记录" :visible.sync="visible" v-if="visible" width="60%" :close-on-click-modal="false">
           <history :processInstanceId="processInstanceId"></history>
         </el-dialog>
@@ -170,31 +148,10 @@
             this.loading = false;
           })
       },
-      //办理任务弹出层
-      clickTaskPop(row){
-          getLeave(row.businessKey).then(response => {
-            this.taskVariables = {
-                 entity: response.data,
-                 userId :1
-            };
-          });
-          this.taskId = row.id;
-          this.$refs.verifyRef.visible = true
-      },
-      // clickTaskPop(row){
-      //     this.businessKey = row.businessKey
-      //     this.processInstanceId = row.processInstanceId
-      //     this.$refs.approvalForm.visible = true
-      // },
-
+      //审批记录
       clickHistPop(row){
          this.processInstanceId = row.processInstanceId
-          this.visible = true
-      },
-      //驳回任务弹出层
-      clickBackPop(row){
-          this.task = row;
-          this.$refs.backRef.visible = true
+         this.visible = true
       },
       //签收
       clickClaim(row){
@@ -208,11 +165,7 @@
          }).finally(() => {
            this.loading = false;
          });
-      },
-      clickUser(userList){
-         console.log(userList)
       }
-
     }
   }
 </script>

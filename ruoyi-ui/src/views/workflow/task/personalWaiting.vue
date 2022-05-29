@@ -38,28 +38,31 @@
             </el-table-column>
             <el-table-column  align="center" prop="businessKey" :show-overflow-tooltip="true" label="流程关联业务ID" width="160"/>
             <el-table-column  align="center" prop="createTime" label="创建时间" width="160"/>
-            <el-table-column label="操作" align="center" width="160" class-name="small-padding fixed-width">
-            <template slot-scope="scope">
-                <el-row :gutter="10" class="mb8">
-                  <el-col :span="1.5">
-                    <el-button size="mini" icon="el-icon-sort" v-if="!scope.row.assignee" type="text" @click="clickClaim(scope.row)">签收 &nbsp;</el-button>
-                    <el-button
-                        v-if="scope.row.assignee"
-                        type="text"
-                        @click="clickTaskPop(scope.row)"
-                        size="mini"
-                        icon="el-icon-sort"
-                    >办理</el-button>
-                    <el-button
-                        type="text"
-                        @click="clickHistPop(scope.row)"
-                        size="mini"
-                        icon="el-icon-tickets"
-                    >审批记录</el-button>
-                    </el-col>
-                </el-row>
-              </template>
-           </el-table-column>
+            <el-table-column label="操作" align="center" width="200" class-name="small-padding fixed-width">
+              <template slot-scope="scope">
+                  <el-row :gutter="10" class="mb8">
+                    <el-col :span="1.5">
+                      <el-button size="mini" icon="el-icon-sort" v-if="scope.row.isClaim===false" type="text"
+                      @click="clickClaim(scope.row)">签收 &nbsp;</el-button>
+                      <el-button size="mini" icon="el-icon-sort" v-if="scope.row.isClaim===true" type="text"
+                      @click="returnTask(scope.row)">归还 &nbsp;</el-button>
+                      <el-button
+                          v-if="scope.row.isClaim===null||scope.row.isClaim===true"
+                          type="text"
+                          @click="clickTaskPop(scope.row)"
+                          size="mini"
+                          icon="el-icon-s-check"
+                      >办理</el-button>
+                      <el-button
+                          type="text"
+                          @click="clickHistPop(scope.row)"
+                          size="mini"
+                          icon="el-icon-tickets"
+                      >审批记录</el-button>
+                      </el-col>
+                  </el-row>
+                </template>
+            </el-table-column>
         </el-table>
 
         <pagination v-show="total>0"
@@ -180,6 +183,7 @@
               this.$modal.msgError("业务不存在");
           }
       },
+      //审批记录
       clickHistPop(row){
          this.processInstanceId = row.processInstanceId
          this.visible = true
@@ -197,10 +201,19 @@
            this.loading = false;
          });
       },
-      clickUser(userList){
-         console.log(userList)
+      //归还任务
+      returnTask(row){
+         this.$modal.confirm('是否确认归还此任务？').then(() => {
+           this.loading = true;
+           return api.returnTask(row.id)
+         }).then(() => {
+           this.loading = false;
+           this.getList();
+           this.$modal.msgSuccess("归还成功");
+         }).finally(() => {
+           this.loading = false;
+         });
       }
-
     }
   }
 </script>

@@ -6,22 +6,20 @@ import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
-import com.ruoyi.workflow.domain.bo.ModelAdd;
 import com.ruoyi.workflow.domain.bo.ModelREQ;
 import com.ruoyi.workflow.service.IModelService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.repository.Model;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import javax.validation.constraints.NotEmpty;
+import java.util.Map;
 
 @Validated
 @Api(value = "模型控制器", tags = {"模型控制器"})
@@ -29,14 +27,39 @@ import java.io.UnsupportedEncodingException;
 @RequestMapping("/workflow/model")
 public class ModelController extends BaseController {
 
-    private static Logger logger = LoggerFactory.getLogger(ModelController.class);
-
     @Autowired
     private IModelService iModelService;
 
     @Autowired
     private RepositoryService repositoryService;
 
+
+    /**
+     * @Description:  保存模型
+     * @param: data
+     * @return: void
+     * @author: gssong
+     * @Date: 2022/5/22 13:47
+     */
+    @PutMapping
+    @ApiOperation("保存模型")
+    @Log(title = "保存模型", businessType = BusinessType.INSERT)
+    @RepeatSubmit
+    public R<Void> saveModelXml(@RequestBody Map<String,String> data) {
+        return iModelService.saveModelXml(data);
+    }
+
+    /**
+     * @Description: 查询模型信息
+     * @param: modelId 模型id
+     * @return: com.ruoyi.common.core.domain.R<java.lang.String>
+     * @author: gssong
+     * @Date: 2022/5/22 13:42
+     */
+    @GetMapping("/getInfo/{modelId}/xml")
+    public R<Map<String,Object>> getEditorXml(@PathVariable String modelId) {
+        return iModelService.getEditorXml(modelId);
+    }
 
     /**
      * @Description: 查询模型列表
@@ -54,7 +77,7 @@ public class ModelController extends BaseController {
 
     /**
      * @Description: 新建模型
-     * @param: modelAdd
+     * @param: data
      * @return: com.ruoyi.common.core.domain.R<org.activiti.engine.repository.Model>
      * @Author: gssong
      * @Date: 2021/10/3
@@ -63,14 +86,8 @@ public class ModelController extends BaseController {
     @Log(title = "模型管理", businessType = BusinessType.INSERT)
     @RepeatSubmit
     @PostMapping
-    public R<Model> add(@RequestBody ModelAdd modelAdd) {
-        try {
-            return iModelService.add(modelAdd);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            logger.error("创建模型失败：" + e.getMessage());
-            return R.fail("创建模型失败",null);
-        }
+    public R<Model> add(@RequestBody Map<String,String> data) {
+        return iModelService.add(data);
     }
 
     /**
@@ -85,13 +102,7 @@ public class ModelController extends BaseController {
     @RepeatSubmit
     @PostMapping("/deploy/{id}")
     public R<Void> deploy(@PathVariable("id") String id) {
-        try {
-            return iModelService.deploy(id);
-        } catch (IOException e) {
-            e.printStackTrace();
-            logger.error("流程部署失败:", e.getMessage());
-            return R.fail("流程部署失败");
-        }
+        return iModelService.deploy(id);
     }
 
     /**
@@ -104,9 +115,12 @@ public class ModelController extends BaseController {
     @ApiOperation("删除流程定义模型")
     @Log(title = "模型管理", businessType = BusinessType.DELETE)
     @RepeatSubmit
-    @DeleteMapping("/{id}")
-    public R<Void> add(@PathVariable String id) {
-        repositoryService.deleteModel(id);
+    @DeleteMapping("/{ids}")
+    @Transactional(rollbackFor = Exception.class)
+    public R<Void> add(@NotEmpty(message = "主键不能为空") @PathVariable String[] ids) {
+        for (String id : ids) {
+            repositoryService.deleteModel(id);
+        }
         return R.ok();
     }
 

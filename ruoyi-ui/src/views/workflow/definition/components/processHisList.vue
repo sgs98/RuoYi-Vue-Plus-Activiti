@@ -91,7 +91,7 @@
             </el-table>
 
             <!-- 预览图片 -->
-            <process-preview ref="previewRef" :url="url" />
+            <process-preview ref="previewRef" :url="url" :type="type"/>
             <!-- 流程设置 -->
             <process-setting ref="settingRef"/>
         </div>
@@ -138,7 +138,8 @@ export default {
             // 是否显示弹出层
             open: false,
             // 表格数据
-            list: []
+            list: [],
+            type: '',//png,xml
         }
     },
     methods: {
@@ -195,6 +196,7 @@ export default {
 
       // 预览图片 downFile
       clickPreviewImg(id) {
+        this.type = 'png'
         this.url = process.env.VUE_APP_BASE_API+'/workflow/definition/export/png/'+id
         this.$refs.previewRef.visible = true
       },

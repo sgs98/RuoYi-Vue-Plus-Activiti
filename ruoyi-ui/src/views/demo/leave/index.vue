@@ -120,7 +120,7 @@
           <dict-tag :options="dict.type.act_status" :value="scope.row.actBusinessStatus.status"/>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="操作" align="center" width="180" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
             v-if="scope.row.actBusinessStatus.status==='draft'||scope.row.actBusinessStatus.status==='back'||scope.row.actBusinessStatus.status==='cancel'"
@@ -463,7 +463,7 @@ export default {
             entity: entity
         }
         const data = {
-            processKey: 'manykey', // key
+            processKey: 'test', // key
             businessKey: entity.id, // 业务id
             variables: variables,
             classFullName: 'com.ruoyi.demo.domain.BsLeave'
@@ -477,7 +477,7 @@ export default {
             // 查询下一节点的变量
             this.taskVariables = {
                 entity: entity,  // 变量
-                assignee: '1', // key
+                //assignee: '1', // key
                 //assigneeList: assigneeList
             }
             this.$refs.verifyRef.visible = true

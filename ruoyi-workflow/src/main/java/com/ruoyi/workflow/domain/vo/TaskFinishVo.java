@@ -64,7 +64,7 @@ public class TaskFinishVo implements Serializable {
      * 办理人或候选人 （ 任务办理人: 如果是候选人则没有值，办理人才有）
      */
     @ApiModelProperty("办理人或候选人Id")
-    private String assigneeId;
+    private Long assigneeId;
     /**
      * 流程定义名称
      */

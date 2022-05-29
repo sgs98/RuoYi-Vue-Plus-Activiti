@@ -101,6 +101,11 @@ public interface ActConstant {
      */
     String PENDING = "PENDING";
 
+    /**
+     * 候选标识
+     */
+    String CANDIDATE = "candidate";
+
     String PARAM_BYTE = "Byte";
 
     String PARAM_SHORT = "Short";

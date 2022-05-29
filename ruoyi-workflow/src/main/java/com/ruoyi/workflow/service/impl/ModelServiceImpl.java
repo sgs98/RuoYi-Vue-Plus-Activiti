@@ -2,38 +2,41 @@ package com.ruoyi.workflow.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.ruoyi.common.constant.Constants;
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.utils.JsonUtils;
 import com.ruoyi.workflow.common.constant.ActConstant;
-import com.ruoyi.workflow.factory.WorkflowService;
-import com.ruoyi.workflow.domain.bo.ModelAdd;
+import com.ruoyi.workflow.activiti.factory.WorkflowService;
 import com.ruoyi.workflow.domain.bo.ModelREQ;
 import com.ruoyi.workflow.service.IModelService;
-import com.ruoyi.workflow.utils.WorkFlowUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.editor.constants.ModelDataJsonConstants;
-import org.activiti.editor.language.json.converter.BpmnJsonConverter;
+import org.activiti.engine.ActivitiException;
 import org.activiti.engine.repository.*;
+import org.apache.batik.transcoder.TranscoderInput;
+import org.apache.batik.transcoder.TranscoderOutput;
+import org.apache.batik.transcoder.image.PNGTranscoder;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 /**
@@ -46,8 +49,94 @@ import java.util.zip.ZipOutputStream;
 @Slf4j
 public class ModelServiceImpl extends WorkflowService implements IModelService {
 
-    @Autowired
-    private WorkFlowUtils workFlowUtils;
+    /**
+     * @Description: 保存模型
+     * @param: data
+     * @return: com.ruoyi.common.core.domain.R<java.lang.Void>
+     * @author: gssong
+     * @Date: 2022/5/22 13:51
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public R<Void> saveModelXml(Map<String, String> data) {
+        try {
+            String xml = data.get("xml");
+            String svg = data.get("svg");
+            String modelId = data.get("modelId");
+            JSONObject jsonObject = JSONUtil.xmlToJson(xml);
+            JSONObject bpmn2 = (JSONObject) jsonObject.get("bpmn2:definitions");
+            JSONObject process =  (JSONObject)bpmn2.get("bpmn2:process");
+            if(!process.containsKey("id")||!process.containsKey("name")||StringUtils.isBlank(process.get("id").toString())||StringUtils.isBlank(process.get("name").toString())){
+                return R.fail("模型Key或者模型名称不能为空");
+            }
+            String key = process.get("id").toString();
+            String name = process.get("name").toString();
+            String description = "";
+            if(process.containsKey("activiti:versionTag")){
+                description = process.get("activiti:versionTag").toString();
+            }
+            Model model = repositoryService.getModel(modelId);
+            List<Model> list = repositoryService.createModelQuery().list();
+            List<Model> modelList = list.stream().filter(e -> !e.getId().equals(model.getId())).collect(Collectors.toList());
+            if(CollectionUtil.isNotEmpty(modelList)){
+                List<Model> models = modelList.stream().filter(e -> e.getKey().equals(key)).collect(Collectors.toList());
+                if(CollectionUtil.isNotEmpty(models)){
+                    return R.fail("模型KEY已存在");
+                }
+            }
+            model.setKey(key);
+            model.setName(name);
+            model.setVersion(model.getVersion()+1);
+            //封装模型json对象
+            ObjectMapper objectMapper = JsonUtils.getObjectMapper();
+            ObjectNode objectNode = objectMapper.createObjectNode();
+            objectNode.put(ModelDataJsonConstants.MODEL_NAME, name);
+            objectNode.put(ModelDataJsonConstants.MODEL_REVISION, model.getVersion()+1);
+            objectNode.put(ModelDataJsonConstants.MODEL_DESCRIPTION, description);
+            model.setMetaInfo(objectNode.toString());
+            repositoryService.saveModel(model);
+            repositoryService.addModelEditorSource(model.getId(), StrUtil.utf8Bytes(xml));
+            InputStream svgStream = new ByteArrayInputStream(StrUtil.utf8Bytes(svg));
+            TranscoderInput input = new TranscoderInput(svgStream);
+
+            PNGTranscoder transcoder = new PNGTranscoder();
+            // Setup output
+            ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+            TranscoderOutput output = new TranscoderOutput(outStream);
+
+            // Do the transformation
+            transcoder.transcode(input, output);
+            final byte[] result = outStream.toByteArray();
+            repositoryService.addModelEditorSourceExtra(model.getId(), result);
+            return R.ok();
+        } catch (Exception e) {
+            throw new ActivitiException("Error saving model", e);
+        }
+    }
+
+    /**
+     * @Description: 查询模型信息
+     * @param: modelId
+     * @return: com.ruoyi.common.core.domain.R<java.lang.String>
+     * @author: gssong
+     * @Date: 2022/5/22 13:54
+     */
+    @Override
+    public R<Map<String,Object>> getEditorXml(String modelId) {
+        Map<String, Object> map = new HashMap<>();
+        Model model = repositoryService.getModel(modelId);
+        if (model != null) {
+            try {
+                byte[] modelEditorSource = repositoryService.getModelEditorSource(model.getId());
+                map.put("xml",StrUtil.utf8Str(modelEditorSource));
+                map.put("model",model);
+                return R.ok("操作成功",map);
+            } catch (Exception e) {
+                throw new ActivitiException(e.getMessage());
+            }
+        }
+        return R.fail();
+    }
 
     /**
      * @Description: 查询模型列表
@@ -65,6 +154,7 @@ public class ModelServiceImpl extends WorkflowService implements IModelService {
         if (StringUtils.isNotEmpty(modelReq.getKey())) {
             query.modelKey(modelReq.getKey());
         }
+        query.orderByLastUpdateTime().desc();
         //创建时间降序排列
         query.orderByCreateTime().desc();
         // 分页查询
@@ -93,42 +183,57 @@ public class ModelServiceImpl extends WorkflowService implements IModelService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<Model> add(ModelAdd modelAdd) throws UnsupportedEncodingException {
-        int version = 0;
+    public R<Model> add(Map<String, String> data){
+        try {
+            String xml = data.get("xml");
+            String svg = data.get("svg");
+            JSONObject jsonObject = JSONUtil.xmlToJson(xml);
+            JSONObject bpmn2 = (JSONObject) jsonObject.get("bpmn2:definitions");
+            JSONObject process =  (JSONObject)bpmn2.get("bpmn2:process");
+            if(!process.containsKey("id")||!process.containsKey("name")||StringUtils.isBlank(process.get("id").toString())||StringUtils.isBlank(process.get("name").toString())){
+                return R.fail("模型Key或者模型名称不能为空");
+            }
+            String key = process.get("id").toString();
+            String name = process.get("name").toString();
+            String description = "";
+            if(process.containsKey("flowable:versionTag")){
+                description = process.get("flowable:versionTag").toString();
+            }
+            int version = 0;
+            Model checkModel = repositoryService.createModelQuery().modelKey(key).singleResult();
+            if(ObjectUtil.isNotNull(checkModel)){
+                return R.fail("模型KEY已存在");
+            }
+            //初始空的模型
+            Model model = repositoryService.newModel();
+            model.setKey(key);
+            model.setName(name);
+            model.setVersion(version);
+            //封装模型json对象
+            ObjectMapper objectMapper = JsonUtils.getObjectMapper();
+            ObjectNode objectNode = objectMapper.createObjectNode();
+            objectNode.put(ModelDataJsonConstants.MODEL_NAME, name);
+            objectNode.put(ModelDataJsonConstants.MODEL_REVISION, version);
+            objectNode.put(ModelDataJsonConstants.MODEL_DESCRIPTION, description);
+            model.setMetaInfo(objectNode.toString());
+            //保存初始化的模型基本信息数据
+            repositoryService.saveModel(model);
+            repositoryService.addModelEditorSource(model.getId(), StrUtil.utf8Bytes(xml));
+            InputStream svgStream = new ByteArrayInputStream(StrUtil.utf8Bytes(svg));
+            TranscoderInput input = new TranscoderInput(svgStream);
 
-        Model checkModel = repositoryService.createModelQuery().modelKey(modelAdd.getKey()).singleResult();
-        if(ObjectUtil.isNotNull(checkModel)){
-            return R.fail("模型KEY已存在",null);
+            PNGTranscoder transcoder = new PNGTranscoder();
+            // Setup output
+            ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+            TranscoderOutput output = new TranscoderOutput(outStream);
+            // Do the transformation
+            transcoder.transcode(input, output);
+            final byte[] result = outStream.toByteArray();
+            repositoryService.addModelEditorSourceExtra(model.getId(), result);
+            return R.ok();
+        }catch (Exception e){
+            throw new ActivitiException("Error saving model", e);
         }
-        // 1. 初始空的模型
-        Model model = repositoryService.newModel();
-        model.setName(modelAdd.getName());
-        model.setKey(modelAdd.getKey());
-        model.setVersion(version);
-
-        // 封装模型json对象
-        ObjectNode objectNode = objectMapper.createObjectNode();
-        objectNode.put(ModelDataJsonConstants.MODEL_NAME, modelAdd.getName());
-        objectNode.put(ModelDataJsonConstants.MODEL_REVISION, version);
-        objectNode.put(ModelDataJsonConstants.MODEL_DESCRIPTION, modelAdd.getDescription());
-        model.setMetaInfo(objectNode.toString());
-        // 保存初始化的模型基本信息数据
-        repositoryService.saveModel(model);
-
-        // 封装模型对象基础数据json串
-        // {"id":"canvas","resourceId":"canvas","stencilset":{"namespace":"http://b3mn.org/stencilset/bpmn2.0#"},"properties":{"process_id":"未定义"}}
-        ObjectNode editorNode = objectMapper.createObjectNode();
-        ObjectNode stencilSetNode = objectMapper.createObjectNode();
-        stencilSetNode.put("namespace", ActConstant.NAMESPACE);
-        editorNode.replace("stencilset", stencilSetNode);
-        // 标识key
-        ObjectNode propertiesNode = objectMapper.createObjectNode();
-        propertiesNode.put("process_id", modelAdd.getKey());
-        propertiesNode.put("name", modelAdd.getName());
-        editorNode.replace("properties", propertiesNode);
-
-        repositoryService.addModelEditorSource(model.getId(), editorNode.toString().getBytes(ActConstant.UTF_8));
-        return R.ok(model);
     }
 
     /**
@@ -140,42 +245,39 @@ public class ModelServiceImpl extends WorkflowService implements IModelService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R deploy(String id) throws IOException {
-        //1.查询流程定义模型json字节码
-        byte[] jsonBytes = repositoryService.getModelEditorSource(id);
-        if (jsonBytes == null) {
-            return R.fail("模型数据为空，请先设计流程定义模型，再进行部署");
+    public R<Void> deploy(String id){
+        try {
+            //1.查询流程定义模型xml
+            byte[] xmlBytes = repositoryService.getModelEditorSource(id);
+            if (xmlBytes == null) {
+                return R.fail("模型数据为空，请先设计流程定义模型，再进行部署");
+            }
+            //2. 查询流程定义模型的图片
+            byte[] pngBytes = repositoryService.getModelEditorSourceExtra(id);
+
+            // 查询模型的基本信息
+            Model model = repositoryService.getModel(id);
+            // xml资源的名称 ，对应act_ge_bytearray表中的name_字段
+            String processName = model.getName() + ".bpmn20.xml";
+            // 图片资源名称，对应act_ge_bytearray表中的name_字段
+            String pngName = model.getName() + "." + model.getKey() + ".png";
+
+            //3. 调用部署相关的api方法进行部署流程定义
+            Deployment deployment = repositoryService.createDeployment()
+                .name(model.getName()) // 部署名称
+                .key(model.getKey()) // 部署标识key
+                .addString(processName, StrUtil.utf8Str(xmlBytes)) // bpmn20.xml资源
+                .addBytes(pngName, pngBytes) // png资源
+                .deploy();
+
+            // 更新 部署id 到流程定义模型数据表中
+            model.setDeploymentId(deployment.getId());
+            repositoryService.saveModel(model);
+            return R.ok();
+        }catch (Exception e){
+            e.printStackTrace();
+            return R.fail();
         }
-        // 将json字节码转为 xml 字节码，因为bpmn2.0规范中关于流程模型的描述是xml格式的，而activiti遵守了这个规范
-        byte[] xmlBytes = workFlowUtils.bpmnJsonXmlBytes(jsonBytes);
-        if (xmlBytes == null) {
-            return R.fail("数据模型不符合要求，请至少设计一条主线流程");
-        }
-        // 2. 查询流程定义模型的图片
-        byte[] pngBytes = repositoryService.getModelEditorSourceExtra(id);
-
-        // 查询模型的基本信息
-        Model model = repositoryService.getModel(id);
-
-        // xml资源的名称 ，对应act_ge_bytearray表中的name_字段
-        String processName = model.getName() + ".bpmn20.xml";
-        // 图片资源名称，对应act_ge_bytearray表中的name_字段
-        String pngName = model.getName() + "." + model.getKey() + ".png";
-
-        // 3. 调用部署相关的api方法进行部署流程定义
-        Deployment deployment = repositoryService.createDeployment()
-            .name(model.getName()) // 部署名称
-            .key(model.getKey()) // 部署标识key
-            .addString(processName, new String(xmlBytes, Constants.UTF8)) // bpmn20.xml资源
-            .addBytes(pngName, pngBytes) // png资源
-            .deploy();
-        ProcessDefinitionQuery definitionQuery = repositoryService.createProcessDefinitionQuery();
-        ProcessDefinition processDefinition = definitionQuery.deploymentId(deployment.getId()).singleResult();
-        System.out.println(processDefinition.getName());
-        // 更新 部署id 到流程定义模型数据表中
-        model.setDeploymentId(deployment.getId());
-        repositoryService.saveModel(model);
-        return R.ok();
     }
 
     /**
@@ -197,9 +299,8 @@ public class ModelServiceImpl extends WorkflowService implements IModelService {
             Model model = repositoryService.getModel(modelId);
             if (ObjectUtil.isNotNull(model)) {
                 // 2. 查询流程定义模型的json字节码
-                byte[] bpmnJsonBytes = repositoryService.getModelEditorSource(modelId);
+                byte[] xmlBytes = repositoryService.getModelEditorSource(modelId);
                 // 2.1 将json字节码转换为xml字节码
-                byte[] xmlBytes = workFlowUtils.bpmnJsonXmlBytes(bpmnJsonBytes);
                 if (xmlBytes == null) {
                     zipName = "模型数据为空-请先设计流程定义模型，再导出";
                 } else {
@@ -242,6 +343,7 @@ public class ModelServiceImpl extends WorkflowService implements IModelService {
      * @Date: 2021/11/6
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean convertToModel(String processDefinitionId) {
         ProcessDefinition pd = repositoryService.createProcessDefinitionQuery()
             .processDefinitionId(processDefinitionId).singleResult();
@@ -252,10 +354,14 @@ public class ModelServiceImpl extends WorkflowService implements IModelService {
                 InputStreamReader in = new InputStreamReader(bpmnStream, ActConstant.UTF_8);
                 XMLStreamReader xtr = xif.createXMLStreamReader(in);
                 BpmnModel bpmnModel = new BpmnXMLConverter().convertToBpmnModel(xtr);
-                BpmnJsonConverter converter = new BpmnJsonConverter();
-                ObjectNode modelNode = converter.convertToJson(bpmnModel);
+                BpmnXMLConverter converter = new BpmnXMLConverter();
+                byte[] xmlBytes = converter.convertToXML(bpmnModel);
                 if(ObjectUtil.isNotNull(model)){
-                    repositoryService.addModelEditorSource(model.getId(), modelNode.toString().getBytes(ActConstant.UTF_8));
+                    repositoryService.addModelEditorSource(model.getId(), xmlBytes);
+                    InputStream inputStream = repositoryService.getResourceAsStream(pd.getDeploymentId(), pd.getDiagramResourceName());
+                    if(inputStream!=null){
+                        repositoryService.addModelEditorSourceExtra(model.getId(),IOUtils.toByteArray(inputStream));
+                    }
                     return true;
                 }else{
                     Model modelData = repositoryService.newModel();
@@ -268,7 +374,11 @@ public class ModelServiceImpl extends WorkflowService implements IModelService {
                     modelObjectNode.put(ModelDataJsonConstants.MODEL_DESCRIPTION, pd.getDescription());
                     modelData.setMetaInfo(modelObjectNode.toString());
                     repositoryService.saveModel(modelData);
-                    repositoryService.addModelEditorSource(modelData.getId(), modelNode.toString().getBytes(ActConstant.UTF_8));
+                    repositoryService.addModelEditorSource(modelData.getId(), xmlBytes);
+                    InputStream inputStream = repositoryService.getResourceAsStream(pd.getDeploymentId(), pd.getDiagramResourceName());
+                    if(inputStream!=null){
+                        repositoryService.addModelEditorSourceExtra(modelData.getId(), IOUtils.toByteArray(inputStream));
+                    }
                     return true;
                 }
 

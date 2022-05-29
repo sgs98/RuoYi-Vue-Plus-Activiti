@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ruoyi.common.core.domain.entity.SysRole;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.exception.ServiceException;
+import com.ruoyi.common.utils.JsonUtils;
 import com.ruoyi.system.domain.SysUserRole;
 import com.ruoyi.system.mapper.SysRoleMapper;
 import com.ruoyi.system.mapper.SysUserMapper;
@@ -34,7 +35,6 @@ import org.activiti.engine.impl.persistence.entity.TaskEntity;
 import org.activiti.engine.impl.persistence.entity.VariableInstance;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.activiti.engine.task.Task;
 import javax.annotation.Resource;
@@ -78,9 +78,6 @@ public class WorkFlowUtils {
 
     @Autowired
     private  RepositoryService repositoryService;
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
     /**
      * @Description: bpmnModel转为xml
      * @param: jsonBytes
@@ -88,11 +85,12 @@ public class WorkFlowUtils {
      * @Author: gssong
      * @Date: 2021/11/5
      */
-    public byte[] bpmnJsonXmlBytes(byte[] jsonBytes) throws IOException {
+    public byte[] bpmnJsonToXmlBytes(byte[] jsonBytes) throws IOException {
         if (jsonBytes == null) {
             return null;
         }
         // 1. json字节码转成 BpmnModel 对象
+        ObjectMapper objectMapper = JsonUtils.getObjectMapper();
         JsonNode jsonNode = objectMapper.readTree(jsonBytes);
         BpmnModel bpmnModel = new BpmnJsonConverter().convertToBpmnModel(jsonNode);
 

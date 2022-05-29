@@ -127,24 +127,11 @@ export default {
            this.definitionId = definitionId
            setting(definitionId).then(response => {
               this.nodeList = response.data
-              /* getInfo(this.nodeList[1].processDefinitionId,this.nodeList[1].nodeId).then(response => {
-                if(response.data){
-                  this.form = response.data
-                  this.nodeName = response.data.nodeName
-                }else{
-                  this.form.processDefinitionId = this.definitionId
-                  this.form.nodeName = this.nodeList[0].nodeName
-                  this.nodeName = this.nodeList[1].nodeName
-                }
-              }) */
+              this.changeSteps(this.nodeList[0])
            })
         },
         //切换节点
-        changeSteps(node,index) {
-          /* if(index === 0){
-             this.$modal.msg("第一个环节自动跳过")
-             return false
-          } */
+        changeSteps(node) {
           this.form.assignee = undefined
           this.form.multipleColumn = undefined
           this.form.multiple = false

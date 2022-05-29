@@ -39,12 +39,12 @@
     "@riophae/vue-treeselect": "0.4.0",
     "axios": "0.24.0",
     "clipboard": "2.0.8",
-    "core-js": "3.19.1",
+    "core-js": "^3.8.1",
     "echarts": "4.9.0",
     "element-ui": "2.15.8",
     "file-saver": "2.0.5",
     "fuse.js": "6.4.3",
-    "highlight.js": "9.18.5",
+    "highlight.js": "^10.5.0",
     "js-beautify": "1.13.0",
     "js-cookie": "3.0.1",
     "jsencrypt": "3.0.0-rc.1",
@@ -58,7 +58,14 @@
     "vue-meta": "2.4.0",
     "vue-router": "3.4.9",
     "vuedraggable": "2.24.3",
-    "vuex": "3.6.0"
+    "vuex": "3.6.0",
+    "bpmn-js-sketchy": "^0.5.3",
+    "bpmn-js-task-resize": "^1.2.0",
+    "bpmn-js-token-simulation": "^0.10.0",
+    "diagram-js-minimap": "^2.0.4",
+    "min-dash": "^3.5.2",
+    "x2js": "^3.4.2",
+    "xml-js": "^1.6.11"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "4.4.6",
@@ -77,7 +84,14 @@
     "sass-loader": "10.1.1",
     "script-ext-html-webpack-plugin": "2.1.5",
     "svg-sprite-loader": "5.1.1",
-    "vue-template-compiler": "2.6.12"
+    "vue-template-compiler": "2.6.12",
+    "bpmn-js": "^8.8.3",
+    "bpmn-js-properties-panel": "^0.37.2",
+    "camunda-bpmn-moddle": "^4.4.1",
+    "eslint-plugin-prettier": "^3.1.0",
+    "fs-extra": "^8.1.0",
+    "terser-webpack-plugin": "^4.2.3",
+    "webpack-bundle-analyzer": "^3.9.0"
   },
   "engines": {
     "node": ">=8.9",
