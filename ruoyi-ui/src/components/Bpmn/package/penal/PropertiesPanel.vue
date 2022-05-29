@@ -1,11 +1,8 @@
 <template>
   <div class="process-panel__container" :style="{ width: `${this.width}px` }">
-   <!-- <div class="fold" @click="clickFold" style="border:0px ">
-      <i class="el-icon-s-unfold" style="cursor:pointer" v-show="!isCollapse"></i>
-      <i class="el-icon-s-fold" style="cursor:pointer" v-show="isCollapse"></i>
-    </div>
-   <el-menu :style="{ width: `${this.width}px` }" :collapse="isCollapse"> -->
-    <el-collapse  class="el-menu-vertical-demo" v-model="activeTab">
+    <i class="el-icon-s-unfold icon" @click="clickFold" v-show="!isCollapse"></i>
+    <i class="el-icon-s-fold icon" @click="clickFold" v-show="isCollapse"></i>
+    <el-collapse  class="el-menu-vertical-demo" v-show="isCollapse" v-model="activeTab">
       <el-collapse-item name="base">
         <div slot="title" class="panel-tab__title"><i class="el-icon-info"></i>常规</div>
         <element-base-info :id-edit-disabled="idEditDisabled" :business-object="elementBusinessObject" :type="elementType" />
@@ -47,7 +44,6 @@
         <element-other-config :id="elementId" />
       </el-collapse-item>
     </el-collapse>
-   <!-- </el-menu> -->
   </div>
 </template>
 <script>
@@ -89,10 +85,6 @@ export default {
       type: String,
       default: "camunda"
     },
-    width: {
-      type: Number,
-      default: 410
-    },
     idEditDisabled: {
       type: Boolean,
       default: false
@@ -112,7 +104,8 @@ export default {
       elementBusinessObject: {}, // 元素 businessObject 镜像，提供给需要做判断的组件使用
       conditionFormVisible: false, // 流转条件设置
       formVisible: false, // 表单配置
-      isCollapse: true
+      isCollapse: true,
+      width: 410
     };
   },
   watch: {
@@ -128,6 +121,10 @@ export default {
   methods: {
     clickFold(){
         this.isCollapse = !this.isCollapse
+        this.width = 38
+        if(this.isCollapse){
+          this.width = 410
+        }
     },
     initModels() {
       // 初始化 modeler 以及其他 moddle
@@ -196,3 +193,11 @@ export default {
   }
 };
 </script>
+<style scoped>
+ .icon{
+    display: inline-block;
+    vertical-align: middle;
+    font-size:20px;
+    cursor: pointer;
+ }
+</style>
