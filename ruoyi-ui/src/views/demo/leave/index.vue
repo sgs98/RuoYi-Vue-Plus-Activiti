@@ -120,7 +120,7 @@
           <dict-tag :options="dict.type.act_status" :value="scope.row.actBusinessStatus.status"/>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" width="180" class-name="small-padding fixed-width">
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
             v-if="scope.row.actBusinessStatus.status==='draft'||scope.row.actBusinessStatus.status==='back'||scope.row.actBusinessStatus.status==='cancel'"

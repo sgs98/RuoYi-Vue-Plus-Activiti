@@ -90,7 +90,6 @@ export default {
     },
     /** 查询部门列表 */
     getList() {
-        console.log(this.deptIds)
       this.loading = true;
       getWorkflowUserListByPage(this.queryParams).then(response => {
         this.deptList = this.handleTree(response.data.list, "deptId");

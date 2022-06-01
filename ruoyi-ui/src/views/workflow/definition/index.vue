@@ -2,28 +2,28 @@
   <div class="app-container">
     <!-- 检索 -->
     <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
-          <el-form-item label="模型名称" prop="name">
-            <el-input
-              v-model="queryParams.name"
-              placeholder="请输入模型名称"
-              clearable
-              size="small"
-              @keyup.enter.native="handleQuery"
-            />
-          </el-form-item>
-          <el-form-item label="标识Key" prop="key">
-            <el-input
-              v-model="queryParams.key"
-              placeholder="请输入标识Key"
-              clearable
-              size="small"
-              @keyup.enter.native="handleQuery"
-            />
-          </el-form-item>
-          <el-form-item>
-            <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-            <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
-          </el-form-item>
+        <el-form-item label="模型名称" prop="name">
+          <el-input
+            v-model="queryParams.name"
+            placeholder="请输入模型名称"
+            clearable
+            size="small"
+            @keyup.enter.native="handleQuery"
+          />
+        </el-form-item>
+        <el-form-item label="标识Key" prop="key">
+          <el-input
+            v-model="queryParams.key"
+            placeholder="请输入标识Key"
+            clearable
+            size="small"
+            @keyup.enter.native="handleQuery"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
+          <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+        </el-form-item>
     </el-form>
     <el-row :gutter="10" class="mb8">
       <el-button icon="el-icon-upload" size="small" type="primary" @click="clickDeploy">部署流程文件</el-button>
@@ -34,18 +34,18 @@
     <el-table :max-height="getTableHeight" v-loading="loading" :data="dataList" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column fixed align="center" type="index" label="序号" width="50"></el-table-column>
-        <el-table-column fixed align="center" prop="name" label="模型名称"  min-width="160"></el-table-column>
+        <el-table-column fixed align="center" prop="name" label="模型名称" min-width="160" show-overflow-tooltip></el-table-column>
         <el-table-column  align="center" prop="key" label="标识Key"  min-width="120"></el-table-column>
         <el-table-column align="center" prop="version" label="版本号" width="90" >
           <template slot-scope="{row}"> v{{row.version}}.0</template>
         </el-table-column>
-        <el-table-column align="center" prop="resourceName" label="流程XML" min-width="150">
+        <el-table-column align="center" prop="resourceName" label="流程XML" min-width="120" show-overflow-tooltip>
         <template slot-scope="{row}">
           <!-- 注意组件上使用原生事件，要加 .active -->
           <el-link type="primary" @click.native="clickExportXML(row.id)">{{ row.resourceName }}</el-link>
         </template>
         </el-table-column>
-        <el-table-column align="center" prop="diagramResourceName" label="流程图片" min-width="150">
+        <el-table-column align="center" prop="diagramResourceName" label="流程图片" min-width="120" show-overflow-tooltip>
         <template slot-scope="{row}">
           <el-link type="primary" @click="clickPreviewImg(row.id)">{{ row.diagramResourceName }}</el-link>
         </template>
@@ -57,9 +57,9 @@
           </template>
         </el-table-column>
         <el-table-column  align="center" prop="deploymentTime" label="部署时间" width="150"></el-table-column>
-        <el-table-column label="操作" align="center" width="160" class-name="small-padding fixed-width">
+        <el-table-column label="操作" align="center" width="210" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-row :gutter="10" class="mb8">
+          <el-row :gutter="20" class="mb8">
             <el-col :span="1.5">
               <el-button
                 size="mini"
@@ -84,8 +84,16 @@
                 icon="el-icon-unlock"
               >激活</el-button>
             </el-col>
+            <el-col :span="1.5">
+              <el-button
+                size="mini"
+                type="text"
+                icon="el-icon-delete"
+                @click="handleDelete(scope.row)"
+                >删除</el-button>
+            </el-col>
           </el-row>
-          <el-row :gutter="10" class="mb8">
+          <el-row :gutter="20" class="mb8">
             <el-col :span="1.5">
               <el-button
                 size="mini"
@@ -96,19 +104,12 @@
               >历史版本</el-button>
             </el-col>
             <el-col :span="1.5">
-              <el-dropdown>
-              <span class="el-dropdown-link">
-                更多<i class="el-icon-arrow-down el-icon--right"></i>
-              </span>
-              <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item>
-                  <el-button  size="mini" type="text" icon="el-icon-setting" @click="handleSetting(scope.row)" >设置</el-button>
-                </el-dropdown-item>
-                <el-dropdown-item>
-                  <el-button  size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)" >删除</el-button>
-                </el-dropdown-item>
-              </el-dropdown-menu>
-              </el-dropdown>
+              <el-button
+                size="mini"
+                type="text"
+                icon="el-icon-setting"
+                @click="handleSetting(scope.row)"
+                >设置</el-button>
             </el-col>
           </el-row>
         </template>

@@ -1,17 +1,9 @@
 <template>
   <el-dialog title="设置" :visible.sync="visible" v-if="visible" width="70%" :close-on-click-modal="false" append-to-body>
-    <div class="container">
-      <div style="width:20%">
-        <el-steps :active="active" :space=50 direction="vertical">
-          <el-step class="step-class" v-for="(node, index) in nodeList"
-            :key="index"
-            @click.native="changeSteps(node,index)"
-            :title="node.nodeName">
-          </el-step>
-        </el-steps>
-      </div>
-      <div style="width:80%" v-loading="loading">
-        <el-form ref="form" label-position="left" :model="form">
+    <div class="container" v-loading="loading">
+       <el-tabs :tab-position="tabPosition" v-model="activeName" @tab-click="changeSteps">
+        <el-tab-pane v-for="(node, index) in nodeList" :key="index" :name="node.id" :label="node.nodeName">
+          <el-form ref="form" label-position="left" :model="form">
           <el-form-item label="环节名称">
             <el-tag v-if="nodeName">{{nodeName}}</el-tag><el-tag v-else>无</el-tag>
           </el-form-item>
@@ -19,7 +11,7 @@
             <el-col :span="24"><el-alert title="每个节点设置，如有修改都请保存一次，跳转节点后数据不会自动保存！" type="warning" show-icon :closable="false"/></el-col>
           </el-row>
           <el-form-item prop="chooseWay" label="选人方式">
-            <el-radio-group v-model="form.chooseWay">
+            <el-radio-group @change="clearSelect" v-model="form.chooseWay">
               <el-radio border label="person">选择人员</el-radio>
               <el-radio border label="role">选择角色</el-radio>
               <el-radio border label="dept">选择部门</el-radio>
@@ -33,8 +25,8 @@
               </el-form-item>
             </el-col>
             <el-col class="line" :span="6">
-              <el-form-item label="是否会签" prop="isShow">
-                <el-switch @change="multipleChange" v-model="form.multiple"></el-switch>
+              <el-form-item label="是否会签" prop="multiple">
+                <el-switch v-model="form.multiple"></el-switch>
               </el-form-item>
            </el-col>
            <el-col class="line" :span="6">
@@ -46,7 +38,7 @@
           <el-row v-if="form.multiple">
             <el-col :span="20">
               <el-form-item label-width="100px" label="会签KEY值" prop="multipleColumn">
-                <el-input v-model="form.multipleColumn" placeholder="会签保存人员KEY值"/>
+                <el-input @input="onInput()" v-model="form.multipleColumn" placeholder="会签保存人员KEY值"/>
               </el-form-item>
             </el-col>
           </el-row>
@@ -61,15 +53,16 @@
               </el-form-item>
            </el-col>
           </el-row>
-
           <el-form-item>
-            <el-button type="primary" @click="onSubmit">保存</el-button>
-            <el-button type="danger" @click="del">重置</el-button>
+            <div style="float:right;">
+              <el-button type="primary" size="small" @click="onSubmit">保存</el-button>
+              <el-button type="danger" size="small" @click="del">重置</el-button>
+            </div>
           </el-form-item>
         </el-form>
-      </div>
+        </el-tab-pane>
+      </el-tabs>
     </div>
-
     <!-- 选择人员 -->
     <sys-user ref="userRef" @confirmUser="clickUser" :propUserList = 'propUserList'/>
     <!-- 选择角色 -->
@@ -78,7 +71,6 @@
     <sys-dept ref="deptRef" @confirmUser="clickDept" :propDeptList = 'propDeptList'/>
     <!-- 选择业务规则 -->
     <process-Rule ref="processRuleRef" @primary="clickRule" :propDeptList = 'propDeptList'/>
-
   </el-dialog>
 </template>
 
@@ -99,6 +91,8 @@ export default {
     },
     data() {
       return {
+        tabPosition: 'left',
+        activeName:'',
         loading: false,
         nodeList: [],
         visible: false,
@@ -122,46 +116,42 @@ export default {
       }
     },
     methods: {
+        onInput(){
+           this.$forceUpdate();
+        },
         // 查询流程节点
         async init(definitionId) {
+           this.loading = true
            this.definitionId = definitionId
-           setting(definitionId).then(response => {
-              this.nodeList = response.data
-              this.changeSteps(this.nodeList[0])
-           })
+           this.form.chooseWay = 'person'
+           const data = await setting(definitionId)
+           this.nodeList = data.data
+           this.activeName = '0'
+           this.changeSteps()
         },
         //切换节点
-        changeSteps(node) {
+        changeSteps() {
+          this.nodeList[this.activeName]
           this.form.assignee = undefined
           this.form.multipleColumn = undefined
           this.form.multiple = false
           this.loading = true
-          this.$refs['form'].clearValidate();
-          this.nodeName = node.nodeName
-          getInfo(this.definitionId,node.nodeId).then(response => {
+          //this.$refs['form'].clearValidate();
+          this.nodeName = this.nodeList[this.activeName].nodeName
+          getInfo(this.definitionId,this.nodeList[this.activeName].nodeId).then(response => {
             if(response.data){
               this.form = response.data
-              this.form.nodeName = node.nodeName
+              this.form.nodeName = response.data.nodeName
               this.loading = false
               this.$forceUpdate()
             }else{
               this.form.id = undefined
-              this.form.nodeId = node.nodeId
-              this.form.nodeName = node.nodeName
+              this.form.nodeId = this.nodeList[this.activeName].nodeId
+              this.form.nodeName = this.nodeList[this.activeName].nodeName
               this.reset()
               this.loading = false
             }
           })
-        },
-        //是否会签
-        multipleChange(data){
-           /*  if(data){
-              this.form.isShow = true
-              this.isShowDisabled = true
-            }else{
-              this.isShowDisabled = false
-              this.form.multipleColumn = undefined
-            } */
         },
         //保存设置
         onSubmit(){
@@ -212,13 +202,13 @@ export default {
         reset(){
           this.form.assigneeId =undefined
           this.form.assignee = undefined
-          this.form.chooseWay = undefined
+          this.form.chooseWay = 'person'
           this.form.processDefinitionId = this.definitionId
         },
         //清空选择的人员
         clearSelect(){
-          this.form.assigneeId = ''
-          this.form.assignee = ''
+          this.form.assigneeId = ""
+          this.form.assignee = ""
         },
         //选择弹出层
         async openSelect(){
@@ -305,19 +295,6 @@ export default {
     }
 }
 </script>
-<style scoped>
-  .step-class {
-    cursor: pointer;
-  }
-  .container{
-    display: flex;
-    justify-content:space-between;
-  }
-  .choose-class{
-    display: flex;
-    justify-content:space-between;
-  }
-</style>
 
 
 
