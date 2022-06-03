@@ -4,62 +4,62 @@
        <el-tabs :tab-position="tabPosition" v-model="activeName" @tab-click="changeSteps">
         <el-tab-pane v-for="(node, index) in nodeList" :key="index" :name="node.id" :label="node.nodeName">
           <el-form ref="form" label-position="left" :model="form">
-          <el-form-item label="环节名称">
-            <el-tag v-if="nodeName">{{nodeName}}</el-tag><el-tag v-else>无</el-tag>
-          </el-form-item>
-          <el-row>
-            <el-col :span="24"><el-alert title="每个节点设置，如有修改都请保存一次，跳转节点后数据不会自动保存！" type="warning" show-icon :closable="false"/></el-col>
-          </el-row>
-          <el-form-item prop="chooseWay" label="选人方式">
-            <el-radio-group @change="clearSelect" v-model="form.chooseWay">
-              <el-radio border label="person">选择人员</el-radio>
-              <el-radio border label="role">选择角色</el-radio>
-              <el-radio border label="dept">选择部门</el-radio>
-              <el-radio border label="rule">业务规则</el-radio>
-            </el-radio-group>
-          </el-form-item>
-          <el-row>
-            <el-col class="line" :span="6">
-              <el-form-item label="是否弹窗选人" prop="isShow">
-                <el-switch :disabled = "isShowDisabled" v-model="form.isShow"></el-switch>
-              </el-form-item>
+            <el-form-item label="环节名称">
+              <el-tag v-if="nodeName">{{nodeName}}</el-tag><el-tag v-else>无</el-tag>
+            </el-form-item>
+            <el-row>
+              <el-col :span="24"><el-alert title="每个节点设置，如有修改都请保存一次，跳转节点后数据不会自动保存！" type="warning" show-icon :closable="false"/></el-col>
+            </el-row>
+            <el-form-item prop="chooseWay" label="选人方式">
+              <el-radio-group @change="clearSelect" v-model="form.chooseWay">
+                <el-radio border label="person">选择人员</el-radio>
+                <el-radio border label="role">选择角色</el-radio>
+                <el-radio border label="dept">选择部门</el-radio>
+                <el-radio border label="rule">业务规则</el-radio>
+              </el-radio-group>
+            </el-form-item>
+            <el-row>
+              <el-col class="line" :span="6">
+                <el-form-item label="是否弹窗选人" prop="isShow">
+                  <el-switch :disabled = "isShowDisabled" v-model="form.isShow"></el-switch>
+                </el-form-item>
+              </el-col>
+              <el-col class="line" :span="6">
+                <el-form-item label="是否会签" prop="multiple">
+                  <el-switch v-model="form.multiple"></el-switch>
+                </el-form-item>
             </el-col>
             <el-col class="line" :span="6">
-              <el-form-item label="是否会签" prop="multiple">
-                <el-switch v-model="form.multiple"></el-switch>
-              </el-form-item>
-           </el-col>
-           <el-col class="line" :span="6">
-              <el-form-item label="是否可退回" prop="isBack">
-                <el-switch v-model="form.isBack"></el-switch>
-              </el-form-item>
-           </el-col>
-          </el-row>
-          <el-row v-if="form.multiple">
-            <el-col :span="20">
-              <el-form-item label-width="100px" label="会签KEY值" prop="multipleColumn">
-                <el-input @input="onInput()" v-model="form.multipleColumn" placeholder="会签保存人员KEY值"/>
-              </el-form-item>
+                <el-form-item label="是否可退回" prop="isBack">
+                  <el-switch v-model="form.isBack"></el-switch>
+                </el-form-item>
             </el-col>
-          </el-row>
-          <el-row>
-            <el-col :span="20">
-              <el-form-item label-width="100px" label="审批人员" prop="assignee">
-                <el-input readonly v-model="form.assignee" placeholder="审批人员">
-                  <el-button type="primary" slot="append" @click="openSelect">选择人员</el-button>
-                  <el-button type="success" slot="append" @click="clearSelect">清空</el-button>
-                </el-input>
-                <el-input v-model="form.assigneeId" v-show="false" placeholder="审批人员ID"/>
-              </el-form-item>
-           </el-col>
-          </el-row>
-          <el-form-item>
-            <div style="float:right;">
-              <el-button type="primary" size="small" @click="onSubmit">保存</el-button>
-              <el-button type="danger" size="small" @click="del">重置</el-button>
-            </div>
-          </el-form-item>
-        </el-form>
+            </el-row>
+            <el-row v-if="form.multiple">
+              <el-col :span="20">
+                <el-form-item label-width="100px" label="会签KEY值" prop="multipleColumn">
+                  <el-input @input="onInput()" v-model="form.multipleColumn" placeholder="会签保存人员KEY值"/>
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="20">
+                <el-form-item label-width="100px" label="审批人员" prop="assignee">
+                  <el-input readonly v-model="form.assignee" placeholder="审批人员">
+                    <el-button type="primary" slot="append" @click="openSelect">选择人员</el-button>
+                    <el-button type="success" slot="append" @click="clearSelect">清空</el-button>
+                  </el-input>
+                  <el-input v-model="form.assigneeId" v-show="false" placeholder="审批人员ID"/>
+                </el-form-item>
+            </el-col>
+            </el-row>
+            <el-form-item>
+              <div style="float:right;">
+                <el-button type="primary" size="small" @click="onSubmit">保存</el-button>
+                <el-button type="danger" size="small" @click="del">重置</el-button>
+              </div>
+            </el-form-item>
+          </el-form>
         </el-tab-pane>
       </el-tabs>
     </div>
@@ -136,7 +136,6 @@ export default {
           this.form.multipleColumn = undefined
           this.form.multiple = false
           this.loading = true
-          //this.$refs['form'].clearValidate();
           this.nodeName = this.nodeList[this.activeName].nodeName
           getInfo(this.definitionId,this.nodeList[this.activeName].nodeId).then(response => {
             if(response.data){

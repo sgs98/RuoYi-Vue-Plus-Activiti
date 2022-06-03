@@ -22,7 +22,6 @@ import com.ruoyi.workflow.domain.vo.ProcessInstFinishVo;
 import com.ruoyi.workflow.domain.vo.ProcessInstRunningVo;
 import com.ruoyi.workflow.activiti.factory.WorkflowService;
 import com.ruoyi.workflow.service.*;
-import com.ruoyi.workflow.utils.WorkFlowUtils;
 import lombok.RequiredArgsConstructor;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.FlowNode;
@@ -70,7 +69,6 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
     private final IActTaskNodeService iActTaskNodeService;
     private final ProcessEngine processEngine;
     private final ManagementService managementService;
-    private final WorkFlowUtils workFlowUtils;
 
 
     /**
@@ -111,18 +109,16 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
         runtimeService.setProcessInstanceName(pi.getProcessInstanceId(), pi.getProcessDefinitionName());
         // 申请人执行流程
         List<Task> taskList = taskService.createTaskQuery().processInstanceId(pi.getId()).list();
+        if(taskList.size()>1){
+            throw new ServiceException("请检查流程第一个环节是否为申请人！");
+        }
         for (Task task : taskList) {
             taskService.setAssignee(task.getId(),LoginHelper.getUserId().toString());
-        }
-
-        //查询下一个任务
-        List<Task> nextList = taskService.createTaskQuery().processInstanceId(pi.getId()).list();
-        for (Task task : nextList) {
             // 更新业务状态
             iActBusinessStatusService.updateState(startReq.getBusinessKey(), BusinessStatusEnum.DRAFT, task.getProcessInstanceId(), startReq.getClassFullName());
         }
         map.put("processInstanceId",pi.getProcessInstanceId());
-        map.put("taskId",nextList.get(0).getId());
+        map.put("taskId",taskList.get(0).getId());
         return map;
     }
 

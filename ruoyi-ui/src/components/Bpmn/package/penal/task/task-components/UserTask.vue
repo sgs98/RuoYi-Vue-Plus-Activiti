@@ -1,7 +1,7 @@
 <template>
   <div style="margin-top: 16px">
     <el-form-item label="处理用户">
-      <el-select filterable allow-create v-model="userTaskForm.assignee" @change="updateElementTask('assignee')">
+      <el-select filterable allow-create v-model="userTaskForm.assignee" clearable @change="updateElementTask('assignee')">
         <el-option v-for="ak in mockData" :key="'ass-' + ak" :label="`用户${ak}`" :value="`user${ak}`" />
       </el-select>
     </el-form-item>
