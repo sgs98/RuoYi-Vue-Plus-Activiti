@@ -138,7 +138,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
                 List<SysUser> userList = iUserService.selectListUserByIds(assigneeList);
                 if(CollectionUtil.isNotEmpty(userList)){
                     list.forEach(e->{
-                        SysUser sysUser = userList.stream().filter(t -> t.getUserId() == e.getAssigneeId()).findFirst().orElse(null);
+                        SysUser sysUser = userList.stream().filter(t -> t.getUserId().compareTo(e.getAssigneeId())==0).findFirst().orElse(null);
                         if(ObjectUtil.isNotEmpty(sysUser)){
                             e.setAssignee(sysUser.getNickName());
                             e.setAssigneeId(sysUser.getUserId());
@@ -397,7 +397,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
                 List<SysUser> userList = iUserService.selectListUserByIds(assigneeList);
                 if(CollectionUtil.isNotEmpty(userList)){
                     taskFinishVoList.forEach(e->{
-                        SysUser sysUser = userList.stream().filter(t -> t.getUserId() == e.getAssigneeId()).findFirst().orElse(null);
+                        SysUser sysUser = userList.stream().filter(t -> t.getUserId().compareTo(e.getAssigneeId())==0).findFirst().orElse(null);
                         if(ObjectUtil.isNotEmpty(sysUser)){
                             e.setAssignee(sysUser.getNickName());
                             e.setAssigneeId(sysUser.getUserId());
@@ -698,7 +698,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
                 List<SysUser> userList = iUserService.selectListUserByIds(assigneeList);
                 if(CollectionUtil.isNotEmpty(userList)){
                     taskFinishVoList.forEach(e->{
-                        SysUser sysUser = userList.stream().filter(t -> t.getUserId() == e.getAssigneeId()).findFirst().orElse(null);
+                        SysUser sysUser = userList.stream().filter(t -> t.getUserId().compareTo(e.getAssigneeId())==0).findFirst().orElse(null);
                         if(ObjectUtil.isNotEmpty(sysUser)){
                             e.setAssignee(sysUser.getNickName());
                             e.setAssigneeId(sysUser.getUserId());
@@ -755,7 +755,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
                 List<SysUser> userList = iUserService.selectListUserByIds(assigneeList);
                 if(CollectionUtil.isNotEmpty(userList)){
                     list.forEach(e->{
-                        SysUser sysUser = userList.stream().filter(t -> t.getUserId() == e.getAssigneeId()).findFirst().orElse(null);
+                        SysUser sysUser = userList.stream().filter(t -> t.getUserId().compareTo(e.getAssigneeId())==0).findFirst().orElse(null);
                         if(ObjectUtil.isNotEmpty(sysUser)){
                             e.setAssignee(sysUser.getNickName());
                             e.setAssigneeId(sysUser.getUserId());
