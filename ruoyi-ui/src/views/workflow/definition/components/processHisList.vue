@@ -179,7 +179,7 @@ export default {
          const deploymentId = row.deploymentId;
          this.$modal.confirm('是否确认删除标识key为"' + row.key + '"的数据项？').then(() => {
            this.loading = true;
-           return del(deploymentId);
+           return del(deploymentId,row.id);
          }).then(() => {
            this.loading = false;
            let data = {id:this.definitionId,key:this.propKey}
