@@ -8,14 +8,6 @@ export function add(data) {
   })
 }
 
-export function edit(data) {
-  return request({
-    url: '/workflow/actNodeAssignee',
-    method: 'put',
-    data: data
-  })
-}
-
 export function del(id) {
   return request({
     url: '/workflow/actNodeAssignee/'+id,
@@ -23,7 +15,7 @@ export function del(id) {
   })
 }
 
-export function getInfo(processDefinitionId,nodeId) {
+export function getInfoSetting(processDefinitionId,nodeId) {
   return request({
     url: `/workflow/actNodeAssignee/${processDefinitionId}/${nodeId}`,
     method: 'get'

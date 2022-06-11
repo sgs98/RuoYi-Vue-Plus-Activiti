@@ -1,27 +1,26 @@
 package com.ruoyi.workflow.domain;
 
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.ruoyi.common.core.domain.BaseEntity;
+import io.swagger.annotations.ApiModel;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
+import lombok.EqualsAndHashCode;
 
-import java.util.Date;
 
 /**
  * @program: ruoyi-vue-plus
- * @description: 任务节点
+ * @description: 审批历史任务节点
  * @author: gssong
  * @created: 2021/11/06 16:12
  */
 @Data
-@NoArgsConstructor
-@Accessors(chain = true)
+@EqualsAndHashCode(callSuper = true)
 @TableName("act_task_Node")
-public class ActTaskNode {
+@ApiModel("审批历史任务节点")
+public class ActTaskNode extends BaseEntity{
 
+    private static final long serialVersionUID = 1L;
     /**
      * 主键
      */
@@ -53,15 +52,4 @@ public class ActTaskNode {
      */
     private Boolean isBack;
 
-    /**
-     * 创建时间
-     */
-    @TableField(fill = FieldFill.INSERT)
-    private Date createTime;
-
-    /**
-     * 更新时间
-     */
-    @TableField(fill = FieldFill.INSERT_UPDATE)
-    private Date updateTime;
 }

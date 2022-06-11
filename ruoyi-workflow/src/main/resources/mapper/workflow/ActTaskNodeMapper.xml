@@ -12,7 +12,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="instanceId" column="instance_id"/>
         <result property="isBack" column="is_back"/>
         <result property="createTime" column="create_time"/>
+        <result property="createBy" column="create_by"/>
         <result property="updateTime" column="update_time"/>
+        <result property="updateBy" column="update_by"/>
     </resultMap>
 
 

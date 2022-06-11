@@ -76,4 +76,11 @@ public class ProcessDefinitionVo implements Serializable {
      */
     @ApiModelProperty("流程部署时间")
     private Date deploymentTime;
+
+    /**
+     * 挂起或激活原因
+     */
+    @ApiModelProperty("挂起或激活原因")
+    private String description;
+
 }

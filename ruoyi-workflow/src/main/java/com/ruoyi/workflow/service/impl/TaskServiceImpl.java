@@ -76,7 +76,6 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
 
 
 
-
     /**
      * @Description: 查询当前用户的待办任务
      * @param: req
@@ -424,15 +423,43 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         if (task.isSuspended()) {
             throw new ServiceException("当前任务已被挂起");
         }
+        ActNodeAssignee nodeAssignee = iActNodeAssigneeService.getInfo(task.getProcessDefinitionId(), task.getTaskDefinitionKey());
         //可驳回的节点
         List<ActTaskNode> taskNodeList = iActTaskNodeService.getListByInstanceId(task.getProcessInstanceId()).stream().filter(e->e.getIsBack()).collect(Collectors.toList());
         map.put("backNodeList",taskNodeList);
+        //当前流程实例状态
+        ActBusinessStatus actBusinessStatus = iActBusinessStatusService.getInfoByProcessInstId(task.getProcessInstanceId());
+        if(ObjectUtil.isEmpty(actBusinessStatus)){
+            throw new ServiceException("当前流程异常，未生成act_business_status对象");
+        }else{
+            map.put("businessStatus",actBusinessStatus);
+        }
         //委托流程
         if(ObjectUtil.isNotEmpty(task.getDelegationState())&&ActConstant.PENDING.equals(task.getDelegationState().name())){
+            ActNodeAssignee actNodeAssignee = new ActNodeAssignee();
+            actNodeAssignee.setIsDelegate(false);
+            actNodeAssignee.setIsTransmit(false);
+            actNodeAssignee.setIsCopy(false);
+            actNodeAssignee.setAddMultiInstance(false);
+            actNodeAssignee.setDeleteMultiInstance(false);
+            map.put("setting",actNodeAssignee);
             map.put("list",new ArrayList<>());
             map.put("isMultiInstance",false);
             return map;
         }
+        //流程定义设置
+        if(ObjectUtil.isNotEmpty(nodeAssignee)){
+            map.put("setting",nodeAssignee);
+        }else{
+            ActNodeAssignee actNodeAssignee = new ActNodeAssignee();
+            actNodeAssignee.setIsDelegate(false);
+            actNodeAssignee.setIsTransmit(false);
+            actNodeAssignee.setIsCopy(false);
+            actNodeAssignee.setAddMultiInstance(false);
+            actNodeAssignee.setDeleteMultiInstance(false);
+            map.put("setting",actNodeAssignee);
+        }
+
         //判断当前是否为会签
         MultiVo isMultiInstance = workFlowUtils.isMultiInstance(task.getProcessDefinitionId(), task.getTaskDefinitionKey());
         if(ObjectUtil.isEmpty(isMultiInstance)){

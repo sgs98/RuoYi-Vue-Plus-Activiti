@@ -10,13 +10,13 @@
                 <el-table-column align="center" prop="version" label="版本号" width="80" >
                 <template slot-scope="{row}"> v{{row.version}}.0</template>
                 </el-table-column>
-                <el-table-column align="center" prop="resourceName" label="流程XML" min-width="190">
+                <el-table-column align="center" prop="resourceName" label="流程XML" min-width="150">
                 <template slot-scope="{row}">
                 <!-- 注意组件上使用原生事件，要加 .active -->
                 <el-link type="primary" @click.native="clickExportXML(row.id)">{{ row.resourceName }}</el-link>
                 </template>
                 </el-table-column>
-                <el-table-column align="center" prop="diagramResourceName" label="流程图片" min-width="240">
+                <el-table-column align="center" prop="diagramResourceName" label="流程图片" min-width="150">
                 <template slot-scope="{row}">
                 <el-link type="primary" @click="clickPreviewImg(row.id)">{{ row.diagramResourceName }}</el-link>
                 </template>
@@ -27,68 +27,80 @@
                     <el-tag type="danger" v-else>挂起</el-tag>
                 </template>
                 </el-table-column>
-                <el-table-column align="center" prop="deploymentTime" label="部署时间" width="160"></el-table-column>
-                <el-table-column label="操作" align="center" width="200" class-name="small-padding fixed-width">
-                <template slot-scope="scope">
-                  <el-dropdown>
-                  <span class="el-dropdown-link">
-                    更多<i class="el-icon-arrow-down el-icon--right"></i>
-                  </span>
-                  <el-dropdown-menu slot="dropdown">
-                      <el-dropdown-item>
-                      <el-button
-                        v-if="scope.row.suspensionState == 1"
-                        @click="clickUpdateProcDefState(scope.row)"
-                        type="text"
-                        size="mini"
-                        icon="el-icon-lock"
-                    >挂起</el-button>
-                    <el-button
-                        v-else type="text"
-                        @click="clickUpdateProcDefState(scope.row)"
-                        size="mini"
-                        icon="el-icon-unlock"
-                    >激活</el-button>
-                    </el-dropdown-item>
-                    <el-dropdown-item>
-                      <el-button
+                <el-table-column align="center" prop="deploymentTime" label="部署时间" width="150"></el-table-column>
+                <el-table-column  align="center" prop="description" :show-overflow-tooltip="true" label="挂起或激活原因" width="150"></el-table-column>
+                <el-table-column label="操作" align="center" width="220" class-name="small-padding fixed-width">
+                  <template slot-scope="scope">
+                    <el-row :gutter="20" class="mb8">
+                      <el-col :span="1.5">
+                        <el-button
+                          v-if="scope.row.suspensionState == 1"
+                          @click="openDialog(scope.row)"
+                          type="text"
+                          size="mini"
+                          icon="el-icon-lock"
+                        >挂起</el-button>
+                        <el-button
+                          v-else type="text"
+                          @click="openDialog(scope.row)"
+                          size="mini"
+                          icon="el-icon-unlock"
+                        >激活</el-button>
+                      </el-col>
+                      <el-col :span="1.5">
+                        <el-button
                           type="text"
                           @click="convertToModel(scope.row)"
                           size="mini"
                           icon="el-icon-sort"
-                      >转换模型</el-button>
-                    </el-dropdown-item>
-                    <el-dropdown-item>
-                      <el-button
-                          size="mini"
-                          type="text"
-                          icon="el-icon-copy-document"
-                          @click="copySetting(scope.row)"
-                      >复制流程</el-button>
-                      </el-dropdown-item>
-
-                    <el-dropdown-item>
-                      <el-button
-                          size="mini"
-                          type="text"
-                          icon="el-icon-setting"
-                          @click="handleSetting(scope.row)"
-                      >设置</el-button>
-                    </el-dropdown-item>
-
-                    <el-dropdown-item>
-                      <el-button
+                        >转换模型</el-button>
+                      </el-col>
+                      <el-col :span="1.5">
+                        <el-button
                           size="mini"
                           type="text"
                           icon="el-icon-delete"
                           @click="handleDelete(scope.row)"
-                      >删除</el-button>
-                    </el-dropdown-item>
-                  </el-dropdown-menu>
-                  </el-dropdown>
-                </template>
+                        >删除</el-button>
+                      </el-col>
+                    </el-row>
+                    <el-row :gutter="20" class="mb8">
+                      <el-col :span="1.5">
+                        <el-button
+                          size="mini"
+                          type="text"
+                          icon="el-icon-setting"
+                          @click="handleSetting(scope.row)"
+                        >设置</el-button>
+                      </el-col>
+                      <el-col :span="1.5">
+                        <el-button
+                          size="mini"
+                          type="text"
+                          icon="el-icon-copy-document"
+                          @click="copySetting(scope.row)"
+                        >复制流程</el-button>
+                      </el-col>
+                    </el-row>
+                  </template>
                 </el-table-column>
             </el-table>
+
+            <el-dialog
+              title="挂起或激活流程"
+              append-to-body
+              :close-on-click-modal="false"
+              :visible.sync="dialogVisible"
+              v-if="dialogVisible"
+              v-loading="loading"
+              width="60%">
+              <el-input  type="textarea" v-model="description" maxlength="300" placeholder="请输入原因"
+              :autosize="{ minRows: 4 }" show-word-limit ></el-input>
+              <span slot="footer" class="dialog-footer">
+                <el-button size="small" @click="dialogVisible = false">取 消</el-button>
+                <el-button type="primary" size="small" @click="clickUpdateProcDefState">确 定</el-button>
+              </span>
+            </el-dialog>
 
             <!-- 预览图片 -->
             <process-preview ref="previewRef" :url="url" :type="type"/>
@@ -117,6 +129,10 @@ export default {
     },
     data() {
         return {
+            // 弹窗
+            dialogVisible: false,
+            // 原因
+            description: '',
             // 弹出层
             visible: false,
             // 流程图
@@ -140,6 +156,8 @@ export default {
             // 表格数据
             list: [],
             type: '',//png,xml
+            // 流程定义对象
+            procedefData: {},
         }
     },
     methods: {
@@ -200,22 +218,33 @@ export default {
         this.url = process.env.VUE_APP_BASE_API+'/workflow/definition/export/png/'+id
         this.$refs.previewRef.visible = true
       },
+      //打开弹窗
+      openDialog(row){
+        this.procedefData = row
+        this.description = row.description
+        this.dialogVisible = true
+      },
       //激活或挂起流程
       clickUpdateProcDefState(row){
         let msg='';
-        if(row.suspensionState===1){
-          msg=`暂停后，此流程下的所有任务都不允许往后流转，您确定暂停【${row.name || row.key}】吗？`
+        if(this.procedefData.suspensionState===1){
+          msg=`暂停后，此流程下的所有任务都不允许往后流转，您确定挂起【${this.procedefData.name || this.procedefData.key}】吗？`
         }else{
-          msg=`启动后，此流程下的所有任务都允许往后流转，您确定启动【${row.name || row.key}】吗？`
+          msg=`启动后，此流程下的所有任务都允许往后流转，您确定激活【${this.procedefData.name || this.procedefData.key}】吗？`
+        }
+        let params = {
+          definitionId: this.procedefData.id,
+          description: this.description
         }
         this.$modal.confirm(msg).then(() => {
            this.loading = true;
-           return updateProcDefState(row.id);
+           return updateProcDefState(params);
          }).then(() => {
            this.loading = false;
            let data = {id:this.definitionId,key:this.propKey}
            this.getList(data);
            this.$modal.msgSuccess("操作成功");
+           this.dialogVisible = false
          }).finally(() => {
            this.loading = false;
          });

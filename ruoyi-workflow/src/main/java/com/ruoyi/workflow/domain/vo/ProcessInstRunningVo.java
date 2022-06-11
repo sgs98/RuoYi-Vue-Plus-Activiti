@@ -1,6 +1,7 @@
 package com.ruoyi.workflow.domain.vo;
 
 import com.alibaba.excel.util.DateUtils;
+import com.ruoyi.workflow.domain.ActBusinessStatus;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -81,4 +82,11 @@ public class ProcessInstRunningVo implements Serializable {
      */
     @ApiModelProperty("当前办理人ID")
     private String currTaskInfoId;
+
+    /**
+     * 流程状态
+     */
+    @ApiModelProperty("流程状态")
+    private ActBusinessStatus actBusinessStatus;
+
 }

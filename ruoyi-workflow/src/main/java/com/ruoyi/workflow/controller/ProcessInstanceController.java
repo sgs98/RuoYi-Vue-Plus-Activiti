@@ -97,17 +97,17 @@ public class ProcessInstanceController {
 
     /**
      * @Description: 挂起或激活流程实例
-     * @param: processInstId
+     * @param: data
      * @return: com.ruoyi.common.core.domain.R<java.lang.Void>
      * @Author: gssong
      * @Date: 2021/10/16
      */
     @ApiOperation("挂起或激活流程实例")
-    @PutMapping("/state/{processInstId}")
+    @PutMapping("/state")
     @Log(title = "流程实例", businessType = BusinessType.UPDATE)
-    public R<Void> updateProcInstState(@PathVariable String processInstId){
+    public R<Void> updateProcInstState(@RequestBody Map<String,Object> data){
         try {
-            processInstanceService.updateProcInstState(processInstId);
+            processInstanceService.updateProcInstState(data);
             return R.ok();
         }catch (Exception e){
             e.printStackTrace();

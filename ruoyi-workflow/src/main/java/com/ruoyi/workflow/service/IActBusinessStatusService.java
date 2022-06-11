@@ -28,10 +28,10 @@ public interface IActBusinessStatusService extends IService<ActBusinessStatus> {
      * 更新业务状态
      * @param businessKey 业务id
      * @param statusEnum 状态值
-     * @param procInstId 流程实例id
+     * @param processInstanceId 流程实例id
      * @return
      */
-    boolean updateState(String businessKey, BusinessStatusEnum statusEnum, String procInstId);
+    boolean updateState(String businessKey, BusinessStatusEnum statusEnum, String processInstanceId);
 
     /**
      * 更新业务状态
@@ -61,4 +61,18 @@ public interface IActBusinessStatusService extends IService<ActBusinessStatus> {
      * @return
      */
     boolean deleteState(String businessKey);
+
+    /**
+     * 根据流程实例id查询流程实例
+     * @param processInstanceId 流程实例id
+     * @return
+     */
+    ActBusinessStatus getInfoByProcessInstId(String processInstanceId);
+
+    /**
+     * 根据流程实例ids查询流程实例
+     * @param processInstanceIds 流程实例id
+     * @return
+     */
+    List<ActBusinessStatus> getInfoByProcessInstIds(List<String> processInstanceIds);
 }

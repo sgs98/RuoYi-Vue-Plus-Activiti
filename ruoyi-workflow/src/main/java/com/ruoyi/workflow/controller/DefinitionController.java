@@ -22,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @program: ruoyi-vue-plus
@@ -132,16 +133,16 @@ public class DefinitionController extends BaseController {
 
     /**
      * @Description: 激活或者挂起流程定义
-     * @param: definitionId 流程定义id
+     * @param: data 参数
      * @return: com.ruoyi.common.core.domain.R<java.lang.Boolean>
      * @Author: gssong
      * @Date: 2021/10/10
      */
     @ApiOperation("激活或者挂起流程定义")
-    @PutMapping("/updateProcDefState/{definitionId}")
+    @PutMapping("/updateProcDefState")
     @Log(title = "流程定义", businessType = BusinessType.UPDATE)
-    public R<Boolean> updateProcDefState(@PathVariable String definitionId){
-        return R.ok(iDefinitionService.updateProcDefState(definitionId));
+    public R<Boolean> updateProcDefState(@RequestBody Map<String,Object> data){
+        return R.ok(iDefinitionService.updateProcDefState(data));
     }
 
     /**

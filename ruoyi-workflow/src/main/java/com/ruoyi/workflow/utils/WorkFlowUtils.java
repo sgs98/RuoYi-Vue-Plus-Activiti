@@ -321,10 +321,14 @@ public class WorkFlowUtils {
                 if(ObjectUtil.isNotEmpty(actBusinessStatus)){
                     businessStatus.set(o,actBusinessStatus);
                 }else{
-                    businessStatus.set(o,new ActBusinessStatus().setStatus(BusinessStatusEnum.DRAFT.getStatus()));
+                    ActBusinessStatus status = new ActBusinessStatus();
+                    status.setStatus(BusinessStatusEnum.DRAFT.getStatus());
+                    businessStatus.set(o,status);
                 }
             }else{
-                businessStatus.set(o,new ActBusinessStatus().setStatus(BusinessStatusEnum.DRAFT.getStatus()));
+                ActBusinessStatus status = new ActBusinessStatus();
+                status.setStatus(BusinessStatusEnum.DRAFT.getStatus());
+                businessStatus.set(o,status);
             }
         }catch (Exception e){
             e.printStackTrace();
