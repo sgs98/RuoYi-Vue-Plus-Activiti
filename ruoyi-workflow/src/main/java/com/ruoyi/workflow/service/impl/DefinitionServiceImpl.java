@@ -128,12 +128,16 @@ public class DefinitionServiceImpl extends WorkflowService implements IDefinitio
      * @Date: 2021/10/7
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public R<Void> deleteDeployment(String deploymentId,String definitionId) {
-        //1.删除部署的流程定义
-        repositoryService.deleteDeployment(deploymentId);
-        iActNodeAssigneeService.delByDefinitionId(definitionId);
-        return R.ok();
+        try {
+            repositoryService.deleteDeployment(deploymentId);
+            iActNodeAssigneeService.delByDefinitionId(definitionId);
+            return R.ok();
+        }catch (Exception e){
+            e.printStackTrace();
+            return R.fail();
+        }
     }
 
     /**

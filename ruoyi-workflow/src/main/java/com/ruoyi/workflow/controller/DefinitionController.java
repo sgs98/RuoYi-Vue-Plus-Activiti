@@ -69,8 +69,8 @@ public class DefinitionController extends BaseController {
 
     /**
      * @Description: 删除流程定义
-     * @param: deploymentId
-     * @param: definitionId
+     * @param: deploymentId 流程部署id
+     * @param: definitionId 流程定义id
      * @return: com.ruoyi.common.core.domain.R<java.lang.Void>
      * @Author: gssong
      * @Date: 2021/10/7
