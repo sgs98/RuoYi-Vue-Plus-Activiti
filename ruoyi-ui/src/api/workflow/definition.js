@@ -27,13 +27,14 @@ export function list(query) {
 
 /**
  *
- * @param {流程定义id} definitionId
+ * @param {参数} data
  * @returns
  */
-export function updateProcDefState(definitionId) {
+export function updateProcDefState(data) {
   return request({
-    url: '/workflow/definition/updateProcDefState/'+definitionId,
-    method: 'put'
+    url: '/workflow/definition/updateProcDefState',
+    method: 'put',
+    data: data
   })
 }
 

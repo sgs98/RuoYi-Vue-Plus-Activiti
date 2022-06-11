@@ -307,6 +307,14 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
         }
         List<ProcessInstRunningVo> list = null;
         if (CollectionUtil.isNotEmpty(processInstRunningVoList)) {
+            List<String> processInstanceIds = processInstRunningVoList.stream().map(ProcessInstRunningVo::getProcessInstanceId).collect(Collectors.toList());
+            List<ActBusinessStatus> businessStatusList = iActBusinessStatusService.getInfoByProcessInstIds(processInstanceIds);
+            processInstRunningVoList.forEach(e->{
+                ActBusinessStatus actBusinessStatus = businessStatusList.stream().filter(t -> t.getProcessInstanceId().equals(e.getProcessInstanceId())).findFirst().orElse(null);
+                if(ObjectUtil.isNotEmpty(actBusinessStatus)){
+                    e.setActBusinessStatus(actBusinessStatus);
+                }
+            });
             list = processInstRunningVoList.stream().sorted(Comparator.comparing(ProcessInstRunningVo::getStartTime).reversed()).collect(Collectors.toList());
         }
         return new TableDataInfo(list, total);
@@ -314,18 +322,20 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
 
     /**
      * @Description: 挂起或激活流程实例
-     * @param: processInstId
+     * @param: data
      * @return: void
      * @Author: gssong
      * @Date: 2021/10/16
      */
     @Override
-    public void updateProcInstState(String processInstId) {
+    @Transactional(rollbackFor = Exception.class)
+    public void updateProcInstState(Map<String,Object> data) {
+        String processInstId = data.get("processInstId").toString();
+        String reason = data.get("reason").toString();
         // 1. 查询指定流程实例的数据
         ProcessInstance processInstance = runtimeService.createProcessInstanceQuery()
             .processInstanceId(processInstId)
             .singleResult();
-
         // 2. 判断当前流程实例的状态
         if (processInstance.isSuspended()) {
             // 如果是已挂起，则更新为激活状态
@@ -334,6 +344,12 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
             // 如果是已激活，则更新为挂起状态
             runtimeService.suspendProcessInstanceById(processInstId);
         }
+        ActBusinessStatus businessStatus = iActBusinessStatusService.getInfoByProcessInstId(processInstId);
+        if(ObjectUtil.isEmpty(businessStatus)){
+            throw new ServiceException("当前流程异常，未生成act_business_status对象");
+        }
+        businessStatus.setSuspendedReason(reason);
+        iActBusinessStatusService.updateById(businessStatus);
     }
 
     /**

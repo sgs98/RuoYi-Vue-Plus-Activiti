@@ -17,6 +17,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="multiple" column="multiple"/>
         <result property="multipleColumn" column="multiple_column"/>
         <result property="isBack" column="is_back"/>
+        <result property="isDelegate" column="is_delegate"/>
+        <result property="isTransmit" column="is_transmit"/>
+        <result property="isCopy" column="is_copy"/>
+        <result property="addMultiInstance" column="add_multi_instance"/>
+        <result property="deleteMultiInstance" column="delete_multi_instance"/>
         <result property="createTime" column="create_time"/>
         <result property="createBy" column="create_by"/>
         <result property="updateTime" column="update_time"/>

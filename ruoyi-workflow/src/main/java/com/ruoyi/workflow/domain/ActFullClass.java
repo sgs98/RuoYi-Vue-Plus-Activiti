@@ -1,12 +1,9 @@
 package com.ruoyi.workflow.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
+import io.swagger.annotations.ApiModel;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
-import java.io.Serializable;
-import java.util.Date;
-import java.math.BigDecimal;
+import lombok.EqualsAndHashCode;
 
 import com.ruoyi.common.core.domain.BaseEntity;
 
@@ -17,8 +14,9 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * @date 2021-12-16
  */
 @Data
-@Accessors(chain = true)
+@EqualsAndHashCode(callSuper = true)
 @TableName("act_full_class")
+@ApiModel("业务规则对象")
 public class ActFullClass extends BaseEntity {
 
     private static final long serialVersionUID=1L;

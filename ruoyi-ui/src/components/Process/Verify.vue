@@ -4,7 +4,7 @@
   <el-dialog  v-if="visible"  title="提交申请" :visible.sync="visible"  width="800px" :close-on-click-modal="false"
   append-to-body destroy-on-close @close="closeDialog" >
     <el-form v-loading="loading"  :rules="rules" ref="formData" :model="formData" status-icon >
-      <el-form-item label="审批意见" prop="message" label-width="120px">
+      <el-form-item label="审批意见" prop="message" v-if="businessStatus.status==='waiting'" label-width="120px">
         <el-input  type="textarea" v-model="formData.message" maxlength="300" placeholder="请输入审批意见" :autosize="{ minRows: 4 }" show-word-limit ></el-input>
       </el-form-item>
       <el-form-item v-if="nextNodes && nextNodes.length > 0" label="下一步审批人"  prop="assigneeMap" label-width="120px" >
@@ -16,7 +16,7 @@
           </el-input>
         </div>
       </el-form-item>
-      <el-form-item label="是否抄送" prop="isCopy" label-width="120px" >
+      <el-form-item label="是否抄送" prop="isCopy" label-width="120px" v-if="setting.isCopy">
          <el-col :span="12">
            <div class="grid-content bg-purple">
              <el-radio-group v-model="formData.isCopy" size="small">
@@ -37,10 +37,10 @@
       <el-form-item align="center">
         <el-button type="primary" @click="submitForm('formData')" size="small">提交</el-button>
         <el-button type="primary" v-if="backNodeList && backNodeList.length>0" @click="openBack()" size="small">退回</el-button>
-        <el-button type="primary" v-if="isMultiInstance" @click="addMultiClick()" size="small">加签</el-button>
-        <el-button type="primary" v-if="multiList && multiList.length>0" @click="deleteMultiClick()" size="small">减签</el-button>
-        <el-button type="primary" @click="delegateClick()" size="small">委托</el-button>
-        <el-button type="primary" @click="transmitClick()" size="small">转办</el-button>
+        <el-button type="primary" v-if="isMultiInstance && setting.addMultiInstance" @click="addMultiClick()" size="small">加签</el-button>
+        <el-button type="primary" v-if="multiList && multiList.length>0 && setting.deleteMultiInstance" @click="deleteMultiClick()" size="small">减签</el-button>
+        <el-button type="primary" v-if="setting.isDelegate" @click="delegateClick()" size="small">委托</el-button>
+        <el-button type="primary" v-if="setting.isTransmit" @click="transmitClick()" size="small">转办</el-button>
         <el-button size="small" @click="closeDialog()">取消</el-button>
       </el-form-item>
     </el-form>
@@ -200,7 +200,7 @@ export default {
       transmitUserList: [],
       //加签用户反选
       addMultiUserList: [],
-      //是否为并行会签
+      //是否为会签
       isMultiInstance: false,
       //加签
       addMultiForm: {},
@@ -209,7 +209,11 @@ export default {
       //可以减签的集合
       multiList: [],
       //可驳回的集合
-      backNodeList: []
+      backNodeList: [],
+      //按钮设置
+      setting: {},
+      //流程状态
+      businessStatus: {}
     };
   },
 
@@ -228,6 +232,8 @@ export default {
           this.isMultiInstance = data.isMultiInstance;
           this.multiList = data.multiList;
           this.backNodeList = data.backNodeList;
+          this.setting = data.setting
+          this.businessStatus = data.businessStatus
           this.loading = false;
         } catch (error) {
           this.loading = false;

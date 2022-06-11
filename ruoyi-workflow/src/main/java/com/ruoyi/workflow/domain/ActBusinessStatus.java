@@ -1,11 +1,10 @@
 package com.ruoyi.workflow.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.ruoyi.common.core.domain.BaseEntity;
+import io.swagger.annotations.ApiModel;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
-import java.io.Serializable;
-import java.util.Date;
+import lombok.EqualsAndHashCode;
 
 /**
  * 业务状态实体对象 act_business_status
@@ -14,13 +13,12 @@ import java.util.Date;
  * @date 2021-10-10
  */
 @Data
-@NoArgsConstructor
-@Accessors(chain = true)
+@EqualsAndHashCode(callSuper = true)
 @TableName("act_business_status")
-public class ActBusinessStatus implements Serializable {
+@ApiModel("业务状态实体对象")
+public class ActBusinessStatus  extends BaseEntity{
 
     private static final long serialVersionUID=1L;
-
 
     /**
      * ID
@@ -49,15 +47,8 @@ public class ActBusinessStatus implements Serializable {
     private String classFullName;
 
     /**
-     * 创建时间
+     * 挂起流程原因
      */
-    @TableField(fill = FieldFill.INSERT)
-    private Date createTime;
-
-    /**
-     * 更新时间
-     */
-    @TableField(fill = FieldFill.INSERT_UPDATE)
-    private Date updateTime;
+    private String suspendedReason;
 
 }

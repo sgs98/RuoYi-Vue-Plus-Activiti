@@ -57,6 +57,7 @@
           </template>
         </el-table-column>
         <el-table-column  align="center" prop="deploymentTime" label="部署时间" width="150"></el-table-column>
+        <el-table-column  align="center" prop="description" :show-overflow-tooltip="true" label="挂起或激活原因" width="150"></el-table-column>
         <el-table-column label="操作" align="center" width="210" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-row :gutter="20" class="mb8">
@@ -72,14 +73,14 @@
             <el-col :span="1.5">
               <el-button
                 v-if="scope.row.suspensionState == 1"
-                @click="clickUpdateProcDefState(scope.row)"
+                @click="openDialog(scope.row)"
                 type="text"
                 size="mini"
                 icon="el-icon-lock"
               >挂起</el-button>
               <el-button
                 v-else type="text"
-                @click="clickUpdateProcDefState(scope.row)"
+                @click="openDialog(scope.row)"
                 size="mini"
                 icon="el-icon-unlock"
               >激活</el-button>
@@ -120,7 +121,20 @@
           :page.sync="queryParams.pageNum"
           :limit.sync="queryParams.pageSize"
           @pagination="getList" />
-
+    <el-dialog
+      title="挂起或激活流程"
+      :close-on-click-modal="false"
+      :visible.sync="dialogVisible"
+      v-if="dialogVisible"
+      v-loading="loading"
+      width="60%">
+      <el-input  type="textarea" v-model="description" maxlength="300" placeholder="请输入原因"
+      :autosize="{ minRows: 4 }" show-word-limit ></el-input>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="small" @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" size="small" @click="clickUpdateProcDefState">确 定</el-button>
+      </span>
+    </el-dialog>
     <!-- 部署流程文件 -->
     <process-deploy ref="deployProcess" />
 
@@ -151,6 +165,10 @@ export default {
     components: { processDeploy, processPreview,processHisList,processSetting },
     data() {
         return {
+            // 弹窗
+            dialogVisible: false,
+            // 原因
+            description: '',
             // 流程图
             url: null,
             // 流程key
@@ -184,7 +202,10 @@ export default {
                 name: undefined,
                 key : undefined
             },
+            // 设置弹窗
             settingVisible: false,
+            // 流程定义对象
+            procedefData: {},
             type: '',//png,xml
             screenHeight: document.body.clientHeight
         }
@@ -274,21 +295,32 @@ export default {
         this.url = process.env.VUE_APP_BASE_API+'/workflow/definition/export/png/'+id
         this.$refs.previewRef.visible = true
       },
+      //打开弹窗
+      openDialog(row){
+        this.procedefData = row
+        this.description = row.description
+        this.dialogVisible = true
+      },
       //激活或挂起流程
-      clickUpdateProcDefState(row){
+      clickUpdateProcDefState(){
         let msg='';
-        if(row.suspensionState===1){
-          msg=`暂停后，此流程下的所有任务都不允许往后流转，您确定挂起【${row.name || row.key}】吗？`
+        if(this.procedefData.suspensionState===1){
+          msg=`暂停后，此流程下的所有任务都不允许往后流转，您确定挂起【${this.procedefData.name || this.procedefData.key}】吗？`
         }else{
-          msg=`启动后，此流程下的所有任务都允许往后流转，您确定激活【${row.name || row.key}】吗？`
+          msg=`启动后，此流程下的所有任务都允许往后流转，您确定激活【${this.procedefData.name || this.procedefData.key}】吗？`
+        }
+        let params = {
+          definitionId: this.procedefData.id,
+          description: this.description
         }
         this.$modal.confirm(msg).then(() => {
            this.loading = true;
-           return updateProcDefState(row.id);
+           return updateProcDefState(params);
          }).then(() => {
            this.loading = false;
            this.getList();
            this.$modal.msgSuccess("操作成功");
+           this.dialogVisible = false
          }).finally(() => {
            this.loading = false;
          });

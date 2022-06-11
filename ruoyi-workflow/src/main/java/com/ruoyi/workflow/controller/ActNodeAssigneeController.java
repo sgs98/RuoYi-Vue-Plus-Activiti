@@ -4,7 +4,6 @@ import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.validate.AddGroup;
-import com.ruoyi.common.core.validate.EditGroup;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.workflow.domain.ActNodeAssignee;
 import com.ruoyi.workflow.service.IActNodeAssigneeService;
@@ -46,20 +45,6 @@ public class ActNodeAssigneeController extends BaseController {
     }
 
     /**
-     * @Description: 修改流程定义设置
-     * @param: actNodeAssignee
-     * @return: com.ruoyi.common.core.domain.R<com.ruoyi.workflow.domain.ActNodeAssignee>
-     * @Author: gssong
-     * @Date: 2021/11/21
-     */
-    @PutMapping
-    @ApiOperation("修改流程定义设置")
-    @Log(title = "流程定义设置", businessType = BusinessType.UPDATE)
-    public R<ActNodeAssignee> edit(@Validated(EditGroup.class)  @RequestBody ActNodeAssignee actNodeAssignee){
-        return R.ok(iActNodeAssigneeService.edit(actNodeAssignee));
-    }
-
-    /**
      * @Description: 按照流程定义id和流程节点id查询流程定义设置
      * @param: actNodeAssignee
      * @return: com.ruoyi.common.core.domain.R<com.ruoyi.workflow.domain.ActNodeAssignee>
@@ -68,8 +53,8 @@ public class ActNodeAssigneeController extends BaseController {
      */
     @GetMapping("/{processDefinitionId}/{nodeId}")
     @ApiOperation("按照流程定义id和流程节点id查询流程定义设置")
-    public R<ActNodeAssignee> getInfo(@PathVariable String processDefinitionId,@PathVariable String nodeId){
-        ActNodeAssignee nodeAssignee = iActNodeAssigneeService.getInfo(processDefinitionId,nodeId);
+    public R<ActNodeAssignee> getInfoSetting(@PathVariable String processDefinitionId,@PathVariable String nodeId){
+        ActNodeAssignee nodeAssignee = iActNodeAssigneeService.getInfoSetting(processDefinitionId,nodeId);
         return R.ok(nodeAssignee);
     }
 

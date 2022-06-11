@@ -22,11 +22,12 @@ public interface IActNodeAssigneeService extends IService<ActNodeAssignee> {
     ActNodeAssignee add(ActNodeAssignee actNodeAssignee);
 
     /**
-     * 修改流程定义设置
-     * @param actNodeAssignee
+     * 按照流程定义id和流程节点id查询流程定义设置
+     * @param processDefinitionId
+     * @param nodeId
      * @return
      */
-    ActNodeAssignee edit(ActNodeAssignee actNodeAssignee);
+    ActNodeAssignee getInfo(String processDefinitionId, String nodeId);
 
     /**
      * 按照流程定义id和流程节点id查询流程定义设置
@@ -34,7 +35,7 @@ public interface IActNodeAssigneeService extends IService<ActNodeAssignee> {
      * @param nodeId
      * @return
      */
-    ActNodeAssignee getInfo(String processDefinitionId, String nodeId);
+    ActNodeAssignee getInfoSetting(String processDefinitionId, String nodeId);
 
     /**
      * 按照流程定义id查询

@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.Map;
 
 public interface IDefinitionService {
     /**
@@ -56,10 +57,10 @@ public interface IDefinitionService {
 
     /**
      * 激活或者挂起流程定义
-     * @param definitionId
+     * @param data
      * @return
      */
-    Boolean updateProcDefState(String definitionId);
+    Boolean updateProcDefState(Map<String,Object> data);
 
     /**
      * 查询流程环节

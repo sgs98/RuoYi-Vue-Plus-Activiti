@@ -20,4 +20,9 @@ public class ActProcessNodeVo {
      * 流程定义id
      */
     private String processDefinitionId;
+
+    /**
+     * 索引下标
+     */
+    private Integer index;
 }
