@@ -2,9 +2,9 @@ package com.ruoyi.workflow.controller;
 
 import java.util.List;
 import java.util.Arrays;
-
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.ruoyi.common.core.domain.PageQuery;
+import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.*;
@@ -24,9 +24,6 @@ import com.ruoyi.workflow.domain.vo.ActFullClassVo;
 import com.ruoyi.workflow.domain.bo.ActFullClassBo;
 import com.ruoyi.workflow.service.IActFullClassService;
 import com.ruoyi.common.core.page.TableDataInfo;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiOperation;
 
 /**
  * 业务规则Controller
@@ -69,11 +66,12 @@ public class ActFullClassController extends BaseController {
      * 获取业务规则详细信息
      */
     @ApiOperation("获取业务规则详细信息")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "id",value = "主键",required = true)
+    })
     @SaCheckPermission("workflow:fullClass:query")
     @GetMapping("/{id}")
-    public R<ActFullClassVo> getInfo(@ApiParam("主键")
-                                                  @NotNull(message = "主键不能为空")
-                                                  @PathVariable("id") Long id) {
+    public R<ActFullClassVo> getInfo(@NotNull(message = "主键不能为空") @PathVariable("id") Long id) {
         return R.ok(iActFullClassService.queryById(id));
     }
 
@@ -105,12 +103,13 @@ public class ActFullClassController extends BaseController {
      * 删除业务规则
      */
     @ApiOperation("删除业务规则")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "ids",value = "主键串",required = true)
+    })
     @SaCheckPermission("workflow:fullClass:remove")
     @Log(title = "业务规则" , businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
-    public R<Void> remove(@ApiParam("主键串")
-                                       @NotEmpty(message = "主键不能为空")
-                                       @PathVariable Long[] ids) {
+    public R<Void> remove(@NotEmpty(message = "主键不能为空") @PathVariable Long[] ids) {
         return toAjax(iActFullClassService.deleteWithValidByIds(Arrays.asList(ids), true) ? 1 : 0);
     }
 }

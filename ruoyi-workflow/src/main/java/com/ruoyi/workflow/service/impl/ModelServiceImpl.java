@@ -377,7 +377,7 @@ public class ModelServiceImpl extends WorkflowService implements IModelService {
                     repositoryService.addModelEditorSource(modelData.getId(), xmlBytes);
                     InputStream inputStream = repositoryService.getResourceAsStream(pd.getDeploymentId(), pd.getDiagramResourceName());
                     if(inputStream!=null){
-                        repositoryService.addModelEditorSourceExtra(modelData.getId(), IOUtils.toByteArray(inputStream));
+                        repositoryService.addModelEditorSourceExtra(modelData.getId(),IOUtils.toByteArray(inputStream));
                     }
                     return true;
                 }

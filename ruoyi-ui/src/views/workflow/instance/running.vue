@@ -32,42 +32,42 @@
         <el-table v-loading="loading" :data="dataList" @selection-change="handleSelectionChange">
             <el-table-column type="selection" width="55" align="center" />
             <el-table-column fixed align="center" type="index" label="序号" width="50"></el-table-column>
-            <el-table-column fixed align="center" prop="name" label="流程定义名称"></el-table-column>
-            <el-table-column  align="center" prop="processDefinitionKey" label="流程定义KEY" ></el-table-column>
+            <el-table-column fixed align="center" prop="name" label="流程定义名称" width="120"></el-table-column>
+            <el-table-column  align="center" prop="processDefinitionKey" label="流程定义KEY" width="120"></el-table-column>
             <el-table-column align="center" prop="processDefinitionVersion" label="版本号" width="90" >
               <template slot-scope="{row}"> v{{row.processDefinitionVersion}}.0</template>
             </el-table-column>
             <el-table-column  align="center" prop="startUserNickName" label="流程发起人"  min-width="130"></el-table-column>
-            <el-table-column  align="center" prop="isSuspended" label="流程状态" width="160">
+            <el-table-column  align="center" prop="isSuspended" label="流程状态" width="75">
               <template slot-scope="scope">
                 <el-tag type="success" v-if="scope.row.isSuspended=='激活'">激活</el-tag>
                 <el-tag type="danger" v-else>挂起</el-tag>
               </template>
             </el-table-column>
-            <el-table-column  align="center" prop="currTaskInfo" :show-overflow-tooltip="true" label="当前办理人" width="160"></el-table-column>
-            <el-table-column  align="center" prop="businessKey" :show-overflow-tooltip="true" label="流程关联业务ID" width="160"></el-table-column>
-            <el-table-column  align="center" prop="startTime" label="流程启动时间" width="160"></el-table-column>
-            <el-table-column  align="center" prop="actBusinessStatus.suspendedDescription" :show-overflow-tooltip="true" label="挂起或激活原因" width="150"></el-table-column>
-            <el-table-column label="操作" align="center" width="160" class-name="small-padding fixed-width">
+            <el-table-column  align="center" prop="currTaskInfo" :show-overflow-tooltip="true" label="当前办理人" width="100"></el-table-column>
+            <el-table-column  align="center" prop="businessKey" :show-overflow-tooltip="true" label="流程关联业务ID" width="120"></el-table-column>
+            <el-table-column  align="center" prop="startTime" :show-overflow-tooltip="true" label="流程启动时间" width="100"></el-table-column>
+            <el-table-column  align="center" prop="actBusinessStatus.suspendedReason" :show-overflow-tooltip="true" label="挂起或激活原因" width="150"></el-table-column>
+            <el-table-column label="操作" align="center" width="120" class-name="small-padding fixed-width">
             <template slot-scope="scope">
               <el-row :gutter="10" class="mb8">
-                <el-col :span="1.5">
-                  <el-button size="mini" type="text"  icon="el-icon-delete" @click="handleDelete(scope.row)">删除</el-button>
-                </el-col>
                 <el-col :span="1.5">
                   <el-button
                   v-if="scope.row.isSuspended == '激活'"
                   @click="openDialog(scope.row)"
                   type="text"
                   size="mini"
-                  icon="el-icon-sort"
+                  icon="el-icon-lock"
                 >挂起</el-button>
                 <el-button
                   v-else type="text"
                   @click="openDialog(scope.row)"
                   size="mini"
-                  icon="el-icon-sort"
+                  icon="el-icon-unlock"
                 >激活</el-button>
+                </el-col>
+                <el-col :span="1.5">
+                  <el-button size="mini" type="text"  icon="el-icon-delete" @click="handleDelete(scope.row)">删除</el-button>
                 </el-col>
               </el-row>
             </template>
@@ -84,13 +84,12 @@
             :close-on-click-modal="false"
             :visible.sync="dialogVisible"
             v-if="dialogVisible"
-            v-loading="loading"
             width="60%">
-            <el-input  type="textarea" v-model="description" maxlength="300" placeholder="请输入原因"
+            <el-input  type="textarea" v-model="reason" maxlength="300" placeholder="请输入原因"
             :autosize="{ minRows: 4 }" show-word-limit ></el-input>
             <span slot="footer" class="dialog-footer">
+              <el-button type="primary" size="small" v-loading = "buttonLoading" @click="clickUpdateProcDefState">确 定</el-button>
               <el-button size="small" @click="dialogVisible = false">取 消</el-button>
-              <el-button type="primary" size="small" @click="clickUpdateProcDefState">确 定</el-button>
             </span>
           </el-dialog>
     </div>
@@ -105,13 +104,11 @@
         // 弹窗
         dialogVisible: false,
         // 原因
-        description: '',
+        reason: '',
         //按钮loading
         buttonLoading: false,
         // 遮罩层
         loading: true,
-        // 导出遮罩层
-        exportLoading: false,
         // 选中数组
         ids: [],
         // 非单个禁用
@@ -182,7 +179,11 @@
       //打开弹窗
       openDialog(row){
         this.processInstanceData = row
-        this.description = row.actBusinessStatus.suspendedDescription
+        if(row.actBusinessStatus.suspendedReason === null){
+          this.reason = ''
+        }else{
+          this.reason = row.actBusinessStatus.suspendedReason
+        }
         this.dialogVisible = true
       },
       // 激活或挂起流程
@@ -195,18 +196,18 @@
         }
         let params = {
           processInstId: this.processInstanceData.processInstanceId,
-          description: this.description
+          reason: this.reason
         }
         this.$modal.confirm(msg).then(() => {
-           this.loading = true;
+           this.buttonLoading = true;
            return api.state(params);
          }).then(() => {
-           this.loading = false;
+           this.buttonLoading = false;
            this.getList();
            this.$modal.msgSuccess("操作成功");
            this.dialogVisible = false
          }).finally(() => {
-           this.loading = false;
+           this.buttonLoading = false;
          });
 
       }

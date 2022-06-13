@@ -45,7 +45,7 @@ public interface IActNodeAssigneeService extends IService<ActNodeAssignee> {
     List<ActNodeAssignee> getInfoByProcessDefinitionId(String processDefinitionId);
 
     /**
-     * 删除
+     * 删除流程定义设置
      * @param id
      * @return
      */
@@ -67,7 +67,7 @@ public interface IActNodeAssigneeService extends IService<ActNodeAssignee> {
     Boolean delByDefinitionIdAndNodeId(String definitionId,String nodeId);
 
     /**
-     * 复制为最新流程定义
+     * 复制给最新流程定义设置
      * @param id
      * @param key
      * @return

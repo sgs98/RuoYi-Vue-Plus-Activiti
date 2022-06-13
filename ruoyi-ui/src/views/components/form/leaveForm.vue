@@ -51,7 +51,7 @@
       <div slot="footer" v-show="parentTaskId===null" class="dialog-footer">
         <el-button :loading="buttonLoading" size="mini" type="info" @click="submitForm">暂存</el-button>
         <el-button :loading="buttonLoading" size="mini" type="primary" @click="submitForm">提交</el-button>
-        <el-button @click="cancel">取 消</el-button>
+        <el-button size="mini" @click="cancel">取 消</el-button>
       </div>
       <verify ref="verifyRef" :taskId="taskId" @callSubmit="callSubmit" :taskVariables="taskVariables"></verify>
   </div>

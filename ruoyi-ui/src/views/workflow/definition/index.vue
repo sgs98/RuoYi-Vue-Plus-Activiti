@@ -126,13 +126,12 @@
       :close-on-click-modal="false"
       :visible.sync="dialogVisible"
       v-if="dialogVisible"
-      v-loading="loading"
       width="60%">
       <el-input  type="textarea" v-model="description" maxlength="300" placeholder="请输入原因"
       :autosize="{ minRows: 4 }" show-word-limit ></el-input>
       <span slot="footer" class="dialog-footer">
+        <el-button type="primary" size="small" v-loading = "buttonLoading" @click="clickUpdateProcDefState">确 定</el-button>
         <el-button size="small" @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" size="small" @click="clickUpdateProcDefState">确 定</el-button>
       </span>
     </el-dialog>
     <!-- 部署流程文件 -->
@@ -179,8 +178,6 @@ export default {
             buttonLoading: false,
             // 遮罩层
             loading: true,
-            // 导出遮罩层
-            exportLoading: false,
             // 选中数组
             ids: [],
             // 非单个禁用
@@ -298,7 +295,11 @@ export default {
       //打开弹窗
       openDialog(row){
         this.procedefData = row
-        this.description = row.description
+        if(row.description === null){
+          this.description = ''
+        }else{
+          this.description = row.description
+        }
         this.dialogVisible = true
       },
       //激活或挂起流程
@@ -314,15 +315,15 @@ export default {
           description: this.description
         }
         this.$modal.confirm(msg).then(() => {
-           this.loading = true;
+           this.buttonLoading = true;
            return updateProcDefState(params);
          }).then(() => {
-           this.loading = false;
+           this.buttonLoading = false;
            this.getList();
            this.$modal.msgSuccess("操作成功");
            this.dialogVisible = false
          }).finally(() => {
-           this.loading = false;
+           this.buttonLoading = false;
          });
       },
       //历史版本

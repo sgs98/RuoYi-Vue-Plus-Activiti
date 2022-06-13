@@ -212,6 +212,8 @@ swagger:
       basePackage: com.ruoyi.web
     - name: 3.代码生成模块
       basePackage: com.ruoyi.generator
+    - name: 4.工作流模块
+      basePackage: com.ruoyi.workflow
 
 knife4j:
   # 是否开启Knife4j增强模式

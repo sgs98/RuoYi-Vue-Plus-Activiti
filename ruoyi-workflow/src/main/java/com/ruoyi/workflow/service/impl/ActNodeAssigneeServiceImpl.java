@@ -151,7 +151,7 @@ public class ActNodeAssigneeServiceImpl extends ServiceImpl<ActNodeAssigneeMappe
     }
 
     /**
-     * @Description: 删除
+     * @Description: 删除流程定义设置
      * @param: id
      * @return: java.lang.Boolean
      * @author: gssong
@@ -206,7 +206,7 @@ public class ActNodeAssigneeServiceImpl extends ServiceImpl<ActNodeAssigneeMappe
     }
 
     /**
-     * @Description: 复制流程定义
+     * @Description: 复制给最新流程定义设置
      * @param: id
      * @param: key 流程定义key
      * @return: java.lang.Boolean
