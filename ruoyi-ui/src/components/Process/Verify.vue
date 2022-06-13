@@ -52,7 +52,7 @@
   <sys-user :propUserList="copyUserList" ref="userCopyRef" @confirmUser="confirmCopyUser"/>
   <!-- 选择人员组件结束 -->
   <!-- 委托申请开始 -->
-  <el-dialog :close-on-click-modal="false" title="委托申请" :visible.sync="delegateVisible" width="500px"  append-to-body>
+  <el-dialog :close-on-click-modal="false" title="委托申请" :visible.sync="delegateVisible" width="700px"  append-to-body>
     <el-form  ref="delegateData" :model="delegateForm" status-icon >
       <!-- <el-form-item label-width="80px" label="审批意见">
         <el-input  type="textarea" v-model="delegateForm.message" maxlength="300"  placeholder="请输入审批意见" :autosize="{ minRows: 4 }" show-word-limit ></el-input>
@@ -71,7 +71,7 @@
   </el-dialog>
   <!-- 委托申请结束 -->
   <!-- 转办申请开始 -->
-  <el-dialog :close-on-click-modal="false" title="转发申请" :visible.sync="transmitVisible" width="500px"  append-to-body>
+  <el-dialog :close-on-click-modal="false" title="转发申请" :visible.sync="transmitVisible" width="700px"  append-to-body>
     <el-form  ref="transmitData" :model="transmitForm" :rules="transmitRules"  status-icon >
       <el-form-item label-width="80px" label="审批意见">
         <el-input  type="textarea" v-model="transmitForm.message" maxlength="300"  placeholder="请输入审批意见" :autosize="{ minRows: 4 }" show-word-limit ></el-input>
@@ -90,7 +90,7 @@
   </el-dialog>
   <!-- 转办申请结束 -->
   <!-- 加签开始 -->
-  <el-dialog  :close-on-click-modal="false" title="加签" :visible.sync="addMultiVisible" width="500px"  append-to-body>
+  <el-dialog  :close-on-click-modal="false" title="加签" :visible.sync="addMultiVisible" width="700px"  append-to-body>
     <el-form  :model="addMultiForm" status-icon >
       <el-form-item label-width="80px" label="加签人" prop="nickNames">
         <el-input placeholder="请选择加签人" readonly v-model="addMultiForm.nickNames" >
@@ -106,12 +106,12 @@
   </el-dialog>
   <!-- 加签结束 -->
   <!-- 减签开始 -->
-  <el-dialog :close-on-click-modal="false" title="减签" :visible.sync="deleteMultiVisible" width="500px"  append-to-body>
+  <el-dialog :close-on-click-modal="false" title="减签" :visible.sync="deleteMultiVisible" width="700px"  append-to-body>
     <el-table border  @selection-change="handleSelectionMultiList" :data="multiList" style="width: 100%">
       <el-table-column type="selection" width="55"/>
-      <el-table-column prop="name" label="任务名称" width="180"/>
-      <el-table-column prop="assignee" label="办理人" width="180"/>
-      <el-table-column prop="assigneeId" v-show="false" label="办理人ID" width="180"/>
+      <el-table-column prop="name" label="任务名称" width="200"/>
+      <el-table-column prop="assignee" label="办理人" width="200"/>
+      <el-table-column prop="assigneeId" v-show="false" label="办理人ID" width="200"/>
     </el-table>
     <span slot="footer" class="dialog-footer">
       <el-button size="small" type="primary" @click="deleteMultiSubmit()">确定</el-button>
