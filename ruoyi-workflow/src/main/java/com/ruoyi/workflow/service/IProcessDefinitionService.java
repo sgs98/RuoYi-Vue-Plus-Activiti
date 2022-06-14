@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
 
-public interface IDefinitionService {
+public interface IProcessDefinitionService {
     /**
      * 查询流程定义列表
      * @param defReq

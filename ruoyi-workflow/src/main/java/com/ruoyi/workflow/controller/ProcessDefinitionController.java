@@ -8,7 +8,7 @@ import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.workflow.domain.bo.DefREQ;
 import com.ruoyi.workflow.domain.vo.ActProcessNodeVo;
 import com.ruoyi.workflow.domain.vo.ProcessDefinitionVo;
-import com.ruoyi.workflow.service.IDefinitionService;
+import com.ruoyi.workflow.service.IProcessDefinitionService;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -30,9 +30,9 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/workflow/definition")
-public class DefinitionController extends BaseController {
+public class ProcessDefinitionController extends BaseController {
 
-    private final IDefinitionService iDefinitionService;
+    private final IProcessDefinitionService iProcessDefinitionService;
 
     /**
      * @Description: 查询流程定义列表
@@ -44,7 +44,7 @@ public class DefinitionController extends BaseController {
     @ApiOperation("查询流程定义列表")
     @GetMapping("/list")
     public TableDataInfo<ProcessDefinitionVo> getByPage(DefREQ defReq){
-        return iDefinitionService.getByPage(defReq);
+        return iProcessDefinitionService.getByPage(defReq);
     }
 
     /**
@@ -57,7 +57,7 @@ public class DefinitionController extends BaseController {
     @ApiOperation("查询历史流程定义列表")
     @GetMapping("/hisList")
     public R<List<ProcessDefinitionVo>> getHisByPage(DefREQ defReq){
-        List<ProcessDefinitionVo> definitionVoList= iDefinitionService.getHisByPage(defReq);
+        List<ProcessDefinitionVo> definitionVoList= iProcessDefinitionService.getHisByPage(defReq);
         return R.ok(definitionVoList);
     }
 
@@ -79,7 +79,7 @@ public class DefinitionController extends BaseController {
     @DeleteMapping("/{deploymentId}/{definitionId}")
     public R<Void> deleteDeployment(@NotBlank(message = "流程部署id不能为空")  @PathVariable String deploymentId,
                                     @NotBlank(message = "流程定义id不能为空") @PathVariable String definitionId) {
-        return iDefinitionService.deleteDeployment(deploymentId,definitionId);
+        return iProcessDefinitionService.deleteDeployment(deploymentId,definitionId);
     }
 
 
@@ -97,7 +97,7 @@ public class DefinitionController extends BaseController {
     @Log(title = "流程定义管理", businessType = BusinessType.INSERT)
     @PostMapping("/deployByFile")
     public R<Void> deployByFile(@RequestParam("file") MultipartFile file) {
-        return iDefinitionService.deployByFile(file);
+        return iProcessDefinitionService.deployByFile(file);
     }
 
 
@@ -119,7 +119,7 @@ public class DefinitionController extends BaseController {
     public void exportFile(@NotBlank(message = "文件类型不能为空") @PathVariable String type,
                            @NotBlank(message = "流程定义id不能为空") @PathVariable String definitionId,
                            HttpServletResponse response) {
-        iDefinitionService.exportFile(type,definitionId,response);
+        iProcessDefinitionService.exportFile(type,definitionId,response);
     }
 
     /**
@@ -135,7 +135,7 @@ public class DefinitionController extends BaseController {
     })
     @GetMapping("/getXml/{definitionId}")
     public R<String> getXml(@NotBlank(message = "流程定义id不能为空")  @PathVariable String definitionId) {
-        String  xmlStr = iDefinitionService.getXml(definitionId);
+        String  xmlStr = iProcessDefinitionService.getXml(definitionId);
         return R.ok("操作成功",xmlStr);
     }
 
@@ -150,7 +150,7 @@ public class DefinitionController extends BaseController {
     @Log(title = "流程定义管理", businessType = BusinessType.UPDATE)
     @PutMapping("/updateProcDefState")
     public R<Boolean> updateProcDefState(@RequestBody Map<String,Object> data){
-        return R.ok(iDefinitionService.updateProcDefState(data));
+        return R.ok(iProcessDefinitionService.updateProcDefState(data));
     }
 
     /**
@@ -166,7 +166,7 @@ public class DefinitionController extends BaseController {
     })
     @GetMapping("/setting/{processDefinitionId}")
     public R<List<ActProcessNodeVo>> setting(@NotBlank(message = "流程定义id不能为空")  @PathVariable String processDefinitionId){
-        return iDefinitionService.setting(processDefinitionId);
+        return iProcessDefinitionService.setting(processDefinitionId);
     }
 
 }

@@ -11,23 +11,19 @@ import com.ruoyi.workflow.domain.bo.DefREQ;
 import com.ruoyi.workflow.domain.vo.ActProcessNodeVo;
 import com.ruoyi.workflow.domain.vo.ProcessDefinitionVo;
 import com.ruoyi.workflow.activiti.factory.WorkflowService;
-import com.ruoyi.workflow.mapper.DefinitionMapper;
+import com.ruoyi.workflow.mapper.ProcessDefinitionMapper;
 import com.ruoyi.workflow.service.IActNodeAssigneeService;
-import com.ruoyi.workflow.service.IDefinitionService;
+import com.ruoyi.workflow.service.IProcessDefinitionService;
 import lombok.extern.slf4j.Slf4j;
 import org.activiti.bpmn.model.*;
 import org.activiti.bpmn.model.Process;
-import org.activiti.engine.ProcessEngine;
-import org.activiti.engine.ProcessEngines;
-import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.repository.DeploymentBuilder;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.repository.ProcessDefinitionQuery;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionFactory;
+import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,10 +47,13 @@ import java.util.zip.ZipInputStream;
  */
 @Service
 @Slf4j
-public class DefinitionServiceImpl extends WorkflowService implements IDefinitionService {
+public class ProcessDefinitionServiceImpl extends WorkflowService implements IProcessDefinitionService {
 
     @Autowired
     private IActNodeAssigneeService iActNodeAssigneeService;
+
+    @Autowired
+    private SqlSessionTemplate sqlSessionTemplate;
 
     /**
      * @Description: 查询流程定义列表
@@ -247,17 +246,9 @@ public class DefinitionServiceImpl extends WorkflowService implements IDefinitio
         try {
             String definitionId = data.get("definitionId").toString();
             String description = data.get("description").toString();
-            ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
-            ProcessEngineConfigurationImpl processEngineConfiguration = (ProcessEngineConfigurationImpl) processEngine.getProcessEngineConfiguration();
-
-            SqlSessionFactory sqlSessionFactory = processEngineConfiguration.getSqlSessionFactory();
-            if (!sqlSessionFactory.getConfiguration().hasMapper(DefinitionMapper.class)) {
-                sqlSessionFactory.getConfiguration().addMapper(DefinitionMapper.class);
-            }
-            SqlSession sqlSession = sqlSessionFactory.openSession();
-            DefinitionMapper definitionMapper = sqlSession.getMapper(DefinitionMapper.class);
+            ProcessDefinitionMapper processDefinitionMapper = sqlSessionTemplate.getMapper(ProcessDefinitionMapper.class);
             //更新原因
-            definitionMapper.updateDescriptionById(definitionId,description);
+            processDefinitionMapper.updateDescriptionById(definitionId,description);
             ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery()
                 .processDefinitionId(definitionId).singleResult();
             if (processDefinition.isSuspended()) {
