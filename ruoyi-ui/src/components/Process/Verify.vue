@@ -120,7 +120,8 @@
   </el-dialog>
   <!-- 减签结束 -->
   <!-- 驳回开始 -->
-  <back ref="backRef" :taskId = "taskId" @callBack="callBack()" :backNodeList = "backNodeList"/>
+  <back ref="backRef" :taskId = "taskId" @callBack="callBack()"
+  :backNodeList = "backNodeList" :sendMessage="sendMessage"/>
   <!-- 驳回结束 -->
 </div>
 </template>
@@ -134,6 +135,7 @@ export default {
   props: {
     taskId: String,
     taskVariables: Object,
+    sendMessage: Object
   },
   components: {
     ChooseWorkflowUser,
@@ -159,19 +161,24 @@ export default {
         //抄送人id
         assigneeIds: undefined,
         //抄送人名称
-        assigneeNames: undefined
+        assigneeNames: undefined,
+        //消息提醒
+        sendMessage: {}
       },
       //转办
       transmitForm: {
         message: null,
         userId: null,
-        userName: null
+        userName: null,
+        taskId: null,
+        sendMessage: {}
       },
       //委托
       delegateForm:{
         delegateUserId: null,
         delegateUserName: null,
-        taskId: null
+        taskId: null,
+        sendMessage: {}
       },
       //是否抄送
       isCopy: '2',
@@ -213,7 +220,9 @@ export default {
       //按钮设置
       setting: {},
       //流程状态
-      businessStatus: {}
+      businessStatus: {},
+      //消息提醒类型1.站内信,2.邮箱,3.短信
+      sendMessageType:[1],
     };
   },
 
@@ -247,16 +256,15 @@ export default {
       this.$refs[formName].validate(async (valid) => {
         if (valid) {
           this.loading = true;
-          let obj = this.formData.assigneeMap
-          let objData = JSON.stringify(obj)
-         /*  if(objData === '{}'){
-            this.$message.error("请输入下一步审批人");
-            this.loading = false;
-            return
-          } */
           try {
             this.formData.variables = this.taskVariables
             this.formData.taskId = this.taskId
+            //消息提醒
+            this.formData.sendMessage = {
+                title: this.sendMessage.title,
+                type: this.sendMessageType,
+                messageContent: this.$store.state.user.name+"提交了"+this.sendMessage.messageContent
+            }
             let response = await api.completeTask(this.formData);
             if (response.code === 200) {
               // 刷新数据
@@ -325,6 +333,12 @@ export default {
     //提交委托申请
     async delegateSubmit(){
       this.delegateForm.taskId = this.taskId
+      //消息提醒
+      this.delegateForm.sendMessage = {
+          title: this.sendMessage.title,
+          type: this.sendMessageType,
+          messageContent: this.$store.state.user.name+"委托了"+this.sendMessage.messageContent
+      }
       let response = await api.delegateTask(this.delegateForm);
       if(response.code === 200){
         // 刷新数据
@@ -381,12 +395,18 @@ export default {
     },
     //提交转发
     transmitSubmit(formName){
-        let params = {
-          transmitUserId: this.transmitForm.userId,
-          taskId: this.taskId,
-          comment: this.transmitForm.message
+        this.transmitForm = {
+           transmitUserId: this.transmitForm.userId,
+           taskId: this.taskId,
+           comment: this.transmitForm.message
         }
-        api.transmitTask(params).then(response=>{
+        //消息提醒
+        this.transmitForm.sendMessage = {
+            title: this.sendMessage.title,
+            type: this.sendMessageType,
+            messageContent: this.$store.state.user.name+"转发了"+this.sendMessage.messageContent
+        }
+        api.transmitTask(this.transmitForm).then(response=>{
           if(response.code === 200){
             // 刷新数据
             this.$message.success("办理成功");
@@ -439,7 +459,6 @@ export default {
         assigneeNames: assigneeNames,
         nickNames: assigneeNames.join(",")
       }
-      console.log(this.addMultiForm)
       this.$forceUpdate()
       this.$refs.addMultiUserRef.visible = false
     },

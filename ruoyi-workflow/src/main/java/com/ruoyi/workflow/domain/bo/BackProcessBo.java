@@ -1,4 +1,4 @@
-package com.ruoyi.workflow.domain.vo;
+package com.ruoyi.workflow.domain.bo;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -14,15 +14,18 @@ import java.io.Serializable;
  */
 @Data
 @ApiModel("驳回请求")
-public class BackProcessVo implements Serializable {
+public class BackProcessBo implements Serializable {
     private static final long serialVersionUID=1L;
 
-    @ApiModelProperty("任务id")
+    @ApiModelProperty(value = "任务id",required = true)
     private String taskId;
 
-    @ApiModelProperty("驳回的目标节点id")
+    @ApiModelProperty(value = "驳回的目标节点id",required = true)
     private String targetActivityId;
 
-    @ApiModelProperty("审批意见")
+    @ApiModelProperty(value = "审批意见")
     private String comment;
+
+    @ApiModelProperty("消息对象")
+    private SendMessage sendMessage;
 }

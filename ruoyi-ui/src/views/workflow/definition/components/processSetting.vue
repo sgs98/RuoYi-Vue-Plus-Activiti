@@ -73,6 +73,46 @@
                   </el-form-item>
               </el-col>
             </el-row>
+            <el-row>
+              <el-col :span="20">
+                <el-form-item label-width="100px" label="节点任务" prop="task">
+                  <el-popover
+                    placement="right"
+                    width="500"
+                    trigger="click">
+                    <el-button type="primary" size="mini" @click="addListener">添加</el-button>
+                    <el-link style="padding-left:15px" type="info" :underline="false">说明：当前任务节点完成前或完成后执行</el-link>
+                    <el-table :data="form.taskListenerList">
+                      <el-table-column label="事件类型" width="150" align="center" prop="paramType" >
+                          <template slot-scope="scope">
+                              <el-select v-model="scope.row.eventType" placeholder="请选择">
+                              <el-option
+                                v-for="item in options"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value">
+                              </el-option>
+                            </el-select>
+                          </template>
+                      </el-table-column>
+                      <el-table-column label="bean名称" align="center" prop="paramType" >
+                          <template slot-scope="scope">
+                              <el-input v-model="scope.row.beanName"/>
+                          </template>
+                      </el-table-column>
+                      <el-table-column label="操作" width="80">
+                          <template slot-scope="scope">
+                              <el-button @click="deleteListener(scope.$index)" type="danger" size="small">删除</el-button>
+                          </template>
+                      </el-table-column>
+                    </el-table>
+                    <el-badge :value="form.taskListenerList.length" slot="reference" class="item">
+                      <el-button type="primary" icon="el-icon-circle-plus-outline">节点任务</el-button>
+                    </el-badge>
+                  </el-popover>
+                </el-form-item>
+              </el-col>
+            </el-row>
             <el-row v-if="node.index === 1">
               <el-col :span="20">
                 <el-form-item label-width="100px" label="审批人员" prop="assignee">
@@ -135,7 +175,8 @@ export default {
           isTransmit: false,
           isCopy: false,
           addMultiInstance: false,
-          deleteMultiInstance: false
+          deleteMultiInstance: false,
+          taskListenerList:[]
         },
         // 按钮值
         btnText:"选择人员",
@@ -151,6 +192,13 @@ export default {
         propRoleList: [],
         // 部门选择
         propDeptList: [],
+        options: [{
+          value: 'before',
+          label: '完成前'
+        }, {
+          value: 'after',
+          label: '完成后'
+        }]
       }
     },
     methods: {
@@ -227,6 +275,18 @@ export default {
           this.form.assignee = undefined
           this.form.chooseWay = 'person'
           this.form.processDefinitionId = this.definitionId
+        },
+        // 添加参数
+        addListener(){
+            let param = {
+                eventType:'',
+                beanName:''
+            }
+            this.form.taskListenerList.push(param);
+        },
+        // 删除参数
+        deleteListener(index){
+          this.form.taskListenerList.splice(index,1)
         },
         //清空选择的人员
         clearSelect(chooseWay){

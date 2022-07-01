@@ -143,7 +143,7 @@
             size="mini"
             type="text"
             icon="el-icon-back"
-            @click="cancelProcessApply(scope.row.processInstanceId)"
+            @click="cancelProcessApply(scope.row)"
           >撤销</el-button>
           <el-button
             v-if="scope.row.actBusinessStatus.status!=='draft'"
@@ -227,7 +227,7 @@
       </el-tabs>
     </el-dialog>
     <!-- 提交 -->
-    <verify ref="verifyRef" @callSubmit="callSubmit" :taskId="taskId" :taskVariables="taskVariables"></verify>
+    <verify ref="verifyRef" @callSubmit="callSubmit" :taskId="taskId" :taskVariables="taskVariables" :sendMessage="sendMessage"></verify>
   </div>
 </template>
 
@@ -315,7 +315,9 @@ export default {
       },
       taskVariables: {}, //流程变量
       taskId: undefined, //任务id
-      flag: true
+      flag: true,
+      // 消息提醒
+      sendMessage: {}
     };
   },
   created() {
@@ -390,6 +392,10 @@ export default {
         })
         this.open = true;
         this.title = "修改请假业务";
+        this.sendMessage = {
+          title:'请假申请',
+          messageContent:this.$store.state.user.name+'单据【'+row.id+"】申请"
+        }
       });
     },
     //查看
@@ -463,7 +469,7 @@ export default {
             entity: entity
         }
         const data = {
-            processKey: 'test', // key
+            processKey: 'sub', // key
             businessKey: entity.id, // 业务id
             variables: variables,
             classFullName: 'com.ruoyi.demo.domain.BsLeave'
@@ -485,10 +491,10 @@ export default {
         })
     },
     //撤回
-    cancelProcessApply(processInstanceId){
+    cancelProcessApply(row){
          this.$modal.confirm('是否撤销申请').then(() => {
             this.loading = true;
-            return processAip.cancelProcessApply(processInstanceId);
+            return processAip.cancelProcessApply(row.processInstanceId);
          }).then(() => {
             this.getList();
             this.$modal.msgSuccess("撤回成功");

@@ -53,12 +53,13 @@
         <el-button :loading="buttonLoading" size="mini" type="primary" @click="submitForm">提交</el-button>
         <el-button size="mini" @click="cancel">取 消</el-button>
       </div>
-      <verify ref="verifyRef" :taskId="taskId" @callSubmit="callSubmit" :taskVariables="taskVariables"></verify>
+      <verify ref="verifyRef" :taskId="taskId" @callSubmit="callSubmit"
+      :taskVariables="taskVariables" :sendMessage="sendMessage"></verify>
   </div>
 </template>
 
 <script>
-import { getLeave, addLeave, updateLeave } from "@/api/demo/leave";
+import { getLeave} from "@/api/demo/leave";
 import processAip from "@/api/workflow/processInst";
  import verify from "@/components/Process/Verify";
 export default {
@@ -115,7 +116,9 @@ export default {
           { required: true, message: "请假结束时间不能为空", trigger: "blur" }
         ]
       },
-      taskVariables: undefined
+      taskVariables: undefined,
+      //消息提醒
+      sendMessage: {}
     };
   },
   watch: {
@@ -147,39 +150,21 @@ export default {
                  entity: response.data,
                  userId :1
             };
+            this.sendMessage = {
+              title:'请假申请',
+              messageContent:'单据【'+this.form.id+"】申请"
+            }
       });
       this.$refs.verifyRef.visible = true
-      /* this.$refs["form"].validate(valid => {
-        if (valid) {
-          this.buttonLoading = true;
-          if (this.form.id != null) {
-            updateLeave(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功");
-              this.open = false;
-              this.getList();
-            }).finally(() => {
-              this.buttonLoading = false;
-            });
-          } else {
-            addLeave(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功");
-              this.open = false;
-              this.getList();
-            }).finally(() => {
-              this.buttonLoading = false;
-            });
-          }
-        }
-      }); */
     },
     //提交流程
     submitFormAppply(){
         getLeave(this.form.id).then(response => {
             const data = {
-            processKey: 'testkey', // key
-            classFullName: 'com.ruoyi.demo.leave.domain.BsLeave', // 全类名
-            businessKey: response.data.id, // 业务id
-            variables: { entity: response.data }, // 变量
+                processKey: 'testkey', // key
+                classFullName: 'com.ruoyi.demo.leave.domain.BsLeave', // 全类名
+                businessKey: response.data.id, // 业务id
+                variables: { entity: response.data }, // 变量
             }
             processAip.startProcessApply(data).then(response => {
               if(response.code===200){

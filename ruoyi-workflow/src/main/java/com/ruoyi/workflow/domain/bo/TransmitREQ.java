@@ -1,11 +1,9 @@
 package com.ruoyi.workflow.domain.bo;
 
 import com.ruoyi.common.core.validate.AddGroup;
-import com.ruoyi.workflow.common.PageEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotBlank;
@@ -26,12 +24,16 @@ public class TransmitREQ implements Serializable {
     private static final long serialVersionUID=1L;
 
     @ApiModelProperty("任务id")
+    @NotBlank(message = "任务id为空",groups = AddGroup.class)
     private String taskId;
 
-    @NotBlank(message = "请选择转办人",groups = AddGroup.class)
     @ApiModelProperty(value = "转办人id")
+    @NotBlank(message = "转办人不能为空",groups = AddGroup.class)
     private String transmitUserId;
 
     @ApiModelProperty("审批意见")
     private String comment;
+
+    @ApiModelProperty("消息对象")
+    private SendMessage sendMessage;
 }

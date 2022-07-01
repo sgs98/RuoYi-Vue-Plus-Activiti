@@ -1,6 +1,5 @@
 package com.ruoyi.workflow.domain.bo;
 
-import com.ruoyi.common.core.validate.AddGroup;
 import com.ruoyi.workflow.common.PageEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -8,7 +7,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.validation.annotation.Validated;
 
-import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 
 /**
@@ -33,14 +31,4 @@ public class TaskREQ extends PageEntity implements Serializable {
 
     @ApiModelProperty("流程定义id")
     private String processInstId;
-
-    @ApiModelProperty(value = "委派人id")
-    @NotBlank(message = "请选择委派人",groups = AddGroup.class)
-    private String delegateUserId;
-
-    @ApiModelProperty("委派人")
-    private String delegateUserName;
-
-    @ApiModelProperty("审批意见")
-    private String comment;
 }

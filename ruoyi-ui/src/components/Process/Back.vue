@@ -25,6 +25,7 @@ export default {
     props: {
         taskId: String,
         backNodeList: Array,
+        sendMessage: Object
     },
 
     data() {
@@ -32,8 +33,10 @@ export default {
             visible: false, // 弹出窗口，true弹出
             loading: false,
             formData: {
+                taskId: null,
                 targetActivityId: null,
                 comment: null,
+                sendMessage: {}
             },
             rules: {
                 targetActivityId: [
@@ -62,12 +65,18 @@ export default {
                     // 校验通过，提交表单数据
                     this.loading = true
                     try {
-                      const params = {
+                      this.formData = {
                         taskId: this.taskId,
                         targetActivityId: this.formData.targetActivityId,
-                        comment: this.formData.comment
+                        comment: this.formData.comment,
                       }
-                      let response = await api.backProcess(params)
+                      //消息提醒
+                      this.formData.sendMessage = {
+                          title: this.sendMessage.title,
+                          type: this.sendMessageType,
+                          messageContent: this.$store.state.user.name+"驳回了"+this.sendMessage.messageContent
+                      }
+                      let response = await api.backProcess(this.formData)
                       if(response.code === 200) {
                           this.$message.success('提交成功')
                           // 将表单清空

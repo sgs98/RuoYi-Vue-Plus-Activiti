@@ -27,7 +27,7 @@ captcha:
 # 开发环境配置
 server:
   # 服务器的HTTP端口，默认为8080
-  port: 8081
+  port: 8080
   servlet:
     # 应用的访问路径
     context-path: /
@@ -118,15 +118,6 @@ sa-token:
 security:
   # 排除路径
   excludes:
-    - /login
-    - /smsLogin
-    - /xcxLogin
-    - /logout
-    - /register
-    - /captchaImage
-    # 预览流程图
-    - /workflow/definition/export/**
-    - /workflow/processInstance/getHistoryProcessImage/**
     # 静态资源
     - /*.html
     - /**/*.html
@@ -143,6 +134,10 @@ security:
     # actuator 监控配置
     - /actuator
     - /actuator/**
+    # WebSocket
+    - /webSocketServer/**
+    # 积木报表配置
+    - /jmreport/**
 
 # MyBatisPlus配置
 # https://baomidou.com/config/

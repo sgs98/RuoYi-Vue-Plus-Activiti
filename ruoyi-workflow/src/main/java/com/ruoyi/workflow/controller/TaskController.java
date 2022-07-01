@@ -9,7 +9,7 @@ import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.helper.LoginHelper;
 import com.ruoyi.workflow.domain.ActTaskNode;
 import com.ruoyi.workflow.domain.bo.*;
-import com.ruoyi.workflow.domain.vo.BackProcessVo;
+import com.ruoyi.workflow.domain.bo.BackProcessBo;
 import com.ruoyi.workflow.domain.vo.TaskFinishVo;
 import com.ruoyi.workflow.domain.vo.TaskWaitingVo;
 import com.ruoyi.workflow.service.ITaskService;
@@ -127,7 +127,7 @@ public class TaskController extends BaseController {
 
     /**
      * @Description: 驳回审批
-     * @param: backProcessVo
+     * @param: backProcessBo
      * @return: com.ruoyi.common.core.domain.R<java.lang.String>
      * @Author: gssong
      * @Date: 2021/11/6
@@ -135,8 +135,8 @@ public class TaskController extends BaseController {
     @ApiOperation("驳回审批）")
     @Log(title = "任务管理", businessType = BusinessType.INSERT)
     @PostMapping("/backProcess")
-    public R<String> backProcess(@RequestBody BackProcessVo backProcessVo) {
-        return R.ok(iTaskService.backProcess(backProcessVo));
+    public R<String> backProcess(@RequestBody BackProcessBo backProcessBo) {
+        return R.ok(iTaskService.backProcess(backProcessBo));
     }
 
     /**
@@ -148,7 +148,7 @@ public class TaskController extends BaseController {
      */
     @ApiOperation("获取历史任务节点，用于驳回功能")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "processInstId",value = "流程实例id",required = true)
+        @ApiImplicitParam(name = "processInstId",value = "流程实例id",required = true,dataTypeClass = String.class)
     })
     @GetMapping("/getBackNodes/{processInstId}")
     public R<List<ActTaskNode>> getBackNodes(@NotBlank(message = "流程实例id不能为空") @PathVariable String processInstId) {
@@ -164,7 +164,7 @@ public class TaskController extends BaseController {
      */
     @ApiOperation("签收（拾取）任务")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "taskId",value = "任务id",required = true)
+        @ApiImplicitParam(name = "taskId",value = "任务id",required = true,dataTypeClass = String.class)
     })
     @Log(title = "任务管理", businessType = BusinessType.INSERT)
     @PostMapping("/claim/{taskId}")
@@ -187,7 +187,7 @@ public class TaskController extends BaseController {
      */
     @ApiOperation("归还（拾取的）任务")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "taskId",value = "任务id",required = true)
+        @ApiImplicitParam(name = "taskId",value = "任务id",required = true,dataTypeClass = String.class)
     })
     @Log(title = "任务管理", businessType = BusinessType.INSERT)
     @PostMapping("/returnTask/{taskId}")
@@ -203,7 +203,7 @@ public class TaskController extends BaseController {
 
     /**
      * @Description: 委派任务
-     * @param: taskREQ
+     * @param: delegateREQ
      * @return: com.ruoyi.common.core.domain.R<java.lang.Void>
      * @author: gssong
      * @Date: 2022/3/4 13:18
@@ -211,8 +211,8 @@ public class TaskController extends BaseController {
     @ApiOperation("委派任务")
     @Log(title = "任务管理", businessType = BusinessType.INSERT)
     @PostMapping("/delegateTask")
-    public R<Void> delegateTask(@Validated({AddGroup.class}) @RequestBody  TaskREQ taskREQ) {
-        return toAjax(iTaskService.delegateTask(taskREQ));
+    public R<Void> delegateTask(@Validated({AddGroup.class}) @RequestBody  DelegateREQ delegateREQ) {
+        return toAjax(iTaskService.delegateTask(delegateREQ));
     }
 
     /**

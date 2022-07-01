@@ -5,10 +5,12 @@ import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ruoyi.common.exception.ServiceException;
+import com.ruoyi.common.utils.JsonUtils;
 import com.ruoyi.workflow.common.constant.ActConstant;
 import com.ruoyi.workflow.domain.ActNodeAssignee;
 import com.ruoyi.workflow.domain.vo.ActProcessNodeVo;
 import com.ruoyi.workflow.domain.vo.MultiVo;
+import com.ruoyi.workflow.domain.vo.TaskListenerVo;
 import com.ruoyi.workflow.mapper.ActNodeAssigneeMapper;
 import com.ruoyi.workflow.service.IActNodeAssigneeService;
 import com.ruoyi.workflow.utils.WorkFlowUtils;
@@ -71,6 +73,18 @@ public class ActNodeAssigneeServiceImpl extends ServiceImpl<ActNodeAssigneeMappe
             actNodeAssignee.setDeleteMultiInstance(false);
             actNodeAssignee.setMultipleColumn("");
         }
+        if(CollectionUtil.isNotEmpty(actNodeAssignee.getTaskListenerList())){
+            List<TaskListenerVo> taskListenerList = new ArrayList<>();
+            actNodeAssignee.getTaskListenerList().forEach(e->{
+                if(StringUtils.isNotBlank(e.getEventType())&&StringUtils.isNotBlank(e.getBeanName())){
+                    taskListenerList.add(e);
+                }
+            });
+            if(CollectionUtil.isNotEmpty(taskListenerList)){
+                String jsonString = JsonUtils.toJsonString(taskListenerList);
+                actNodeAssignee.setTaskListener(jsonString);
+            }
+        }
         baseMapper.insert(actNodeAssignee);
         return actNodeAssignee;
     }
@@ -132,6 +146,11 @@ public class ActNodeAssigneeServiceImpl extends ServiceImpl<ActNodeAssigneeMappe
             nodeAssignee.setMultipleColumn("");
             nodeAssignee.setAddMultiInstance(false);
             nodeAssignee.setDeleteMultiInstance(false);
+        }
+        if(ObjectUtil.isNotEmpty(nodeAssignee)&&StringUtils.isNotBlank(nodeAssignee.getTaskListener())){
+            nodeAssignee.setTaskListenerList(JsonUtils.parseArray(nodeAssignee.getTaskListener(),TaskListenerVo.class));
+        }else{
+            nodeAssignee.setTaskListenerList(new ArrayList<>());
         }
         return nodeAssignee;
     }

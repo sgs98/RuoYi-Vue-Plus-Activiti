@@ -4,7 +4,7 @@
       <slot name="control-header"></slot>
       <template v-if="!$slots['control-header']">
         <el-button-group key="file-control">
-          <el-button :size="headerButtonSize" :type="headerButtonType" icon="el-icon-folder-opened" v-show="false" @click="$refs.refFile.click()">打开文件</el-button>
+          <el-button :size="headerButtonSize" v-if="false" :type="headerButtonType" icon="el-icon-folder-opened" @click="$refs.refFile.click()">打开文件</el-button>
           <el-tooltip effect="light">
             <div slot="content">
               <el-button :size="headerButtonSize" type="text" @click="downloadProcessAsXml()">下载为XML文件</el-button>
@@ -168,8 +168,7 @@ export default {
       previewResult: "",
       previewType: "xml",
       recoverable: false,
-      revocable: false,
-      model: {}
+      revocable: false
     };
   },
   computed: {
@@ -307,10 +306,10 @@ export default {
       try {
         let { warnings } = await this.bpmnModeler.importXML(xmlString);
         if (warnings && warnings.length) {
-          //warnings.forEach(warn => console.warn(warn));
+          warnings.forEach(warn => console.warn(warn));
         }
       } catch (e) {
-        //console.error(`[Process Designer Warn]: ${e?.message || e}`);
+        console.error(`[Process Designer Warn]: ${e?.message || e}`);
       }
     },
 
@@ -484,7 +483,7 @@ export default {
       }
       // 触发 save 事件
       this.$emit('saveBpmnMode', xml,svg)
-    },
+    }
   }
 };
 </script>

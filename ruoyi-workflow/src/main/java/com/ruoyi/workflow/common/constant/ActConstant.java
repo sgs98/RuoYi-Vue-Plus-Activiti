@@ -106,6 +106,21 @@ public interface ActConstant {
      */
     String CANDIDATE = "candidate";
 
+    /**
+     * 任务执行前
+     */
+    String HANDLE_BEFORE = "before";
+
+    /**
+     * 任务执行后
+     */
+    String HANDLE_AFTER = "after";
+
+    /**
+     * 任务执行方法
+     */
+    String HANDLE_PROCESS = "handleProcess";
+
     String PARAM_BYTE = "Byte";
 
     String PARAM_SHORT = "Short";

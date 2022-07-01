@@ -4,7 +4,7 @@ import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.workflow.domain.ActTaskNode;
 import com.ruoyi.workflow.domain.bo.*;
-import com.ruoyi.workflow.domain.vo.BackProcessVo;
+import com.ruoyi.workflow.domain.bo.BackProcessBo;
 import com.ruoyi.workflow.domain.vo.TaskFinishVo;
 import com.ruoyi.workflow.domain.vo.TaskWaitingVo;
 
@@ -62,10 +62,10 @@ public interface ITaskService {
 
     /**
      * 驳回审批
-     * @param: backProcessVo
+     * @param: backProcessBo
      * @return
      */
-    String backProcess(BackProcessVo backProcessVo);
+    String backProcess(BackProcessBo backProcessBo);
 
     /**
      * 获取历史任务节点，用于驳回功能
@@ -76,10 +76,10 @@ public interface ITaskService {
 
     /**
      * 委托
-     * @param taskREQ
+     * @param delegateREQ
      * @return
      */
-    Boolean delegateTask(TaskREQ taskREQ);
+    Boolean delegateTask(DelegateREQ delegateREQ);
 
     /**
      * 转办任务

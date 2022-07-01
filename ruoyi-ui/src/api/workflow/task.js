@@ -1,6 +1,7 @@
 import request from '@/utils/request'
 
 export default {
+
   // 查询当前用户的待办任务
   getTaskWaitByPage(query) {
     return request({

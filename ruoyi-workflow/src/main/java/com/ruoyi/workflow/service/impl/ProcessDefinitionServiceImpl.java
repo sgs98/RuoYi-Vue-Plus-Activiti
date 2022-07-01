@@ -135,7 +135,7 @@ public class ProcessDefinitionServiceImpl extends WorkflowService implements IPr
             return R.ok();
         }catch (Exception e){
             e.printStackTrace();
-            return R.fail();
+            return R.fail(e.getMessage());
         }
     }
 
@@ -148,7 +148,7 @@ public class ProcessDefinitionServiceImpl extends WorkflowService implements IPr
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R deployByFile(MultipartFile file) {
+    public R<Void> deployByFile(MultipartFile file) {
         try {
             // 文件名+后缀名
             String filename = file.getOriginalFilename();
@@ -292,7 +292,7 @@ public class ProcessDefinitionServiceImpl extends WorkflowService implements IPr
                 List<SequenceFlow> outgoingFlows = ((StartEvent) element).getOutgoingFlows();
                 for (SequenceFlow outgoingFlow : outgoingFlows) {
                     FlowElement flowElement = outgoingFlow.getTargetFlowElement();
-                    if(flowElement instanceof UserTask){
+                    if(flowElement instanceof Task){
                         firstNode.setNodeId(flowElement.getId());
                         firstNode.setNodeName(flowElement.getName());
                         firstNode.setProcessDefinitionId(processDefinitionId);
@@ -304,7 +304,7 @@ public class ProcessDefinitionServiceImpl extends WorkflowService implements IPr
         processNodeVoList.add(firstNode);
         for (FlowElement element : elements) {
             ActProcessNodeVo actProcessNodeVo = new ActProcessNodeVo();
-            if (element instanceof UserTask && !firstNode.getNodeId().equals(element.getId())) {
+            if (element instanceof Task && !firstNode.getNodeId().equals(element.getId())) {
                 actProcessNodeVo.setNodeId(element.getId());
                 actProcessNodeVo.setNodeName(element.getName());
                 actProcessNodeVo.setProcessDefinitionId(processDefinitionId);
@@ -314,7 +314,7 @@ public class ProcessDefinitionServiceImpl extends WorkflowService implements IPr
                 Collection<FlowElement> flowElements = ((SubProcess) element).getFlowElements();
                 for (FlowElement flowElement : flowElements) {
                     ActProcessNodeVo actProcessNode= new ActProcessNodeVo();
-                    if (flowElement instanceof UserTask && !firstNode.getNodeId().equals(flowElement.getId())) {
+                    if (flowElement instanceof Task && !firstNode.getNodeId().equals(flowElement.getId())) {
                         actProcessNode.setNodeId(flowElement.getId());
                         actProcessNode.setNodeName(flowElement.getName());
                         actProcessNode.setProcessDefinitionId(processDefinitionId);

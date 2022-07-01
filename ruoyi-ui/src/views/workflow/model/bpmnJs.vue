@@ -181,9 +181,8 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style scoped lang="scss">
 body {
-  overflow: hidden;
   margin: 0;
   box-sizing: border-box;
 }

@@ -2,7 +2,7 @@
   <div class="process-panel__container" :style="{ width: `${this.width}px` }">
     <i class="el-icon-s-unfold icon" @click="clickFold" v-show="!isCollapse"></i>
     <i class="el-icon-s-fold icon" @click="clickFold" v-show="isCollapse"></i>
-    <el-collapse  class="el-menu-vertical-demo" v-show="isCollapse" v-model="activeTab">
+    <el-collapse  v-show="isCollapse" v-model="activeTab">
       <el-collapse-item name="base">
         <div slot="title" class="panel-tab__title"><i class="el-icon-info"></i>常规</div>
         <element-base-info :id-edit-disabled="idEditDisabled" :business-object="elementBusinessObject" :type="elementType" />
@@ -85,6 +85,10 @@ export default {
       type: String,
       default: "camunda"
     },
+    width: {
+      type: Number,
+      default: 410
+    },
     idEditDisabled: {
       type: Boolean,
       default: false
@@ -105,7 +109,6 @@ export default {
       conditionFormVisible: false, // 流转条件设置
       formVisible: false, // 表单配置
       isCollapse: true,
-      width: 410
     };
   },
   watch: {

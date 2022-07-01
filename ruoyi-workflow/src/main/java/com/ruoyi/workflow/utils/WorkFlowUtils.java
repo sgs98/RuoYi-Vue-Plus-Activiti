@@ -8,20 +8,26 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ruoyi.common.core.domain.entity.SysRole;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.exception.ServiceException;
+import com.ruoyi.common.helper.LoginHelper;
 import com.ruoyi.common.utils.JsonUtils;
+import com.ruoyi.common.utils.spring.SpringUtils;
 import com.ruoyi.system.domain.SysUserRole;
 import com.ruoyi.system.mapper.SysRoleMapper;
 import com.ruoyi.system.mapper.SysUserMapper;
 import com.ruoyi.system.mapper.SysUserRoleMapper;
 import com.ruoyi.workflow.activiti.cmd.ExpressCmd;
+import com.ruoyi.workflow.activiti.cmd.IdentityLinkListCmd;
 import com.ruoyi.workflow.common.constant.ActConstant;
 import com.ruoyi.workflow.common.enums.BusinessStatusEnum;
 import com.ruoyi.workflow.domain.ActBusinessStatus;
 import com.ruoyi.workflow.domain.ActFullClassParam;
+import com.ruoyi.workflow.domain.SysMessage;
+import com.ruoyi.workflow.domain.bo.SendMessage;
 import com.ruoyi.workflow.domain.vo.ActFullClassVo;
 import com.ruoyi.workflow.domain.vo.MultiVo;
 import com.ruoyi.workflow.domain.vo.ProcessNode;
 import com.ruoyi.workflow.service.IActBusinessStatusService;
+import com.ruoyi.workflow.service.ISysMessageService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.activiti.bpmn.converter.BpmnXMLConverter;
@@ -31,12 +37,15 @@ import org.activiti.engine.impl.bpmn.behavior.SequentialMultiInstanceBehavior;
 import org.activiti.editor.language.json.converter.BpmnJsonConverter;
 import org.activiti.engine.*;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntityImpl;
+import org.activiti.engine.impl.persistence.entity.IdentityLinkEntity;
 import org.activiti.engine.impl.persistence.entity.TaskEntity;
 import org.activiti.engine.impl.persistence.entity.VariableInstance;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.activiti.engine.task.Task;
+import org.springframework.util.ReflectionUtils;
+
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -75,6 +84,10 @@ public class WorkFlowUtils {
 
     @Autowired
     private  RepositoryService repositoryService;
+
+    @Autowired
+    private ISysMessageService iSysMessageService;
+
     /**
      * @Description: bpmnModel转为xml
      * @param: jsonBytes
@@ -200,7 +213,7 @@ public class WorkFlowUtils {
                 tempNodes.add(tempNode);
             }
         //包含网关
-        } else if(ActConstant.INCLUSIVE_GATEWAY.equals(gateway)){
+        } else if (ActConstant.INCLUSIVE_GATEWAY.equals(gateway)){
             String conditionExpression = sequenceFlow.getConditionExpression();
             if(StringUtils.isBlank(conditionExpression)){
                 processNode.setNodeId(outFlowElement.getId());
@@ -212,7 +225,7 @@ public class WorkFlowUtils {
                 processNode.setAssignee(((UserTask) outFlowElement).getAssignee());
                 processNode.setAssigneeId(((UserTask) outFlowElement).getAssignee());
                 nextNodes.add(processNode);
-            } else{
+            } else {
                 ExpressCmd expressCmd = new ExpressCmd(sequenceFlow,executionEntity,conditionExpression);
                 Boolean condition  = managementService.executeCommand(expressCmd);
                 if (condition) {
@@ -476,5 +489,73 @@ public class WorkFlowUtils {
             }
         }
         return list;
+    }
+
+    /**
+     * @Description: 发送站内信
+     * @param: sendMessage
+     * @param: processInstanceId
+     * @return: void
+     * @author: gssong
+     * @Date: 2022/6/18 13:26
+     */
+    public void sendMessage(SendMessage sendMessage, String processInstanceId) {
+        List<SysMessage> messageList = new ArrayList<>();
+        List<Task> taskList = taskService.createTaskQuery().processInstanceId(processInstanceId).list();
+        for (Task taskInfo : taskList) {
+            if(StringUtils.isNotBlank(taskInfo.getAssignee())){
+                SysMessage sysMessage = new SysMessage();
+                sysMessage.setSendId(LoginHelper.getUserId());
+                sysMessage.setRecordId(Long.valueOf(taskInfo.getAssignee()));
+                sysMessage.setType(1);
+                sysMessage.setTitle(sendMessage.getTitle());
+                sysMessage.setMessageContent(sendMessage.getMessageContent()+",请您注意查收");
+                sysMessage.setStatus(0);
+                messageList.add(sysMessage);
+            }else{
+                IdentityLinkListCmd identityLinkListCmd = new IdentityLinkListCmd(taskInfo.getId());
+                List<IdentityLinkEntity> identityLinkEntities = managementService.executeCommand(identityLinkListCmd);
+                if(CollectionUtil.isNotEmpty(identityLinkEntities)){
+                    for (IdentityLinkEntity identityLinkEntity : identityLinkEntities) {
+                        SysMessage sysMessage = new SysMessage();
+                        sysMessage.setSendId(LoginHelper.getUserId());
+                        sysMessage.setRecordId(Long.valueOf(identityLinkEntity.getUserId()));
+                        sysMessage.setType(1);
+                        sysMessage.setTitle(sendMessage.getTitle());
+                        sysMessage.setMessageContent(sendMessage.getMessageContent()+",请您注意查收");
+                        sysMessage.setStatus(0);
+                        messageList.add(sysMessage);
+                    }
+                }
+            }
+        }
+        if(CollectionUtil.isNotEmpty(messageList)){
+            iSysMessageService.sendBatchMessage(messageList);
+        }
+    }
+
+    /**
+     * @Description: 执行bean中方法
+     * @param: serviceName bean名称
+     * @param: methodName 方法名称
+     * @param: params 参数
+     * @return: java.lang.Object
+     * @author: gssong
+     * @Date: 2022/6/26 15:37
+     */
+    public Object springInvokeMethod(String serviceName, String methodName, Object... params) {
+        Object service = SpringUtils.getBean(serviceName);
+        Class<? extends Object>[] paramClass = null;
+        if (Objects.nonNull(params)) {
+            int paramsLength = params.length;
+            paramClass = new Class[paramsLength];
+            for (int i = 0; i < paramsLength; i++) {
+                paramClass[i] = params[i].getClass();
+            }
+        }
+        // 找到方法
+        Method method = ReflectionUtils.findMethod(service.getClass(), methodName, paramClass);
+        // 执行方法
+        return ReflectionUtils.invokeMethod(method, service, params);
     }
 }

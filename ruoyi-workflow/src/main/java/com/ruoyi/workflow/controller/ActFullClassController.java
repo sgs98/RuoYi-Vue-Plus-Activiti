@@ -67,7 +67,7 @@ public class ActFullClassController extends BaseController {
      */
     @ApiOperation("获取业务规则详细信息")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "id",value = "主键",required = true)
+        @ApiImplicitParam(name = "id",value = "主键",required = true,dataTypeClass = Long.class)
     })
     @SaCheckPermission("workflow:fullClass:query")
     @GetMapping("/{id}")
@@ -104,7 +104,7 @@ public class ActFullClassController extends BaseController {
      */
     @ApiOperation("删除业务规则")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "ids",value = "主键串",required = true)
+        @ApiImplicitParam(name = "ids",value = "主键串",required = true,dataTypeClass = Long.class,allowMultiple = true)
     })
     @SaCheckPermission("workflow:fullClass:remove")
     @Log(title = "业务规则" , businessType = BusinessType.DELETE)

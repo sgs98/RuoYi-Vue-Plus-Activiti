@@ -10,7 +10,8 @@ import java.util.*;
 @Data
 @ApiModel("完成任务请求类")
 public class TaskCompleteREQ {
-    @ApiModelProperty("任务ID")
+
+    @ApiModelProperty(value = "任务ID",required = true)
     private String taskId;
 
     @ApiModelProperty("是否抄送")
@@ -24,6 +25,9 @@ public class TaskCompleteREQ {
 
     @ApiModelProperty("审批意见")
     private String message;
+
+    @ApiModelProperty("消息对象")
+    private SendMessage sendMessage;
 
     @ApiModelProperty("下一个节点审批，key: 节点id, vallue：审批人集合,多个人使用英文逗号分隔")
     private Map<String, String> assigneeMap;

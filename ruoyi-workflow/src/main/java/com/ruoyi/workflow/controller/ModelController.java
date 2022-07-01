@@ -55,7 +55,7 @@ public class ModelController extends BaseController {
      */
     @ApiOperation("查询模型信息")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "modelId",value = "模型id",required = true)
+        @ApiImplicitParam(name = "modelId",value = "模型id",required = true,dataTypeClass = String.class)
     })
     @GetMapping("/getInfo/{modelId}/xml")
     public R<Map<String,Object>> getEditorXml(@NotBlank(message = "模型id不能为空") @PathVariable String modelId) {
@@ -99,7 +99,7 @@ public class ModelController extends BaseController {
      */
     @ApiOperation("通过流程定义模型id部署流程定义")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "id",value = "流程部署id",required = true)
+        @ApiImplicitParam(name = "id",value = "流程部署id",required = true,dataTypeClass = String.class)
     })
     @Log(title = "模型管理", businessType = BusinessType.INSERT)
     @PostMapping("/deploy/{id}")
@@ -116,7 +116,7 @@ public class ModelController extends BaseController {
      */
     @ApiOperation("删除流程定义模型")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "ids",value = "主键",required = true)
+        @ApiImplicitParam(name = "ids",value = "主键",required = true,dataTypeClass = String.class,allowMultiple = true)
     })
     @Log(title = "模型管理", businessType = BusinessType.DELETE)
     @RepeatSubmit()
@@ -139,7 +139,7 @@ public class ModelController extends BaseController {
      */
     @ApiOperation("导出流程定义模型zip压缩包")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "modelId",value = "模型id",required = true)
+        @ApiImplicitParam(name = "modelId",value = "模型id",required = true,dataTypeClass = String.class)
     })
     @GetMapping("/export/zip/{modelId}")
     public void exportZip(@NotEmpty(message = "模型id不能为空") @PathVariable String modelId,
@@ -156,7 +156,7 @@ public class ModelController extends BaseController {
      */
     @ApiOperation("将流程定义转换为模型")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "processDefinitionId",value = "流程定义id",required = true)
+        @ApiImplicitParam(name = "processDefinitionId",value = "流程定义id",required = true,dataTypeClass = String.class)
     })
     @Log(title = "模型管理", businessType = BusinessType.UPDATE)
     @GetMapping("/convertToModel/{processDefinitionId}")

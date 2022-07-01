@@ -73,10 +73,10 @@ export default {
     })
   },
 
-  // 作废流程实例，不会删除历史记录
-  cancelProcessApply(processInstId) {
+  // 撤销申请
+  cancelProcessApply(processInstanceId) {
     return request({
-      url: '/workflow/processInstance/cancelProcessApply/'+processInstId,
+      url: '/workflow/processInstance/cancelProcessApply/'+processInstanceId,
       method: 'get'
     })
   },

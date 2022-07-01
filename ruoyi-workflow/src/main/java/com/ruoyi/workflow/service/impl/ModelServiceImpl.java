@@ -266,7 +266,7 @@ public class ModelServiceImpl extends WorkflowService implements IModelService {
             Deployment deployment = repositoryService.createDeployment()
                 .name(model.getName()) // 部署名称
                 .key(model.getKey()) // 部署标识key
-                .addString(processName, StrUtil.utf8Str(xmlBytes)) // bpmn20.xml资源
+                .addBytes(processName, xmlBytes) // bpmn20.xml资源
                 .addBytes(pngName, pngBytes) // png资源
                 .deploy();
 
@@ -276,7 +276,7 @@ public class ModelServiceImpl extends WorkflowService implements IModelService {
             return R.ok();
         }catch (Exception e){
             e.printStackTrace();
-            return R.fail();
+            return R.fail(e.getMessage());
         }
     }
 

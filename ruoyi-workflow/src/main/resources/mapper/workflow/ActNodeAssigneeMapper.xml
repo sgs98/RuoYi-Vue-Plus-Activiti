@@ -22,6 +22,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="isCopy" column="is_copy"/>
         <result property="addMultiInstance" column="add_multi_instance"/>
         <result property="deleteMultiInstance" column="delete_multi_instance"/>
+        <result property="taskListener" column="task_listener"/>
         <result property="createTime" column="create_time"/>
         <result property="createBy" column="create_by"/>
         <result property="updateTime" column="update_time"/>

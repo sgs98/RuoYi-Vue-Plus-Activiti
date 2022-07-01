@@ -5,12 +5,14 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.ruoyi.common.core.domain.BaseEntity;
 import com.ruoyi.common.core.validate.AddGroup;
+import com.ruoyi.workflow.domain.vo.TaskListenerVo;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * 流程定义设置对象 act_node_assignee
@@ -121,6 +123,17 @@ public class ActNodeAssignee extends BaseEntity{
      * 是否可减签
      */
     private Boolean deleteMultiInstance;
+
+    /**
+     * 任务监听
+     */
+    private String taskListener;
+
+    /**
+     * 任务监听
+     */
+    @TableField(exist = false)
+    private List<TaskListenerVo> taskListenerList;
 
     /**
      * 下标排序

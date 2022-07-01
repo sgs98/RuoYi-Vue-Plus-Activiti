@@ -1,5 +1,6 @@
 package com.ruoyi.workflow.controller;
 
+import com.ruoyi.common.annotation.Anonymous;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.R;
@@ -72,8 +73,8 @@ public class ProcessDefinitionController extends BaseController {
      */
     @ApiOperation("删除流程定义")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "deploymentId",value = "流程部署id",required = true),
-        @ApiImplicitParam(name = "definitionId",value = "流程定义id",required = true)
+        @ApiImplicitParam(name = "deploymentId",value = "流程部署id",required = true,dataTypeClass = String.class),
+        @ApiImplicitParam(name = "definitionId",value = "流程定义id",required = true,dataTypeClass = String.class)
     })
     @Log(title = "流程定义管理", businessType = BusinessType.DELETE)
     @DeleteMapping("/{deploymentId}/{definitionId}")
@@ -112,9 +113,10 @@ public class ProcessDefinitionController extends BaseController {
      */
     @ApiOperation("导出流程定义文件（xml,png)")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "type",value = "文件类型",required = true),
-        @ApiImplicitParam(name = "definitionId",value = "流程定义id",required = true)
+        @ApiImplicitParam(name = "type",value = "文件类型",required = true,dataTypeClass = String.class),
+        @ApiImplicitParam(name = "definitionId",value = "流程定义id",required = true,dataTypeClass = String.class)
     })
+    @Anonymous
     @GetMapping("/export/{type}/{definitionId}")
     public void exportFile(@NotBlank(message = "文件类型不能为空") @PathVariable String type,
                            @NotBlank(message = "流程定义id不能为空") @PathVariable String definitionId,
@@ -131,7 +133,7 @@ public class ProcessDefinitionController extends BaseController {
      */
     @ApiOperation("查看xml文件")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "definitionId",value = "流程定义id",required = true)
+        @ApiImplicitParam(name = "definitionId",value = "流程定义id",required = true,dataTypeClass = String.class)
     })
     @GetMapping("/getXml/{definitionId}")
     public R<String> getXml(@NotBlank(message = "流程定义id不能为空")  @PathVariable String definitionId) {
@@ -162,7 +164,7 @@ public class ProcessDefinitionController extends BaseController {
      */
     @ApiOperation("查询流程环节")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "processDefinitionId",value = "流程定义id",required = true)
+        @ApiImplicitParam(name = "processDefinitionId",value = "流程定义id",required = true,dataTypeClass = String.class)
     })
     @GetMapping("/setting/{processDefinitionId}")
     public R<List<ActProcessNodeVo>> setting(@NotBlank(message = "流程定义id不能为空")  @PathVariable String processDefinitionId){

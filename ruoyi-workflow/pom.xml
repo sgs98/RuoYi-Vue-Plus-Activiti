@@ -5,7 +5,7 @@
     <parent>
         <artifactId>ruoyi-vue-plus</artifactId>
         <groupId>com.ruoyi</groupId>
-        <version>4.1.0</version>
+        <version>4.2.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -14,6 +14,11 @@
     <description>
         工作流模块
     </description>
+
+    <properties>
+      <xerces.version>2.11.0</xerces.version>
+      <batik.version>1.10</batik.version>
+    </properties>
 
     <dependencies>
 
@@ -34,6 +39,27 @@
             <groupId>com.ruoyi</groupId>
             <artifactId>ruoyi-system</artifactId>
         </dependency>
+
+        <!--JimuReport-->
+        <dependency>
+            <groupId>org.jeecgframework.jimureport</groupId>
+            <artifactId>spring-boot-starter-jimureport</artifactId>
+        </dependency>
+
+        <!--解决部署xml错误-->
+        <dependency>
+            <groupId>xerces</groupId>
+            <artifactId>xercesImpl</artifactId>
+            <version>${xerces.version}</version>
+        </dependency>
+
+        <!-- svg转png图片工具-->
+        <dependency>
+            <groupId>org.apache.xmlgraphics</groupId>
+            <artifactId>batik-all</artifactId>
+            <version>${batik.version}</version>
+        </dependency>
+
     </dependencies>
 
 </project>

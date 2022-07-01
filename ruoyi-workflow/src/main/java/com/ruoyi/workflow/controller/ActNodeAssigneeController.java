@@ -53,8 +53,8 @@ public class ActNodeAssigneeController extends BaseController {
      */
     @ApiOperation("按照流程定义id和流程节点id查询流程定义设置")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "processDefinitionId",value = "流程定义id",required = true),
-        @ApiImplicitParam(name = "nodeId",value = "流程节点id",required = true)
+        @ApiImplicitParam(name = "processDefinitionId",value = "流程定义id",required = true,dataTypeClass = String.class),
+        @ApiImplicitParam(name = "nodeId",value = "流程节点id",required = true,dataTypeClass = String.class)
     })
     @GetMapping("/{processDefinitionId}/{nodeId}")
     public R<ActNodeAssignee> getInfoSetting(@NotBlank(message = "流程定义id不能为空") @PathVariable String processDefinitionId,
@@ -72,7 +72,7 @@ public class ActNodeAssigneeController extends BaseController {
      */
     @ApiOperation("删除流程定义设置")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "id",value = "主键",required = true)
+        @ApiImplicitParam(name = "id",value = "主键",required = true,dataTypeClass = String.class)
     })
     @Log(title = "流程定义设置管理", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}")
@@ -90,8 +90,8 @@ public class ActNodeAssigneeController extends BaseController {
      */
     @ApiOperation("复制给最新流程定义设置")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "id",value = "主键",required = true),
-        @ApiImplicitParam(name = "key",value = "流程Key",required = true)
+        @ApiImplicitParam(name = "id",value = "主键",required = true,dataTypeClass = String.class),
+        @ApiImplicitParam(name = "key",value = "流程Key",required = true,dataTypeClass = String.class)
     })
     @Log(title = "流程定义设置管理", businessType = BusinessType.INSERT)
     @PostMapping("/copy/{id}/{key}")

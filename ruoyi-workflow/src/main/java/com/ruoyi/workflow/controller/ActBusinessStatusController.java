@@ -36,7 +36,7 @@ public class ActBusinessStatusController {
      */
     @ApiOperation("根据业务id查询流程实例")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "businessKey",value = "业务id",required = true)
+        @ApiImplicitParam(name = "businessKey",value = "业务id",required = true,dataTypeClass = String.class)
     })
     @GetMapping("/getInfoByBusinessKey/{businessKey}")
     public R<ActBusinessStatus> getInfoByBusinessId(@NotBlank(message = "业务id不能为空") @PathVariable String  businessKey){
