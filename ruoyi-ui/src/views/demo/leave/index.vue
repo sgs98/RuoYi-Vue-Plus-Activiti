@@ -394,7 +394,7 @@ export default {
         this.title = "修改请假业务";
         this.sendMessage = {
           title:'请假申请',
-          messageContent:this.$store.state.user.name+'单据【'+row.id+"】申请"
+          messageContent:'单据【'+row.id+"】申请"
         }
       });
     },

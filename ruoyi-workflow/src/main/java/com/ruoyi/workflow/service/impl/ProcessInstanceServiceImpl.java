@@ -362,20 +362,24 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteRuntimeProcessInst(String processInstId) {
-        //1.查询流程实例
-        ProcessInstance processInstance = runtimeService.createProcessInstanceQuery()
-            .processInstanceId(processInstId).singleResult();
-        //2.删除流程实例
-        List<Task> list = taskService.createTaskQuery().processInstanceId(processInstId).list();
-        List<Task> subTasks = list.stream().filter(e -> StringUtils.isNotBlank(e.getParentTaskId())).collect(Collectors.toList());
-        if(CollectionUtil.isNotEmpty(subTasks)){
-            subTasks.forEach(e->{
-                taskService.deleteTask(e.getId());
-            });
+        try {
+            //1.查询流程实例
+            ProcessInstance processInstance = runtimeService.createProcessInstanceQuery()
+                .processInstanceId(processInstId).singleResult();
+            //2.删除流程实例
+            List<Task> list = taskService.createTaskQuery().processInstanceId(processInstId).list();
+            List<Task> subTasks = list.stream().filter(e -> StringUtils.isNotBlank(e.getParentTaskId())).collect(Collectors.toList());
+            if(CollectionUtil.isNotEmpty(subTasks)){
+                subTasks.forEach(e->{
+                    taskService.deleteTask(e.getId());
+                });
+            }
+            runtimeService.deleteProcessInstance(processInstId, LoginHelper.getUserId() + "作废了当前流程申请");
+            //3. 更新业务状态
+            return iActBusinessStatusService.updateState(processInstance.getBusinessKey(), BusinessStatusEnum.INVALID);
+        }catch (Exception e){
+            throw new ServiceException(e.getMessage());
         }
-        runtimeService.deleteProcessInstance(processInstId, LoginHelper.getUserId() + "作废了当前流程申请");
-        //3. 更新业务状态
-        return iActBusinessStatusService.updateState(processInstance.getBusinessKey(), BusinessStatusEnum.INVALID);
     }
 
     /**
@@ -388,27 +392,31 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteRuntimeProcessAndHisInst(String processInstId) {
-        //1.查询流程实例
-        ProcessInstance processInstance = runtimeService.createProcessInstanceQuery()
-            .processInstanceId(processInstId).singleResult();
-        //2.删除流程实例
-        List<Task> list = taskService.createTaskQuery().processInstanceId(processInstId).list();
-        List<Task> subTasks = list.stream().filter(e -> StringUtils.isNotBlank(e.getParentTaskId())).collect(Collectors.toList());
-        if(CollectionUtil.isNotEmpty(subTasks)){
-            subTasks.forEach(e->{
-                taskService.deleteTask(e.getId());
-            });
+        try {
+            //1.查询流程实例
+            ProcessInstance processInstance = runtimeService.createProcessInstanceQuery()
+                .processInstanceId(processInstId).singleResult();
+            //2.删除流程实例
+            List<Task> list = taskService.createTaskQuery().processInstanceId(processInstId).list();
+            List<Task> subTasks = list.stream().filter(e -> StringUtils.isNotBlank(e.getParentTaskId())).collect(Collectors.toList());
+            if(CollectionUtil.isNotEmpty(subTasks)){
+                subTasks.forEach(e->{
+                    taskService.deleteTask(e.getId());
+                });
+            }
+            runtimeService.deleteProcessInstance(processInstId, LoginHelper.getUserId() + "删除了当前流程申请");
+            //3.删除历史记录
+            HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery().processInstanceId(processInstId).singleResult();
+            if(ObjectUtil.isNotEmpty(historicProcessInstance)){
+                historyService.deleteHistoricProcessInstance(processInstId);
+            }
+            //4.删除业务状态
+            iActBusinessStatusService.deleteState(processInstance.getBusinessKey());
+            //5.删除保存的任务节点
+            return iActTaskNodeService.deleteByInstanceId(processInstId);
+        }catch (Exception e){
+            throw new ServiceException(e.getMessage());
         }
-        runtimeService.deleteProcessInstance(processInstId, LoginHelper.getUserId() + "删除了当前流程申请");
-        //3.删除历史记录
-        HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery().processInstanceId(processInstId).singleResult();
-        if(ObjectUtil.isNotEmpty(historicProcessInstance)){
-            historyService.deleteHistoricProcessInstance(processInstId);
-        }
-        //4.删除业务状态
-        iActBusinessStatusService.deleteState(processInstance.getBusinessKey());
-        //5.删除保存的任务节点
-        return iActTaskNodeService.deleteByInstanceId(processInstId);
     }
 
     /**
@@ -420,15 +428,19 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
      */
     @Override
     public boolean deleteFinishProcessAndHisInst(String processInstId) {
-        //1.查询流程实例
-        HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery()
-            .processInstanceId(processInstId).singleResult();
-        //2.删除历史记录
-        historyService.deleteHistoricProcessInstance(processInstId);
-        //3.删除业务状态
-        iActBusinessStatusService.deleteState(historicProcessInstance.getBusinessKey());
-        //4.删除保存的任务节点
-        return iActTaskNodeService.deleteByInstanceId(processInstId);
+        try {
+            //1.查询流程实例
+            HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery()
+                .processInstanceId(processInstId).singleResult();
+            //2.删除历史记录
+            historyService.deleteHistoricProcessInstance(processInstId);
+            //3.删除业务状态
+            iActBusinessStatusService.deleteState(historicProcessInstance.getBusinessKey());
+            //4.删除保存的任务节点
+            return iActTaskNodeService.deleteByInstanceId(processInstId);
+        }catch (Exception e){
+            throw new ServiceException(e.getMessage());
+        }
     }
 
     /**
@@ -512,72 +524,76 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
         if(ObjectUtil.isNull(actTaskNode)){
             throw new ServiceException("未查询到撤回节点信息");
         }
-        List<Task> list = taskService.createTaskQuery().processInstanceId(processInstId).list().stream().filter(e->StringUtils.isBlank(e.getParentTaskId())).collect(Collectors.toList());
-        for (Task task : list) {
-            // 1. 获取流程模型实例 BpmnModel
-            BpmnModel bpmnModel = repositoryService.getBpmnModel(task.getProcessDefinitionId());
-            // 2.当前节点信息
-            FlowNode curFlowNode = (FlowNode) bpmnModel.getFlowElement(task.getTaskDefinitionKey());
-            // 3.获取当前节点原出口连线
-            List<SequenceFlow> sequenceFlowList = curFlowNode.getOutgoingFlows();
-            // 4. 临时存储当前节点的原出口连线
-            List<SequenceFlow> oriSequenceFlows = new ArrayList<>();
-            oriSequenceFlows.addAll(sequenceFlowList);
-            // 5. 将当前节点的原出口清空
-            sequenceFlowList.clear();
-            // 6. 获取目标节点信息
-            FlowNode targetFlowNode = (FlowNode) bpmnModel.getFlowElement(actTaskNode.getNodeId());
-            // 7. 获取目标节点的入口连线
-            List<SequenceFlow> incomingFlows = targetFlowNode.getIncomingFlows();
-            // 8. 存储所有目标出口
-            List<SequenceFlow> targetSequenceFlow = new ArrayList<>();
-            for (SequenceFlow incomingFlow : incomingFlows) {
-                // 找到入口连线的源头（获取目标节点的父节点）
-                FlowNode source = (FlowNode) incomingFlow.getSourceFlowElement();
-                List<SequenceFlow> sequenceFlows;
-                if (source instanceof ParallelGateway) {
-                    // 并行网关: 获取目标节点的父节点（并行网关）的所有出口，
-                    sequenceFlows = source.getOutgoingFlows();
-                } else {
-                    // 其他类型父节点, 则获取目标节点的入口连续
-                    sequenceFlows = targetFlowNode.getIncomingFlows();
+        try {
+            List<Task> list = taskService.createTaskQuery().processInstanceId(processInstId).list().stream().filter(e->StringUtils.isBlank(e.getParentTaskId())).collect(Collectors.toList());
+            for (Task task : list) {
+                // 1. 获取流程模型实例 BpmnModel
+                BpmnModel bpmnModel = repositoryService.getBpmnModel(task.getProcessDefinitionId());
+                // 2.当前节点信息
+                FlowNode curFlowNode = (FlowNode) bpmnModel.getFlowElement(task.getTaskDefinitionKey());
+                // 3.获取当前节点原出口连线
+                List<SequenceFlow> sequenceFlowList = curFlowNode.getOutgoingFlows();
+                // 4. 临时存储当前节点的原出口连线
+                List<SequenceFlow> oriSequenceFlows = new ArrayList<>();
+                oriSequenceFlows.addAll(sequenceFlowList);
+                // 5. 将当前节点的原出口清空
+                sequenceFlowList.clear();
+                // 6. 获取目标节点信息
+                FlowNode targetFlowNode = (FlowNode) bpmnModel.getFlowElement(actTaskNode.getNodeId());
+                // 7. 获取目标节点的入口连线
+                List<SequenceFlow> incomingFlows = targetFlowNode.getIncomingFlows();
+                // 8. 存储所有目标出口
+                List<SequenceFlow> targetSequenceFlow = new ArrayList<>();
+                for (SequenceFlow incomingFlow : incomingFlows) {
+                    // 找到入口连线的源头（获取目标节点的父节点）
+                    FlowNode source = (FlowNode) incomingFlow.getSourceFlowElement();
+                    List<SequenceFlow> sequenceFlows;
+                    if (source instanceof ParallelGateway) {
+                        // 并行网关: 获取目标节点的父节点（并行网关）的所有出口，
+                        sequenceFlows = source.getOutgoingFlows();
+                    } else {
+                        // 其他类型父节点, 则获取目标节点的入口连续
+                        sequenceFlows = targetFlowNode.getIncomingFlows();
+                    }
+                    targetSequenceFlow.addAll(sequenceFlows);
                 }
-                targetSequenceFlow.addAll(sequenceFlows);
+                // 9. 将当前节点的出口设置为新节点
+                curFlowNode.setOutgoingFlows(targetSequenceFlow);
+                // 10. 完成当前任务，流程就会流向目标节点创建新目标任务
+                // 当前任务，完成当前任务
+                taskService.addComment(task.getId(), task.getProcessInstanceId(),"申请人撤销申请");
+                taskService.setAssignee(task.getId(), LoginHelper.getUserId().toString());
+                // 完成任务，就会进行驳回到目标节点，产生目标节点的任务数据
+                taskService.complete(task.getId());
+                // 11. 完成驳回功能后，将当前节点的原出口方向进行恢复
+                curFlowNode.setOutgoingFlows(oriSequenceFlows);
             }
-            // 9. 将当前节点的出口设置为新节点
-            curFlowNode.setOutgoingFlows(targetSequenceFlow);
-            // 10. 完成当前任务，流程就会流向目标节点创建新目标任务
-            // 当前任务，完成当前任务
-            taskService.addComment(task.getId(), task.getProcessInstanceId(),"申请人撤销申请");
-            taskService.setAssignee(task.getId(), LoginHelper.getUserId().toString());
-            // 完成任务，就会进行驳回到目标节点，产生目标节点的任务数据
-            taskService.complete(task.getId());
-            // 11. 完成驳回功能后，将当前节点的原出口方向进行恢复
-            curFlowNode.setOutgoingFlows(oriSequenceFlows);
-        }
-        // 12. 查询目标任务节点历史办理人
-        List<Task> newTaskList = taskService.createTaskQuery().processInstanceId(processInstId).list().stream().filter(e->StringUtils.isBlank(e.getParentTaskId())).collect(Collectors.toList());
-        if(newTaskList.size()>1){
-            newTaskList.remove(0);
-            for (Task task : newTaskList) {
-                DeleteTaskCmd deleteTaskCmd = new DeleteTaskCmd(task.getId());
-                managementService.executeCommand(deleteTaskCmd);
+            // 12. 查询目标任务节点历史办理人
+            List<Task> newTaskList = taskService.createTaskQuery().processInstanceId(processInstId).list().stream().filter(e->StringUtils.isBlank(e.getParentTaskId())).collect(Collectors.toList());
+            if(newTaskList.size()>1){
+                newTaskList.remove(0);
+                for (Task task : newTaskList) {
+                    DeleteTaskCmd deleteTaskCmd = new DeleteTaskCmd(task.getId());
+                    managementService.executeCommand(deleteTaskCmd);
+                }
             }
-        }
-        List<Task> newTasks = taskService.createTaskQuery().processInstanceId(processInstId).list().stream().filter(e->StringUtils.isBlank(e.getParentTaskId())).collect(Collectors.toList());
-        for (Task newTask : newTasks) {
-            Map<String, Object> variables =new HashMap<>();
-            variables.put("status",BusinessStatusEnum.CANCEL.getStatus());
-            taskService.setVariables(newTask.getId(),variables);
-            Execution execution = runtimeService.createExecutionQuery().executionId(newTask.getExecutionId()).singleResult();
-            DeleteVariableCmd deleteExecutionChildCmd = new DeleteVariableCmd(execution.getParentId(),true,false);
-            managementService.executeCommand(deleteExecutionChildCmd);
-            taskService.setAssignee(newTask.getId(), LoginHelper.getUserId().toString());
-            iActTaskNodeService.deleteBackTaskNode(newTask.getProcessInstanceId(),newTask.getTaskDefinitionKey());
-        }
+            List<Task> newTasks = taskService.createTaskQuery().processInstanceId(processInstId).list().stream().filter(e->StringUtils.isBlank(e.getParentTaskId())).collect(Collectors.toList());
+            for (Task newTask : newTasks) {
+                Map<String, Object> variables =new HashMap<>();
+                variables.put("status",BusinessStatusEnum.CANCEL.getStatus());
+                taskService.setVariables(newTask.getId(),variables);
+                Execution execution = runtimeService.createExecutionQuery().executionId(newTask.getExecutionId()).singleResult();
+                DeleteVariableCmd deleteExecutionChildCmd = new DeleteVariableCmd(execution.getParentId(),true,false);
+                managementService.executeCommand(deleteExecutionChildCmd);
+                taskService.setAssignee(newTask.getId(), LoginHelper.getUserId().toString());
+                iActTaskNodeService.deleteBackTaskNode(newTask.getProcessInstanceId(),newTask.getTaskDefinitionKey());
+            }
 
-        // 13. 更新业务状态
-        boolean b = iActBusinessStatusService.updateState(processInstance.getBusinessKey(), BusinessStatusEnum.CANCEL);
-        return b;
+            // 13. 更新业务状态
+            boolean b = iActBusinessStatusService.updateState(processInstance.getBusinessKey(), BusinessStatusEnum.CANCEL);
+            return b;
+        }catch (Exception e){
+            throw new ServiceException(e.getMessage());
+        }
     }
 }

@@ -49,4 +49,4 @@ INSERT INTO `sys_dict_data` VALUES (1537766634446532610, 2, '短信', '3', 'sys_
 INSERT INTO `sys_dict_data` VALUES (1537800002466955266, 0, '已读', '1', 'read_status', NULL, 'primary', 'N', '0', 'admin', '2022-06-17 22:11:06', 'admin', '2022-06-18 17:54:47', NULL);
 INSERT INTO `sys_dict_data` VALUES (1537800099497984001, 1, '未读', '0', 'read_status', NULL, 'danger', 'N', '0', 'admin', '2022-06-17 22:11:29', 'admin', '2022-06-18 17:54:53', NULL);
 
-alter table act_node_assignee add task_listener VARCHAR(4000) not null comment '任务监听';
+alter table act_node_assignee add task_listener VARCHAR(4000)  comment '任务监听';

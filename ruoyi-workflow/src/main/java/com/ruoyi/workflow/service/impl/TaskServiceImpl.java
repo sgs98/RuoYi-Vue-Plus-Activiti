@@ -177,17 +177,17 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean completeTask(TaskCompleteREQ req) {
+        // 1.查询任务
+        Task task = taskService.createTaskQuery().taskId(req.getTaskId()).taskAssignee(getUserId().toString()).singleResult();
+
+        if (ObjectUtil.isNull(task)) {
+            throw new ServiceException("任务不存在或您不是当前审批人");
+        }
+
+        if (task.isSuspended()) {
+            throw new ServiceException("当前任务已被挂起");
+        }
         try {
-            // 1.查询任务
-            Task task = taskService.createTaskQuery().taskId(req.getTaskId()).taskAssignee(getUserId().toString()).singleResult();
-
-            if (ObjectUtil.isNull(task)) {
-                throw new ServiceException("任务不存在或您不是当前审批人");
-            }
-
-            if (task.isSuspended()) {
-                throw new ServiceException("当前任务已被挂起");
-            }
             //办理委托任务
             if(ObjectUtil.isNotEmpty(task.getDelegationState())&&ActConstant.PENDING.equals(task.getDelegationState().name())){
                 taskService.resolveTask(req.getTaskId());
@@ -846,122 +846,126 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         if (ObjectUtil.isNull(task)) {
             throw new ServiceException("当前任务不存在或你不是任务办理人");
         }
-        //流程实例id
-        String processInstanceId = task.getProcessInstanceId();
-        MultiVo currentMultiInstance = workFlowUtils.isMultiInstance(task.getProcessDefinitionId(), task.getTaskDefinitionKey());
-        MultiVo targetMultiInstance = workFlowUtils.isMultiInstance(task.getProcessDefinitionId(), backProcessBo.getTargetActivityId());
+        try {
+            //流程实例id
+            String processInstanceId = task.getProcessInstanceId();
+            MultiVo currentMultiInstance = workFlowUtils.isMultiInstance(task.getProcessDefinitionId(), task.getTaskDefinitionKey());
+            MultiVo targetMultiInstance = workFlowUtils.isMultiInstance(task.getProcessDefinitionId(), backProcessBo.getTargetActivityId());
 
-        // 1. 获取流程模型实例 BpmnModel
-        BpmnModel bpmnModel = repositoryService.getBpmnModel(task.getProcessDefinitionId());
-        // 2.当前节点信息
-        FlowNode curFlowNode = (FlowNode) bpmnModel.getFlowElement(task.getTaskDefinitionKey());
-        // 3.获取当前节点原出口连线
-        List<SequenceFlow> sequenceFlowList = curFlowNode.getOutgoingFlows();
-        // 4. 临时存储当前节点的原出口连线
-        List<SequenceFlow> oriSequenceFlows = new ArrayList<>();
-        oriSequenceFlows.addAll(sequenceFlowList);
-        // 5. 将当前节点的原出口清空
-        sequenceFlowList.clear();
-        // 6. 获取目标节点信息
-        FlowNode targetFlowNode = (FlowNode) bpmnModel.getFlowElement(backProcessBo.getTargetActivityId());
-        // 7. 获取目标节点的入口连线
-        List<SequenceFlow> incomingFlows = targetFlowNode.getIncomingFlows();
-        // 8. 存储所有目标出口
-        List<SequenceFlow> targetSequenceFlow = new ArrayList<>();
-        for (SequenceFlow incomingFlow : incomingFlows) {
-            // 找到入口连线的源头（获取目标节点的父节点）
-            FlowNode source = (FlowNode) incomingFlow.getSourceFlowElement();
-            List<SequenceFlow> sequenceFlows;
-            if (source instanceof ParallelGateway) {
-                // 并行网关: 获取目标节点的父节点（并行网关）的所有出口，
-                sequenceFlows = source.getOutgoingFlows();
-            } else {
-                // 其他类型父节点, 则获取目标节点的入口连续
-                sequenceFlows = targetFlowNode.getIncomingFlows();
-            }
-            targetSequenceFlow.addAll(sequenceFlows);
-        }
-        // 9. 将当前节点的出口设置为新节点
-        curFlowNode.setOutgoingFlows(targetSequenceFlow);
-        // 10. 完成当前任务，流程就会流向目标节点创建新目标任务
-        List<Task> list = taskService.createTaskQuery().processInstanceId(processInstanceId).list();
-        if(list.size() == 1){
-            if(ObjectUtil.isEmpty(currentMultiInstance)){
-                DeleteExecutionChildCmd deleteExecutionChildCmd = new DeleteExecutionChildCmd(task.getExecutionId());
-                managementService.executeCommand(deleteExecutionChildCmd);
-            }
-            // 当前任务，完成当前任务
-            taskService.addComment(task.getId(), processInstanceId, StringUtils.isNotBlank(backProcessBo.getComment()) ? backProcessBo.getComment() : "驳回");
-            Execution execution = runtimeService.createExecutionQuery().executionId(task.getExecutionId()).singleResult();
-            // 完成任务，就会进行驳回到目标节点，产生目标节点的任务数据
-            taskService.complete(backProcessBo.getTaskId());
-            if(ObjectUtil.isNotEmpty(currentMultiInstance)&&ObjectUtil.isEmpty(targetMultiInstance)){
-                DeleteVariableCmd deleteVariableCmd = new DeleteVariableCmd(execution.getParentId(),true,true);
-                managementService.executeCommand(deleteVariableCmd);
-            }
-        }else{
-            for (Task t : list) {
-                if (backProcessBo.getTaskId().equals(t.getId())) {
-                    // 当前任务，完成当前任务
-                    taskService.addComment(t.getId(), processInstanceId, StringUtils.isNotBlank(backProcessBo.getComment()) ? backProcessBo.getComment() : "驳回");
-                    // 完成任务，就会进行驳回到目标节点，产生目标节点的任务数据
-                    taskService.complete(t.getId());
+            // 1. 获取流程模型实例 BpmnModel
+            BpmnModel bpmnModel = repositoryService.getBpmnModel(task.getProcessDefinitionId());
+            // 2.当前节点信息
+            FlowNode curFlowNode = (FlowNode) bpmnModel.getFlowElement(task.getTaskDefinitionKey());
+            // 3.获取当前节点原出口连线
+            List<SequenceFlow> sequenceFlowList = curFlowNode.getOutgoingFlows();
+            // 4. 临时存储当前节点的原出口连线
+            List<SequenceFlow> oriSequenceFlows = new ArrayList<>();
+            oriSequenceFlows.addAll(sequenceFlowList);
+            // 5. 将当前节点的原出口清空
+            sequenceFlowList.clear();
+            // 6. 获取目标节点信息
+            FlowNode targetFlowNode = (FlowNode) bpmnModel.getFlowElement(backProcessBo.getTargetActivityId());
+            // 7. 获取目标节点的入口连线
+            List<SequenceFlow> incomingFlows = targetFlowNode.getIncomingFlows();
+            // 8. 存储所有目标出口
+            List<SequenceFlow> targetSequenceFlow = new ArrayList<>();
+            for (SequenceFlow incomingFlow : incomingFlows) {
+                // 找到入口连线的源头（获取目标节点的父节点）
+                FlowNode source = (FlowNode) incomingFlow.getSourceFlowElement();
+                List<SequenceFlow> sequenceFlows;
+                if (source instanceof ParallelGateway) {
+                    // 并行网关: 获取目标节点的父节点（并行网关）的所有出口，
+                    sequenceFlows = source.getOutgoingFlows();
                 } else {
-                    Execution execution = runtimeService.createExecutionQuery().executionId(t.getExecutionId()).singleResult();
-                    DeleteTaskCmd deleteTaskCmd = new DeleteTaskCmd(t.getId());
-                    managementService.executeCommand(deleteTaskCmd);
-                    historyService.deleteHistoricTaskInstance(t.getId());
-                    if(ObjectUtil.isNotEmpty(currentMultiInstance)){
-                        DeleteVariableCmd deleteVariableCmd = new DeleteVariableCmd(execution.getId(),false,true);
-                        managementService.executeCommand(deleteVariableCmd);
-                    }else if(ObjectUtil.isNotEmpty(targetMultiInstance)){
-                        DeleteVariableCmd deleteVariableCmd = new DeleteVariableCmd(execution.getParentId(),true,true);
-                        managementService.executeCommand(deleteVariableCmd);
-                    }else{
-                        historyService.createNativeHistoricActivityInstanceQuery()
-                            .sql("DELETE  FROM ACT_HI_ACTINST WHERE EXECUTION_ID_ = '" + t.getExecutionId() + "'").list();
+                    // 其他类型父节点, 则获取目标节点的入口连续
+                    sequenceFlows = targetFlowNode.getIncomingFlows();
+                }
+                targetSequenceFlow.addAll(sequenceFlows);
+            }
+            // 9. 将当前节点的出口设置为新节点
+            curFlowNode.setOutgoingFlows(targetSequenceFlow);
+            // 10. 完成当前任务，流程就会流向目标节点创建新目标任务
+            List<Task> list = taskService.createTaskQuery().processInstanceId(processInstanceId).list();
+            if(list.size() == 1){
+                if(ObjectUtil.isEmpty(currentMultiInstance)){
+                    DeleteExecutionChildCmd deleteExecutionChildCmd = new DeleteExecutionChildCmd(task.getExecutionId());
+                    managementService.executeCommand(deleteExecutionChildCmd);
+                }
+                // 当前任务，完成当前任务
+                taskService.addComment(task.getId(), processInstanceId, StringUtils.isNotBlank(backProcessBo.getComment()) ? backProcessBo.getComment() : "驳回");
+                Execution execution = runtimeService.createExecutionQuery().executionId(task.getExecutionId()).singleResult();
+                // 完成任务，就会进行驳回到目标节点，产生目标节点的任务数据
+                taskService.complete(backProcessBo.getTaskId());
+                if(ObjectUtil.isNotEmpty(currentMultiInstance)&&ObjectUtil.isEmpty(targetMultiInstance)){
+                    DeleteVariableCmd deleteVariableCmd = new DeleteVariableCmd(execution.getParentId(),true,true);
+                    managementService.executeCommand(deleteVariableCmd);
+                }
+            }else{
+                for (Task t : list) {
+                    if (backProcessBo.getTaskId().equals(t.getId())) {
+                        // 当前任务，完成当前任务
+                        taskService.addComment(t.getId(), processInstanceId, StringUtils.isNotBlank(backProcessBo.getComment()) ? backProcessBo.getComment() : "驳回");
+                        // 完成任务，就会进行驳回到目标节点，产生目标节点的任务数据
+                        taskService.complete(t.getId());
+                    } else {
+                        Execution execution = runtimeService.createExecutionQuery().executionId(t.getExecutionId()).singleResult();
+                        DeleteTaskCmd deleteTaskCmd = new DeleteTaskCmd(t.getId());
+                        managementService.executeCommand(deleteTaskCmd);
+                        historyService.deleteHistoricTaskInstance(t.getId());
+                        if(ObjectUtil.isNotEmpty(currentMultiInstance)){
+                            DeleteVariableCmd deleteVariableCmd = new DeleteVariableCmd(execution.getId(),false,true);
+                            managementService.executeCommand(deleteVariableCmd);
+                        }else if(ObjectUtil.isNotEmpty(targetMultiInstance)){
+                            DeleteVariableCmd deleteVariableCmd = new DeleteVariableCmd(execution.getParentId(),true,true);
+                            managementService.executeCommand(deleteVariableCmd);
+                        }else{
+                            historyService.createNativeHistoricActivityInstanceQuery()
+                                .sql("DELETE  FROM ACT_HI_ACTINST WHERE EXECUTION_ID_ = '" + t.getExecutionId() + "'").list();
+                        }
                     }
                 }
             }
-        }
-        // 11. 完成驳回功能后，将当前节点的原出口方向进行恢复
-        curFlowNode.setOutgoingFlows(oriSequenceFlows);
-       // 判断是否会签
-        LambdaQueryWrapper<ActNodeAssignee> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(ActNodeAssignee::getNodeId,backProcessBo.getTargetActivityId());
-        wrapper.eq(ActNodeAssignee::getProcessDefinitionId,task.getProcessDefinitionId());
-        ActNodeAssignee actNodeAssignee = iActNodeAssigneeService.getOne(wrapper);
-        List<Task> newTaskList = taskService.createTaskQuery().processInstanceId(processInstanceId).list();
-        if(ObjectUtil.isNotEmpty(actNodeAssignee)&&!actNodeAssignee.getMultiple()){
-            for (Task newTask : newTaskList) {
-                // 取之前的历史办理人
-                List<HistoricTaskInstance> oldTargerTaskList = historyService.createHistoricTaskInstanceQuery()
-                    .taskDefinitionKey(newTask.getTaskDefinitionKey()) // 节点id
-                    .processInstanceId(processInstanceId)
-                    .finished() // 已经完成才是历史
-                    .orderByTaskCreateTime().desc() // 最新办理的在最前面
-                    .list();
-                if(CollectionUtil.isNotEmpty(oldTargerTaskList)){
-                    HistoricTaskInstance oldTargerTask = oldTargerTaskList.get(0);
-                    taskService.setAssignee(newTask.getId(), oldTargerTask.getAssignee());
+            // 11. 完成驳回功能后，将当前节点的原出口方向进行恢复
+            curFlowNode.setOutgoingFlows(oriSequenceFlows);
+            // 判断是否会签
+            LambdaQueryWrapper<ActNodeAssignee> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(ActNodeAssignee::getNodeId,backProcessBo.getTargetActivityId());
+            wrapper.eq(ActNodeAssignee::getProcessDefinitionId,task.getProcessDefinitionId());
+            ActNodeAssignee actNodeAssignee = iActNodeAssigneeService.getOne(wrapper);
+            List<Task> newTaskList = taskService.createTaskQuery().processInstanceId(processInstanceId).list();
+            if(ObjectUtil.isNotEmpty(actNodeAssignee)&&!actNodeAssignee.getMultiple()){
+                for (Task newTask : newTaskList) {
+                    // 取之前的历史办理人
+                    List<HistoricTaskInstance> oldTargerTaskList = historyService.createHistoricTaskInstanceQuery()
+                        .taskDefinitionKey(newTask.getTaskDefinitionKey()) // 节点id
+                        .processInstanceId(processInstanceId)
+                        .finished() // 已经完成才是历史
+                        .orderByTaskCreateTime().desc() // 最新办理的在最前面
+                        .list();
+                    if(CollectionUtil.isNotEmpty(oldTargerTaskList)){
+                        HistoricTaskInstance oldTargerTask = oldTargerTaskList.get(0);
+                        taskService.setAssignee(newTask.getId(), oldTargerTask.getAssignee());
+                    }
                 }
             }
-        }
 
-        // 13. 删除驳回后的流程节点
-        ActTaskNode actTaskNode = iActTaskNodeService.getListByInstanceIdAndNodeId(task.getProcessInstanceId(), backProcessBo.getTargetActivityId());
-        if (ObjectUtil.isNotNull(actTaskNode) && actTaskNode.getOrderNo() == 0) {
-            ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceId(processInstanceId).singleResult();
-            List<Task> newList = taskService.createTaskQuery().processInstanceId(processInstanceId).list();
-            for (Task ta : newList) {
-                Map<String, Object> variables = new HashMap<>();
-                variables.put("status", BusinessStatusEnum.BACK.getStatus());
-                taskService.setVariables(ta.getId(), variables);
+            // 13. 删除驳回后的流程节点
+            ActTaskNode actTaskNode = iActTaskNodeService.getListByInstanceIdAndNodeId(task.getProcessInstanceId(), backProcessBo.getTargetActivityId());
+            if (ObjectUtil.isNotNull(actTaskNode) && actTaskNode.getOrderNo() == 0) {
+                ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceId(processInstanceId).singleResult();
+                List<Task> newList = taskService.createTaskQuery().processInstanceId(processInstanceId).list();
+                for (Task ta : newList) {
+                    Map<String, Object> variables = new HashMap<>();
+                    variables.put("status", BusinessStatusEnum.BACK.getStatus());
+                    taskService.setVariables(ta.getId(), variables);
+                }
+                iActBusinessStatusService.updateState(processInstance.getBusinessKey(), BusinessStatusEnum.BACK);
             }
-            iActBusinessStatusService.updateState(processInstance.getBusinessKey(), BusinessStatusEnum.BACK);
+            iActTaskNodeService.deleteBackTaskNode(processInstanceId, backProcessBo.getTargetActivityId());
+            return processInstanceId;
+        }catch (Exception e){
+            throw new ServiceException("操作失败:"+e.getMessage());
         }
-        iActTaskNodeService.deleteBackTaskNode(processInstanceId, backProcessBo.getTargetActivityId());
-        return processInstanceId;
     }
 
     /**
@@ -1092,7 +1096,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
             return R.ok();
         }catch (Exception e){
             e.printStackTrace();
-            return R.fail();
+            return R.fail(e.getMessage());
         }
     }
 
@@ -1177,7 +1181,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
             return R.ok();
         }catch (Exception e){
             e.printStackTrace();
-            return R.fail();
+            return R.fail(e.getMessage());
         }
     }
 
@@ -1227,7 +1231,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
             return R.ok();
         }catch (Exception e){
             e.printStackTrace();
-            return R.fail();
+            return R.fail(e.getMessage());
         }
     }
 }
