@@ -593,7 +593,8 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
             boolean b = iActBusinessStatusService.updateState(processInstance.getBusinessKey(), BusinessStatusEnum.CANCEL);
             return b;
         }catch (Exception e){
-            throw new ServiceException(e.getMessage());
+            e.printStackTrace();
+            throw new ServiceException("撤销失败:"+e.getMessage());
         }
     }
 }
