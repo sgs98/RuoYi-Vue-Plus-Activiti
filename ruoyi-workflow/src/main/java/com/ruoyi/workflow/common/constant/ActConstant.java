@@ -32,6 +32,11 @@ public interface ActConstant {
     String INCLUSIVE_GATEWAY = "InclusiveGateway";
 
     /**
+     *结束节点
+     */
+    String END_EVENT = "EndEvent";
+
+    /**
      *连线
      */
     String SEQUENCE_FLOW = "sequenceFlow";
