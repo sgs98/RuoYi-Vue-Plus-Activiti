@@ -114,7 +114,8 @@ public class WorkFlowUtils {
 
     /**
      * @Description: 获取下一审批节点信息
-     * @param: flowElement 节点信息
+     * @param: flowElements 全部节点
+     * @param: flowElement 当前节点信息
      * @param: nextNodes 下一节点信息
      * @param: tempNodes 保存没有表达式的节点信息
      * @param: taskId 任务id
@@ -123,7 +124,7 @@ public class WorkFlowUtils {
      * @author: gssong
      * @Date: 2022/4/11 13:37
      */
-    public void getNextNodes(FlowElement flowElement, ExecutionEntityImpl executionEntity, List<ProcessNode> nextNodes, List<ProcessNode> tempNodes, String taskId, String gateway) {
+    public void getNextNodes(Collection<FlowElement> flowElements,FlowElement flowElement, ExecutionEntityImpl executionEntity, List<ProcessNode> nextNodes, List<ProcessNode> tempNodes, String taskId, String gateway) {
         // 获取当前节点的连线信息
         List<SequenceFlow> outgoingFlows = ((FlowNode) flowElement).getOutgoingFlows();
         // 当前节点的所有下一节点出口
@@ -135,16 +136,20 @@ public class WorkFlowUtils {
             if (outFlowElement instanceof UserTask) {
                 buildNode(executionEntity, nextNodes, tempNodes, taskId, gateway, sequenceFlow, processNode, tempNode, outFlowElement);
             }else if (outFlowElement instanceof ExclusiveGateway) { // 排他网关
-                getNextNodes(outFlowElement, executionEntity, nextNodes, tempNodes, taskId, ActConstant.EXCLUSIVE_GATEWAY);
+                getNextNodes(flowElements,outFlowElement, executionEntity, nextNodes, tempNodes, taskId, ActConstant.EXCLUSIVE_GATEWAY);
             }else if (outFlowElement instanceof ParallelGateway) { //并行网关
-                getNextNodes(outFlowElement,executionEntity, nextNodes, tempNodes, taskId, ActConstant.PARALLEL_GATEWAY);
+                getNextNodes(flowElements,outFlowElement,executionEntity, nextNodes, tempNodes, taskId, ActConstant.PARALLEL_GATEWAY);
             }else if(outFlowElement instanceof InclusiveGateway){ //包含网关
-                getNextNodes(outFlowElement,executionEntity, nextNodes, tempNodes, taskId, ActConstant.INCLUSIVE_GATEWAY);
+                getNextNodes(flowElements,outFlowElement,executionEntity, nextNodes, tempNodes, taskId, ActConstant.INCLUSIVE_GATEWAY);
             }else if (outFlowElement instanceof EndEvent) {
-                continue;
+                FlowElement subProcess = getSubProcess(flowElements, outFlowElement);
+                if(subProcess==null){
+                    continue;
+                }
+                getNextNodes(flowElements,subProcess,executionEntity, nextNodes, tempNodes, taskId, ActConstant.END_EVENT);
             }else if(outFlowElement instanceof SubProcess) {
-                Collection<FlowElement> flowElements = ((SubProcess) outFlowElement).getFlowElements();
-                for (FlowElement element : flowElements) {
+                Collection<FlowElement> subFlowElements = ((SubProcess) outFlowElement).getFlowElements();
+                for (FlowElement element : subFlowElements) {
                     if (element instanceof UserTask) {
                         buildNode(executionEntity, nextNodes, tempNodes, taskId, gateway, sequenceFlow, processNode, tempNode, element);
                         break;
@@ -251,6 +256,27 @@ public class WorkFlowUtils {
             processNode.setAssigneeId(((UserTask) outFlowElement).getAssignee());
             nextNodes.add(processNode);
         }
+    }
+
+    /**
+     * @Description: 判断是否为主流程结束节点
+     * @param: flowElements全部节点
+     * @param: endElement 结束节点
+     * @return: org.flowable.bpmn.model.FlowElement
+     * @author: gssong
+     * @Date: 2022/7/11 20:39
+     */
+    public FlowElement getSubProcess(Collection<FlowElement> flowElements, FlowElement endElement) {
+        for (FlowElement mainElement : flowElements) {
+            if (mainElement instanceof SubProcess) {
+                for (FlowElement subEndElement : ((SubProcess) mainElement).getFlowElements()) {
+                    if (endElement.equals(subEndElement)) {
+                        return mainElement;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     /**

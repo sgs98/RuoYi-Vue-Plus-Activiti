@@ -525,13 +525,15 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         BpmnModel bpmnModel = repositoryService.getBpmnModel(processDefinitionId);
         //通过任务节点id，来获取当前节点信息
         FlowElement flowElement = bpmnModel.getFlowElement(task.getTaskDefinitionKey());
+        //全部节点
+        Collection<FlowElement> flowElements = bpmnModel.getProcesses().get(0).getFlowElements();
         // 封装下一个用户任务节点信息
         List<ProcessNode> nextNodes = new ArrayList<>();
         // 保存没有表达式的节点
         List<ProcessNode> tempNodes = new ArrayList<>();
         ExecutionEntityImpl executionEntity = (ExecutionEntityImpl) runtimeService.createExecutionQuery()
             .executionId(task.getExecutionId()).singleResult();
-        workFlowUtils.getNextNodes(flowElement,executionEntity, nextNodes, tempNodes, task.getId(), null);
+        workFlowUtils.getNextNodes(flowElements,flowElement,executionEntity, nextNodes, tempNodes, task.getId(), null);
         if(CollectionUtil.isEmpty(tempNodes)&&CollectionUtil.isNotEmpty(nextNodes)){
             Iterator<ProcessNode> iterator = nextNodes.iterator();
             while (iterator.hasNext()) {
