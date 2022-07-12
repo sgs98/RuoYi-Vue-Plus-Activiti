@@ -9,8 +9,8 @@
     <version>4.2.0</version>
 
     <name>RuoYi-Vue-Plus</name>
-    <url>https://gitee.com/JavaLionLi/RuoYi-Vue-Plus</url>
-    <description>RuoYi-Vue-Plus后台管理系统</description>
+    <url>https://gitee.com/sgs98/RuoYi-Vue-Plus-Activiti</url>
+    <description>RuoYi-Vue-Plus-Activiti后台管理系统</description>
 
     <properties>
         <ruoyi-vue-plus.version>4.2.0</ruoyi-vue-plus.version>
