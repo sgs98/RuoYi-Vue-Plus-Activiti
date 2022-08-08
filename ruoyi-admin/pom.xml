@@ -90,12 +90,6 @@
             </exclusions>
         </dependency>
 
-        <!-- 即时通信模块 -->
-        <dependency>
-            <groupId>com.ruoyi</groupId>
-            <artifactId>ruoyi-websocket</artifactId>
-        </dependency>
-
     </dependencies>
 
     <build>

@@ -37,11 +37,9 @@ public class BsLeaveServiceImpl implements IBsLeaveService {
 
     private final BsLeaveMapper baseMapper;
 
-    @Autowired
-    private IProcessInstanceService iProcessInstanceService;
+    private final IProcessInstanceService iProcessInstanceService;
 
-    @Autowired
-    private WorkFlowUtils workFlowUtils;
+    private final WorkFlowUtils workFlowUtils;
     @Override
     public BsLeaveVo queryById(String id){
         BsLeaveVo vo = baseMapper.selectVoById(id);

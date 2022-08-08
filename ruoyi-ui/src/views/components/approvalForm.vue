@@ -4,7 +4,7 @@
         <el-tab-pane label="业务单据" v-loading="loading">
             <component :is="currProcessForm" :businessKey="businessKey" :parentTaskId="parentTaskId" @closeForm="closeForm" :taskId="taskId"></component>
         </el-tab-pane>
-        <el-tab-pane label="流程进度">
+        <!-- <el-tab-pane label="流程进度">
           <el-table :data="list" border stripe style="width: 100%" max-height="300">
                <el-table-column label="流程审批历史记录" align="center">
                 <el-table-column type="index" label="序号" align="center" width="50"></el-table-column>
@@ -19,6 +19,24 @@
             <el-image :src="url" style="font-size: 20px; margin: 50px;">
               <div slot="placeholder"><i class="el-icon-loading"></i> 流程审批历史图加载中……</div>
             </el-image>
+        </el-tab-pane> -->
+        <el-tab-pane label="审批意见" v-loading="loading">
+            <el-table :data="list" border stripe style="width: 100%" max-height="570">
+              <el-table-column label="流程审批历史记录" align="center">
+                <el-table-column type="index" label="序号" align="center" width="50"></el-table-column>
+                <el-table-column prop="name" label="任务名称" align="center" ></el-table-column>
+                <el-table-column prop="nickName" label="办理人" align="center" ></el-table-column>
+                <el-table-column prop="status" label="状态" align="center" ></el-table-column>
+                <el-table-column prop="comment" label="审批意见" align="center" ></el-table-column>
+                <el-table-column prop="startTime" label="开始时间" align="center" ></el-table-column>
+                <el-table-column prop="endTime" label="结束时间" align="center" ></el-table-column>
+              </el-table-column>
+            </el-table>
+        </el-tab-pane>
+        <el-tab-pane label="流程进度">
+           <el-image v-if="processInstanceId" :src="url" style="font-size: 20px; margin: 50px;">
+              <div slot="placeholder"><i class="el-icon-loading"></i> 流程审批历史图加载中……</div>
+           </el-image>
         </el-tab-pane>
       </el-tabs>
   </el-dialog>

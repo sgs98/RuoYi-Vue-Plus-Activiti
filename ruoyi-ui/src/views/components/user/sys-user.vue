@@ -2,33 +2,12 @@
 <el-dialog title="用户" :visible.sync="visible" v-if="visible" width="60%" append-to-body v-dialogDrag :close-on-click-modal="false">
   <div class="app-container">
     <el-row :gutter="20">
-      <!--部门数据-->
-      <el-col :span="4" :xs="24">
-        <div class="head-container">
-          <el-input
-            v-model="deptName"
-            placeholder="请输入部门名称"
-            clearable
-            size="mini"
-            prefix-icon="el-icon-search"
-            style="margin-bottom: 20px"
-          />
-        </div>
-        <div class="head-container">
-          <el-tree
-            :data="deptOptions"
-            :props="defaultProps"
-            :expand-on-click-node="false"
-            :filter-node-method="filterNode"
-            ref="tree"
-            default-expand-all
-            @node-click="handleNodeClick"
-          />
-        </div>
-      </el-col>
       <!--用户数据-->
       <el-col :span="20" :xs="24">
-        <el-form :model="queryParams" ref="queryForm" :inline="true" size="mini" v-show="showSearch" label-width="68px">
+        <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
+          <el-form-item label="归属部门" prop="deptId">
+            <treeselect v-model="queryParams.deptId" style="width: 240px" :options="deptOptions" :show-count="true" placeholder="请选择归属部门" />
+          </el-form-item>
           <el-form-item label="用户名称" prop="userName">
             <el-input
               v-model="queryParams.userName"
@@ -47,9 +26,20 @@
               @keyup.enter.native="handleQuery"
             />
           </el-form-item>
+          <el-form-item label="创建时间">
+            <el-date-picker
+              v-model="dateRange"
+              style="width: 240px"
+              value-format="yyyy-MM-dd"
+              type="daterange"
+              range-separator="-"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+            ></el-date-picker>
+          </el-form-item>
           <el-form-item>
-            <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-            <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+            <el-button type="primary" icon="el-icon-search"  @click="handleQuery">搜索</el-button>
+            <el-button icon="el-icon-refresh"  @click="resetQuery">重置</el-button>
           </el-form-item>
         </el-form>
 
@@ -83,12 +73,12 @@
   </div>
   <!-- 选中的用户 -->
   <div>
-    <el-tag v-for="user in chooseUserList" :key="user.userId" style="margin:2px"
+    <el-tag v-for="user in chooseUserList" :key="user.userName" style="margin:2px"
     closable @close="handleCloseTag(user)" >{{user.userName}} </el-tag>
   </div>
   <div slot="footer" class="dialog-footer">
-        <el-button size="small" type="primary" @click="confirmUser">确认</el-button>
-        <el-button size="small" @click="visible=false">取 消</el-button>
+        <el-button :loading="buttonLoading" type="primary" @click="primary">确认</el-button>
+        <el-button @click="visible=false">取 消</el-button>
   </div>
 </el-dialog>
 </template>
@@ -96,6 +86,8 @@
 <script>
 import { getWorkflowUserListByPage } from "@/api/workflow/workflowUser";
 import { treeselect } from "@/api/system/dept";
+import Treeselect from "@riophae/vue-treeselect";
+import "@riophae/vue-treeselect/dist/vue-treeselect.css";
 
 export default {
   props: {
@@ -112,10 +104,12 @@ export default {
   },
   name: "User",
   dicts: ['sys_user_sex'],
+  components: { Treeselect },
   data() {
     return {
       // 遮罩层
       loading: true,
+      buttonLoading: false,
       visible: false,
       // 显示搜索条件
       showSearch: true,
@@ -129,6 +123,8 @@ export default {
       open: false,
       // 部门名称
       deptName: undefined,
+      // 日期范围
+      dateRange: [],
       defaultProps: {
         children: "children",
         label: "label"
@@ -140,7 +136,8 @@ export default {
         userName: undefined,
         phonenumber: undefined,
         deptId: undefined,
-        type: 'person',
+        type: undefined,
+        params: undefined,
         ids:[]
       },
       // 列信息
@@ -152,9 +149,6 @@ export default {
         { key: 4, label: `手机号码`, visible: true },
         { key: 5, label: `创建时间`, visible: true }
       ],
-      getRowKey(row) {
-        return row.userId
-      },
       // 保存选择的用户
       chooseUserList: [],
       flag: false
@@ -168,10 +162,10 @@ export default {
     propUserList(val) {
       if(val.length>0){
          this.queryParams.ids = val
-         this.getList()
          this.flag = true
+         this.getList()
       }else{
-         this.chooseUserList = []
+       this.chooseUserList = []
       }
     }
   },
@@ -195,7 +189,8 @@ export default {
             })
           }
           this.loading = false;
-        });
+        }
+      );
     },
     /** 查询部门下拉树结构 */
     getTreeselect() {
@@ -227,15 +222,16 @@ export default {
     },
     /** 重置按钮操作 */
     resetQuery() {
-      this.queryParams.deptId = ''
-      this.queryParams.phonenumber = ''
-      this.queryParams.userName = ''
+      this.dateRange = [];
+      this.resetForm("queryForm");
       this.handleQuery();
     },
     // 多选框选中数据
     handleSelectionChange(val) {
-        if(this.multiple === true){
-          this.chooseUserList = val
+        if(this.multiple){
+          this.chooseUserList = val.filter((element,index,self)=>{
+             return self.findIndex(x=>x.userId===element.userId) === index
+          })
         }else{
           this.chooseUserList = val
           if (val.length > 1) {
@@ -247,18 +243,16 @@ export default {
           }
         }
     },
+    getRowKey(row) {
+        return row.userId
+    },
     // 删除tag
     handleCloseTag(user){
-       this.chooseUserList.splice(this.chooseUserList.indexOf(user), 1);
-       this.$refs.multipleTable.toggleRowSelection(user,false)
-       this.userList.forEach((row,index)=>{
-          if(user.userId === row.userId){
-             this.$refs.multipleTable.toggleRowSelection(this.userList[index],false)
-          }
-       })
+      this.chooseUserList.splice(this.chooseUserList.indexOf(user), 1);
+      this.$refs.multipleTable.toggleRowSelection(user, false)
     },
     // 确认
-    confirmUser(){
+    primary(){
       if(this.chooseUserList.length>0){
         this.$emit("confirmUser",this.chooseUserList)
       }else{
@@ -268,3 +262,6 @@ export default {
   }
 };
 </script>
+<style scoped>
+
+</style>

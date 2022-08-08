@@ -461,7 +461,9 @@ export default {
     },
     /** 导出按钮操作 */
     handleExport() {
-        this.$download.excel('/demo/leave/export', this.queryParams);
+         this.download('/demo/leave/export', {
+        ...this.queryParams
+      }, `demo_${new Date().getTime()}.xlsx`)
     },
     //提交流程
     submitFormAppply(entity){
@@ -469,7 +471,7 @@ export default {
             entity: entity
         }
         const data = {
-            processKey: 'sub', // key
+            processKey: 'huiqian', // key
             businessKey: entity.id, // 业务id
             variables: variables,
             classFullName: 'com.ruoyi.demo.domain.BsLeave'
@@ -484,6 +486,7 @@ export default {
             this.taskVariables = {
                 entity: entity,  // 变量
                 //assignee: '1', // key
+                userId: '1',
                 //assigneeList: assigneeList
             }
             this.$refs.verifyRef.visible = true

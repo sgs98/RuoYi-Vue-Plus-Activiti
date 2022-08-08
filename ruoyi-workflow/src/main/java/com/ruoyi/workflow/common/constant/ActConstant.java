@@ -140,6 +140,4 @@ public interface ActConstant {
 
     String PARAM_BOOLEAN = "Boolean";
 
-    String PARAM_CHARACTER = "Character";
-
 }

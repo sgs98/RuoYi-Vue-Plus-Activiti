@@ -12,6 +12,7 @@ import com.ruoyi.workflow.domain.bo.*;
 import com.ruoyi.workflow.domain.bo.BackProcessBo;
 import com.ruoyi.workflow.domain.vo.TaskFinishVo;
 import com.ruoyi.workflow.domain.vo.TaskWaitingVo;
+import com.ruoyi.workflow.domain.vo.VariableVo;
 import com.ruoyi.workflow.service.ITaskService;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
@@ -93,10 +94,9 @@ public class TaskController extends BaseController {
         return iTaskService.getAllTaskWaitByPage(req);
     }
 
-
     /**
-     * @param req
      * @Description: 完成任务
+     * @param: req
      * @return: com.ruoyi.common.core.domain.R<java.lang.Void>
      * @author: gssong
      * @Date: 2021/10/21 13:34
@@ -255,6 +255,47 @@ public class TaskController extends BaseController {
     @PostMapping("/deleteMultiInstanceExecution")
     public R<Boolean> deleteMultiInstanceExecution(@Validated({AddGroup.class}) @RequestBody DeleteMultiREQ deleteMultiREQ) {
         return iTaskService.deleteMultiInstanceExecution(deleteMultiREQ);
+    }
+
+    /**
+     * @Description: 修改办理人
+     * @param: updateAssigneeBo
+     * @return: com.ruoyi.common.core.domain.R<java.lang.Void>
+     * @author: gssong
+     * @Date: 2022/7/17 13:31
+     */
+    @ApiOperation("修改办理人")
+    @Log(title = "任务管理", businessType = BusinessType.UPDATE)
+    @PostMapping("/updateAssignee")
+    public R<Void> updateAssignee(@Validated({AddGroup.class}) @RequestBody UpdateAssigneeBo updateAssigneeBo) {
+        return iTaskService.updateAssignee(updateAssigneeBo);
+    }
+
+    /**
+     * @Description: 查询流程变量
+     * @param: taskId
+     * @return: com.ruoyi.common.core.domain.R<java.util.List<com.ruoyi.workflow.domain.vo.VariableVo>>
+     * @author: gssong
+     * @Date: 2022/7/23 14:33
+     */
+    @ApiOperation("查询流程变量")
+    @GetMapping("/getProcessInstVariable/{taskId}")
+    public R<List<VariableVo>> getProcessInstVariable(@PathVariable String taskId) {
+        return iTaskService.getProcessInstVariable(taskId);
+    }
+
+    /**
+     * @Description: 修改审批意见
+     * @param: commentId
+     * @param: comment
+     * @return: com.ruoyi.common.core.domain.R<java.lang.Void>
+     * @author: gssong
+     * @Date: 2022/7/24 13:38
+     */
+    @ApiOperation("修改审批意见")
+    @PutMapping("/editComment/{commentId}/{comment}")
+    public R<Void> editComment(@PathVariable String commentId,@PathVariable String comment) {
+        return iTaskService.editComment(commentId,comment);
     }
 
 }

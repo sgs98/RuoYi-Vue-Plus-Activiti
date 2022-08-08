@@ -7,6 +7,7 @@ import com.ruoyi.workflow.domain.bo.*;
 import com.ruoyi.workflow.domain.bo.BackProcessBo;
 import com.ruoyi.workflow.domain.vo.TaskFinishVo;
 import com.ruoyi.workflow.domain.vo.TaskWaitingVo;
+import com.ruoyi.workflow.domain.vo.VariableVo;
 
 import java.util.List;
 import java.util.Map;
@@ -101,4 +102,27 @@ public interface ITaskService {
      * @return
      */
     R<Boolean> deleteMultiInstanceExecution(DeleteMultiREQ deleteMultiREQ);
+
+    /**
+     * 修改办理人
+     * @param updateAssigneeBo
+     * @return
+     */
+    R<Void> updateAssignee(UpdateAssigneeBo updateAssigneeBo);
+
+
+    /**
+     * 查询流程变量
+     * @param taskId
+     * @return
+     */
+    R<List<VariableVo>> getProcessInstVariable(String taskId);
+
+    /**
+     * 修改审批意见
+     * @param commentId
+     * @param comment
+     * @return
+     */
+    R<Void> editComment(String commentId,String comment);
 }

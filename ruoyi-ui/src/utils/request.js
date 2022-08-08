@@ -37,6 +37,9 @@ service.interceptors.request.use(config => {
     url = url.slice(0, -1);
     config.params = {};
     config.url = url;
+    if(config.url.indexOf('login')==-1){
+      store.dispatch('getMessage')
+    }
   }
   if (!isRepeatSubmit && (config.method === 'post' || config.method === 'put')) {
     const requestObj = {
@@ -57,6 +60,9 @@ service.interceptors.request.use(config => {
         console.warn(`[${s_url}]: ` + message)
         return Promise.reject(new Error(message))
       } else {
+        if(config.url.indexOf('login')==-1){
+          store.dispatch('getMessage')
+        }
         cache.session.setJSON('sessionObj', requestObj)
       }
     }

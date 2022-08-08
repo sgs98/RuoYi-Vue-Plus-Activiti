@@ -15,8 +15,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotBlank;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -38,27 +41,27 @@ public class ProcessDefinitionController extends BaseController {
     /**
      * @Description: 查询流程定义列表
      * @param: defReq
-     * @return: com.ruoyi.common.core.domain.R<java.util.List<com.ruoyi.workflow.domain.vo.ProcessDefinitionVo>>
+     * @return: com.ruoyi.common.core.domain.R<java.util.List < com.ruoyi.workflow.domain.vo.ProcessDefinitionVo>>
      * @Author: gssong
      * @Date: 2021/10/7
      */
     @ApiOperation("查询流程定义列表")
     @GetMapping("/list")
-    public TableDataInfo<ProcessDefinitionVo> getByPage(DefREQ defReq){
+    public TableDataInfo<ProcessDefinitionVo> getByPage(DefREQ defReq) {
         return iProcessDefinitionService.getByPage(defReq);
     }
 
     /**
      * @Description: 查询历史流程定义列表
      * @param: defReq
-     * @return: com.ruoyi.common.core.domain.R<java.util.List<com.ruoyi.workflow.domain.vo.ProcessDefinitionVo>>
+     * @return: com.ruoyi.common.core.domain.R<java.util.List < com.ruoyi.workflow.domain.vo.ProcessDefinitionVo>>
      * @Author: gssong
      * @Date: 2021/10/7
      */
     @ApiOperation("查询历史流程定义列表")
     @GetMapping("/hisList")
-    public R<List<ProcessDefinitionVo>> getHisByPage(DefREQ defReq){
-        List<ProcessDefinitionVo> definitionVoList= iProcessDefinitionService.getHisByPage(defReq);
+    public R<List<ProcessDefinitionVo>> getHisByPage(DefREQ defReq) {
+        List<ProcessDefinitionVo> definitionVoList = iProcessDefinitionService.getHisByPage(defReq);
         return R.ok(definitionVoList);
     }
 
@@ -73,14 +76,14 @@ public class ProcessDefinitionController extends BaseController {
      */
     @ApiOperation("删除流程定义")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "deploymentId",value = "流程部署id",required = true,dataTypeClass = String.class),
-        @ApiImplicitParam(name = "definitionId",value = "流程定义id",required = true,dataTypeClass = String.class)
+        @ApiImplicitParam(name = "deploymentId", value = "流程部署id", required = true, dataTypeClass = String.class),
+        @ApiImplicitParam(name = "definitionId", value = "流程定义id", required = true, dataTypeClass = String.class)
     })
     @Log(title = "流程定义管理", businessType = BusinessType.DELETE)
     @DeleteMapping("/{deploymentId}/{definitionId}")
-    public R<Void> deleteDeployment(@NotBlank(message = "流程部署id不能为空")  @PathVariable String deploymentId,
+    public R<Void> deleteDeployment(@NotBlank(message = "流程部署id不能为空") @PathVariable String deploymentId,
                                     @NotBlank(message = "流程定义id不能为空") @PathVariable String definitionId) {
-        return iProcessDefinitionService.deleteDeployment(deploymentId,definitionId);
+        return iProcessDefinitionService.deleteDeployment(deploymentId, definitionId);
     }
 
 
@@ -113,15 +116,15 @@ public class ProcessDefinitionController extends BaseController {
      */
     @ApiOperation("导出流程定义文件（xml,png)")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "type",value = "文件类型",required = true,dataTypeClass = String.class),
-        @ApiImplicitParam(name = "definitionId",value = "流程定义id",required = true,dataTypeClass = String.class)
+        @ApiImplicitParam(name = "type", value = "文件类型", required = true, dataTypeClass = String.class),
+        @ApiImplicitParam(name = "definitionId", value = "流程定义id", required = true, dataTypeClass = String.class)
     })
     @Anonymous
     @GetMapping("/export/{type}/{definitionId}")
     public void exportFile(@NotBlank(message = "文件类型不能为空") @PathVariable String type,
                            @NotBlank(message = "流程定义id不能为空") @PathVariable String definitionId,
                            HttpServletResponse response) {
-        iProcessDefinitionService.exportFile(type,definitionId,response);
+        iProcessDefinitionService.exportFile(type, definitionId, response);
     }
 
     /**
@@ -133,12 +136,13 @@ public class ProcessDefinitionController extends BaseController {
      */
     @ApiOperation("查看xml文件")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "definitionId",value = "流程定义id",required = true,dataTypeClass = String.class)
+        @ApiImplicitParam(name = "definitionId", value = "流程定义id", required = true, dataTypeClass = String.class)
     })
     @GetMapping("/getXml/{definitionId}")
-    public R<String> getXml(@NotBlank(message = "流程定义id不能为空")  @PathVariable String definitionId) {
-        String  xmlStr = iProcessDefinitionService.getXml(definitionId);
-        return R.ok("操作成功",xmlStr);
+    public R<Object> getXml(@NotBlank(message = "流程定义id不能为空") @PathVariable String definitionId) {
+        String xmlStr = iProcessDefinitionService.getXml(definitionId);
+        List<String> xml = new ArrayList<>(Arrays.asList(xmlStr.split("\n")));
+        return R.ok("操作成功", xml);
     }
 
     /**
@@ -151,23 +155,23 @@ public class ProcessDefinitionController extends BaseController {
     @ApiOperation("激活或者挂起流程定义")
     @Log(title = "流程定义管理", businessType = BusinessType.UPDATE)
     @PutMapping("/updateProcDefState")
-    public R<Boolean> updateProcDefState(@RequestBody Map<String,Object> data){
+    public R<Boolean> updateProcDefState(@RequestBody Map<String, Object> data) {
         return R.ok(iProcessDefinitionService.updateProcDefState(data));
     }
 
     /**
      * @Description: 查询流程环节
      * @param: processDefinitionId
-     * @return: com.ruoyi.common.core.domain.R<java.util.List<com.ruoyi.workflow.domain.vo.ActProcessNodeVo>>
+     * @return: com.ruoyi.common.core.domain.R<java.util.List < com.ruoyi.workflow.domain.vo.ActProcessNodeVo>>
      * @author: gssong
      * @Date: 2021/11/19
      */
     @ApiOperation("查询流程环节")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "processDefinitionId",value = "流程定义id",required = true,dataTypeClass = String.class)
+        @ApiImplicitParam(name = "processDefinitionId", value = "流程定义id", required = true, dataTypeClass = String.class)
     })
     @GetMapping("/setting/{processDefinitionId}")
-    public R<List<ActProcessNodeVo>> setting(@NotBlank(message = "流程定义id不能为空")  @PathVariable String processDefinitionId){
+    public R<List<ActProcessNodeVo>> setting(@NotBlank(message = "流程定义id不能为空") @PathVariable String processDefinitionId) {
         return iProcessDefinitionService.setting(processDefinitionId);
     }
 

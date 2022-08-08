@@ -1,5 +1,5 @@
 <template>
-<el-dialog title="用户" :visible.sync="visible" v-if="visible" width="60%" append-to-body v-dialogDrag :close-on-click-modal="false">
+<el-dialog title="用户" :visible.sync="visible" v-if="visible" width="60%" append-to-body v-dialogDrag @close="multiClose" :close-on-click-modal="false">
   <div class="app-container">
     <el-row :gutter="20">
       <!--部门数据-->
@@ -88,7 +88,7 @@
   </div>
   <div slot="footer" class="dialog-footer">
         <el-button size="small" type="primary" @click="confirmUser">确认</el-button>
-        <el-button size="small" @click="visible=false">取 消</el-button>
+        <el-button size="small" @click="multiClose">取 消</el-button>
   </div>
 </el-dialog>
 </template>
@@ -199,7 +199,7 @@ export default {
             })
           }
           this.loading = false;
-        });
+      });
     },
     /** 查询部门下拉树结构 */
     getTreeselect() {
@@ -217,12 +217,11 @@ export default {
       this.queryParams.deptId = data.id;
       this.getList();
     },
-    // 取消按钮
-    cancel() {
-      this.open = false;
-      this.reset();
+    //关闭
+    multiClose(){
+      this.visible = false
+      this.$emit("multiClose")
     },
-
     /** 搜索按钮操作 */
     handleQuery() {
       this.flag = false
@@ -238,8 +237,10 @@ export default {
     },
     // 多选框选中数据
     handleSelectionChange(val) {
-        if(this.multiple === true){
-          this.chooseUserList = val
+        if(this.multiple){
+          this.chooseUserList = val.filter((element,index,self)=>{
+             return self.findIndex(x=>x.userId===element.userId) === index
+          })
         }else{
           this.chooseUserList = val
           if (val.length > 1) {

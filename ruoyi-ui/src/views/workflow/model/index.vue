@@ -50,7 +50,7 @@
             <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
         </el-row>
 
-        <el-table :max-height="getTableHeight" v-loading="loading" :data="modelList" @selection-change="handleSelectionChange">
+        <el-table v-loading="loading" :data="modelList" @selection-change="handleSelectionChange">
             <el-table-column type="selection" width="55" align="center" />
             <el-table-column fixed align="center" type="index" label="序号" width="50"></el-table-column>
             <el-table-column fixed align="center" prop="name" label="模型名称"></el-table-column>
@@ -89,8 +89,9 @@
           :limit.sync="queryParams.pageSize"
           @pagination="getList" />
         <!-- 设计流程 -->
-        <el-dialog title="设计模型" :before-close="handleClose" :visible.sync="bpmnJsModelVisible" v-if="bpmnJsModelVisible" fullscreen append-to-body>
-            <bpmnJs ref="bpmnJsModel" @close-bpmn="closeBpmn" :modelId="modelId"/>
+        <el-dialog title="设计模型" :before-close="handleClose" :visible.sync="bpmnJsModelVisible"
+        v-if="bpmnJsModelVisible" fullscreen :modal-append-to-body='false'>
+            <bpmnJs ref="bpmnJsModel" @close-bpmn="closeBpmn" :categorysBpmn="categorysBpmn" :modelId="modelId"/>
         </el-dialog>
     </div>
 </template>
@@ -99,6 +100,7 @@
 import {list,add,del,deploy} from "@/api/workflow/model";
 import BpmnJs from './bpmnJs'
 export default {
+    dicts: ['act_category'],
     name: 'Model', // 和对应路由表中配置的name值一致
     components: {BpmnJs},
     data() {
@@ -142,20 +144,12 @@ export default {
               ],
             },
             modelId: null, // 模型id
-            screenHeight: document.body.clientHeight
+            categorys:[]
         }
     },
     created() {
+      this.categorysBpmn = this.dict.type.act_category
       this.getList();
-      window.onresize = () => {
-        //获取body的高度
-        this.screenHeight = document.body.clientHeight
-      }
-    },
-    computed: {
-      getTableHeight() {
-        return this.screenHeight - 300
-      }
     },
     methods: {
       /** 搜索按钮操作 */

@@ -52,7 +52,7 @@ export default {
   // 作废流程实例，不会删除历史记录
   deleteRuntimeProcessInst(processInstId) {
     return request({
-      url: '/workflow/processInstance/deleteRuntimeProcessAndHisInst/'+processInstId,
+      url: '/workflow/processInstance/deleteRuntimeProcessInst/'+processInstId,
       method: 'delete'
     })
   },

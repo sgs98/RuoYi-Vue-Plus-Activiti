@@ -3,10 +3,10 @@
 
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="全类名" prop="fullClass">
+      <el-form-item label="bean名称" prop="beanName">
         <el-input
-          v-model="queryParams.fullClass"
-          placeholder="请输入全类名"
+          v-model="queryParams.businessRule"
+          placeholder="请输入bean名称"
           clearable
           size="small"
           @keyup.enter.native="handleQuery"
@@ -31,10 +31,10 @@
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="fullClassList" :highlight-current-row="true"
+    <el-table v-loading="loading" :data="businessRuleList" :highlight-current-row="true"
      @row-click = "onRowClick">
       <el-table-column label="id" align="center" prop="id" v-if="false"/>
-      <el-table-column label="全类名" :show-overflow-tooltip="true" align="center" prop="fullClass" />
+      <el-table-column label="bean名称" :show-overflow-tooltip="true" align="center" prop="beanName" />
       <el-table-column label="方法名" :show-overflow-tooltip="true" align="center" prop="method" />
       <el-table-column label="备注" :show-overflow-tooltip="true" align="center" prop="remark" />
     </el-table>
@@ -55,13 +55,13 @@
 </template>
 
 <script>
-import { listFullClass } from "@/api/workflow/fullClass";
+import { listBusinessRule } from "@/api/workflow/businessRule";
 
 export default {
   props: {
 
   },
-  name: "FullClass",
+  name: "processRule",
   data() {
     return {
       visible: false,
@@ -74,15 +74,15 @@ export default {
       // 总条数
       total: 0,
       // 业务规则表格数据
-      fullClassList: [],
+      businessRuleList: [],
       // 查询参数
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        fullClass: undefined,
+        beanName: undefined,
         method: undefined,
       },
-      fullClassParam: [],
+      businessRuleParam: [],
       // 选中行数据
       row: {}
     };
@@ -94,8 +94,8 @@ export default {
     /** 查询业务规则列表 */
     getList() {
       this.loading = true;
-      listFullClass(this.queryParams).then(response => {
-        this.fullClassList = response.rows;
+      listBusinessRule(this.queryParams).then(response => {
+        this.businessRuleList = response.rows;
         this.total = response.total;
         this.loading = false;
       });

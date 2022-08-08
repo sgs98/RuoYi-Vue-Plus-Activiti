@@ -164,8 +164,10 @@ export default {
     },
     // 多选框选中数据
     handleSelectionChange(val) {
-      if(this.multiple === true){
-          this.chooseRoleList = val
+      if(this.multiple){
+          this.chooseRoleList = val.filter((element,index,self)=>{
+             return self.findIndex(x=>x.roleId===element.roleId) === index
+          })
         }else{
           this.chooseRoleList = val
           if (val.length > 1) {

@@ -67,6 +67,12 @@ public class ActHistoryInfoVo implements Serializable {
     private String owner;
 
     /**
+     * 审批信息id
+     */
+    @ApiModelProperty("审批信息id")
+    private String commentId;
+
+    /**
      * 审批信息
      */
     @ApiModelProperty("审批信息")

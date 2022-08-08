@@ -3,6 +3,7 @@ package com.ruoyi.workflow.controller;
 import java.util.List;
 import java.util.Arrays;
 
+import com.ruoyi.common.annotation.Anonymous;
 import lombok.RequiredArgsConstructor;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.*;
@@ -50,6 +51,16 @@ public class SysMessageController extends BaseController {
     @GetMapping("/list")
     public TableDataInfo<SysMessageVo> list(@Validated(QueryGroup.class) SysMessageBo bo, PageQuery pageQuery) {
         return iSysMessageService.queryPageList(bo, pageQuery);
+    }
+
+    /**
+     * 查询消息通知列表
+     */
+    @ApiOperation("查询消息通知列表")
+    @Anonymous
+    @GetMapping("/waitingMessage")
+    public TableDataInfo<SysMessageVo> message() {
+        return iSysMessageService.queryPage();
     }
 
     /**
