@@ -35,7 +35,6 @@ import java.nio.charset.StandardCharsets;
  * @author Tijs Rademakers
  */
 @RestController
-@Anonymous
 public class ModelEditorJsonRestResource implements ModelDataJsonConstants {
 
   protected static final Logger LOGGER = LoggerFactory.getLogger(ModelEditorJsonRestResource.class);
@@ -47,6 +46,7 @@ public class ModelEditorJsonRestResource implements ModelDataJsonConstants {
   private ObjectMapper objectMapper;
 
   @RequestMapping(value="/model/{modelId}/json", method = RequestMethod.GET, produces = "application/json")
+  @Anonymous
   public ObjectNode getEditorJson(@PathVariable String modelId) {
     ObjectNode modelNode = null;
 

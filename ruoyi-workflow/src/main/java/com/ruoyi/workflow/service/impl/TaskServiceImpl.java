@@ -1203,7 +1203,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
             for (Map.Entry<String, VariableInstance> entry : variableInstances.entrySet()) {
                 VariableVo variableVo = new VariableVo();
                 variableVo.setKey(entry.getKey());
-                variableVo.setValue(entry.getValue().getValue().toString());
+                variableVo.setValue(ObjectUtil.isNotEmpty(entry.getValue()) && ObjectUtil.isNotEmpty(entry.getValue().getTextValue())?entry.getValue().getTextValue():"");
                 variableVoList.add(variableVo);
             }
         }

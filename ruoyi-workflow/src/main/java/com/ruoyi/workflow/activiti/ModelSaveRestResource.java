@@ -16,11 +16,9 @@ import cn.hutool.core.util.ObjectUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.ruoyi.common.annotation.Anonymous;
-import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.annotation.RepeatSubmit;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.R;
-import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.workflow.common.constant.ActConstant;
 import com.ruoyi.workflow.utils.WorkFlowUtils;
@@ -63,7 +61,6 @@ public class ModelSaveRestResource extends BaseController implements ModelDataJs
   @Autowired
   private WorkFlowUtils workFlowUtils;
 
-    @Log(title = "新建模型", businessType = BusinessType.INSERT)
     @RepeatSubmit
     @RequestMapping(value="/model/newModel", method = RequestMethod.POST)
     public R<Model> add(@RequestBody Map<String ,Object> modelData) {
@@ -122,7 +119,6 @@ public class ModelSaveRestResource extends BaseController implements ModelDataJs
    * @author: gssong
    * @Date: 2022/8/8
    */
-  @Log(title = "编辑模型", businessType = BusinessType.UPDATE)
   @RequestMapping(value="/model/{modelId}/save", method = RequestMethod.PUT)
   @ResponseStatus(value = HttpStatus.OK)
   public void saveModel(@PathVariable String modelId, @RequestParam MultiValueMap<String, String> values) {
