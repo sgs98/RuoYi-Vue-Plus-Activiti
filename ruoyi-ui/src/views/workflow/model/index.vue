@@ -112,7 +112,7 @@
 </template>
 
 <script>
-import {list,add,del,deploy} from "@/api/workflow/model";
+import {list,newModel,editModelInfo,del,deploy} from "@/api/workflow/model";
 import Design from './design'
 export default {
     name: 'Model', // 和对应路由表中配置的name值一致
@@ -241,7 +241,7 @@ export default {
         this.$refs["form"].validate(valid => {
           if (valid) {
               this.buttonLoading = true;
-              add(this.form).then(response => {
+              newModel(this.form).then(response => {
                 this.$modal.msgSuccess("新增成功");
                 this.open = false;
                 this.getList();

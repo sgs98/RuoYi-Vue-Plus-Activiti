@@ -23,6 +23,7 @@ import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.workflow.common.constant.ActConstant;
+import com.ruoyi.workflow.utils.WorkFlowUtils;
 import org.activiti.editor.constants.ModelDataJsonConstants;
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.RepositoryService;
@@ -59,15 +60,21 @@ public class ModelSaveRestResource extends BaseController implements ModelDataJs
   @Resource
   private ObjectMapper objectMapper;
 
+  @Autowired
+  private WorkFlowUtils workFlowUtils;
+
     @Log(title = "新建模型", businessType = BusinessType.INSERT)
     @RepeatSubmit
-    @PostMapping
+    @RequestMapping(value="/model/newModel", method = RequestMethod.POST)
     public R<Model> add(@RequestBody Map<String ,Object> modelData) {
         try {
             int version = 0;
             String key = modelData.get("key").toString();
             String name = modelData.get("name").toString();
-            String description = modelData.get("description").toString();
+            String description = "";
+            if(modelData.containsKey("description")){
+                description = modelData.get("description").toString();
+            }
 
             Model checkModel = repositoryService.createModelQuery().modelKey(key).singleResult();
             if(ObjectUtil.isNotNull(checkModel)){
@@ -136,8 +143,9 @@ public class ModelSaveRestResource extends BaseController implements ModelDataJs
 
 
       repositoryService.saveModel(model);
+      byte[] xmlBytes = workFlowUtils.bpmnJsonToXmlBytes(values.getFirst("json_xml").getBytes(StandardCharsets.UTF_8));
 
-      repositoryService.addModelEditorSource(model.getId(), values.getFirst("json_xml").getBytes(StandardCharsets.UTF_8));
+      repositoryService.addModelEditorSource(model.getId(), xmlBytes);
 
       InputStream svgStream = new ByteArrayInputStream(values.getFirst("svg_xml").getBytes(StandardCharsets.UTF_8));
       TranscoderInput input = new TranscoderInput(svgStream);
