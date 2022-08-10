@@ -17,6 +17,7 @@ import java.io.Serializable;
 @ApiModel("运行中流程查询")
 public class ProcessInstFinishREQ extends PageEntity implements Serializable {
     private static final long serialVersionUID=1L;
+
     @ApiModelProperty("流程名称")
     private String name;
 

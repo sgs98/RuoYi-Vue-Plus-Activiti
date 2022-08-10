@@ -33,14 +33,14 @@
             <el-table-column type="selection" width="55" align="center" />
             <el-table-column fixed align="center" type="index" label="序号" width="50"></el-table-column>
             <el-table-column fixed align="center" prop="name" label="流程定义名称"></el-table-column>
-            <el-table-column  align="center" prop="processDefinitionKey" label="流程定义KEY" ></el-table-column>
-            <el-table-column align="center" prop="processDefinitionVersion" label="版本号" width="90" >
+            <el-table-column  align="center" prop="processDefinitionKey" label="流程定义KEY" width="150"></el-table-column>
+            <el-table-column align="center" prop="processDefinitionVersion" label="版本号" width="100" >
               <template slot-scope="{row}"> v{{row.processDefinitionVersion}}.0</template>
             </el-table-column>
-            <el-table-column  align="center" prop="startUserNickName" label="流程发起人"  min-width="130"></el-table-column>
-            <el-table-column  align="center" prop="businessKey" :show-overflow-tooltip="true" label="流程关联业务ID" width="160"></el-table-column>
-            <el-table-column  align="center" prop="startTime" label="流程启动时间" width="160"></el-table-column>
-            <el-table-column label="操作" align="center" width="160" class-name="small-padding fixed-width">
+            <el-table-column  align="center" prop="startUserNickName" label="流程发起人" width="180"></el-table-column>
+            <el-table-column  align="center" prop="businessKey" :show-overflow-tooltip="true" label="流程关联业务ID"></el-table-column>
+            <el-table-column  align="center" prop="startTime" label="流程启动时间" width="150"></el-table-column>
+            <el-table-column label="操作" align="center" width="180" class-name="small-padding fixed-width">
             <template slot-scope="scope">
                 <el-button size="mini" type="text"  icon="el-icon-delete" @click="handleDelete(scope.row)">删除</el-button>
             </template>

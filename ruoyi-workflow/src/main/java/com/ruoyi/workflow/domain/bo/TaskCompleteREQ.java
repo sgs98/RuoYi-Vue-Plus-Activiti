@@ -29,7 +29,7 @@ public class TaskCompleteREQ {
     @ApiModelProperty("消息对象")
     private SendMessage sendMessage;
 
-    @ApiModelProperty("下一个节点审批，key: 节点id, vallue：审批人集合,多个人使用英文逗号分隔")
+    @ApiModelProperty("下一个节点审批，key: 节点id, value：审批人集合,多个人使用英文逗号分隔")
     private Map<String, String> assigneeMap;
 
     public String getMessage() {

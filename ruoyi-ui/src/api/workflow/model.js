@@ -84,9 +84,27 @@ export function saveModelXml(data) {
     data: data
   })
 }
-export function generalModelId() {
+
+
+export function getModelInfo(modelId) {
   return request({
-    url: `workflow/model/generalModelId`,
+    url: `model/${modelId}/json`,
     method: 'get'
   })
+}
+
+export function newModel(data) {
+    return request({
+      url: `model/newModel`,
+      method: 'post',
+      data: data
+    })
+}
+
+export function editModelInfo(modelId,data) {
+    return request({
+      url: `/model/${modelId}/save`,
+      method: 'put',
+      data: data
+    })
 }

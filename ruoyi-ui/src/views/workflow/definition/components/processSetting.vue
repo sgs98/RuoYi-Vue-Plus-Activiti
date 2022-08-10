@@ -56,6 +56,16 @@
                   </el-form-item>
               </el-col>
             </el-row>
+            <el-row v-if="node.index === 1">
+              <el-col class="line" :span="8">
+                <el-form-item label="是否自动审批" prop="autoComplete">
+                  <el-switch v-model="form.autoComplete"></el-switch>
+                  <el-tooltip class="item" effect="dark" content="当前节点与上一节点审批人相同自动审批，下一节点如果为弹窗选人则默认下一节点全部人员为候选人" placement="top-start">
+                    <i class="el-icon-info" style="cursor: pointer;font-size: 15px;line-height: 15px;vertical-align: middle;padding-left: 10px;"></i>
+                  </el-tooltip>
+                </el-form-item>
+              </el-col>
+            </el-row>
             <el-row v-if="form.multiple">
               <el-col class="line" :span="8">
                 <el-form-item label-width="100px" label="会签集合" prop="multipleColumn">
@@ -133,7 +143,7 @@
       </div>
     </div>
     <!-- 选择人员 -->
-    <sys-user ref="userRef" @confirmUser="clickUser" :propUserList = 'propUserList'/>
+    <sys-dept-user ref="userRef" @confirmUser="clickUser" :propUserList = 'propUserList'/>
     <!-- 选择角色 -->
     <sys-role ref="roleRef" @confirmUser="clickRole" :propRoleList = 'propRoleList'/>
     <!-- 选择部门 -->
@@ -144,7 +154,7 @@
 </template>
 
 <script>
-import  SysUser from "@/views/components/user/sys-user";
+import  SysDeptUser from "@/views/components/user/sys-dept-user";
 import  SysRole from "@/views/components/role/sys-role";
 import  SysDept from "@/views/components/dept/sys-dept";
 import  ProcessRule from "@/views/workflow/definition/components/processRule";
@@ -153,7 +163,7 @@ import {getInfoSetting,add,del} from "@/api/workflow/actNodeAssginee";
 
 export default {
     components: {
-       SysUser,
+       SysDeptUser,
        SysRole,
        SysDept,
        ProcessRule
@@ -174,6 +184,7 @@ export default {
           isDelegate: false,
           isTransmit: false,
           isCopy: false,
+          autoComplete: false,
           addMultiInstance: false,
           deleteMultiInstance: false,
           taskListenerList:[]
@@ -380,8 +391,8 @@ export default {
         },
         //业务规则
         clickRule(rule){
-          this.$set(this.form,'assignee',rule.fullClass+"."+rule.method)
-          this.$set(this.form,'fullClassId',rule.id)
+          this.$set(this.form,'assignee',rule.beanName+"."+rule.method)
+          this.$set(this.form,'businessRuleId',rule.id)
           this.$refs.processRuleRef.visible = false
         }
     }

@@ -7,6 +7,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @program: ruoyi-vue-plus
@@ -19,41 +20,55 @@ import java.util.Date;
 public class TaskWaitingVo implements Serializable {
 
     private static final long serialVersionUID=1L;
+
     /**
      * 流程任务id
      */
     @ApiModelProperty("流程任务id")
     private String id;
+
     /**
      * 任务名称
      */
     @ApiModelProperty("任务名称")
     private String name;
+
     /**
      * 流程状态
      */
     @ApiModelProperty("流程状态")
     private String processStatus;
+
     /**
      * 创建时间
      */
     @ApiModelProperty("创建时间")
     private Date createTime;
+
+    /**
+     * 节点id
+     */
+    @ApiModelProperty("节点id")
+    private String taskDefinitionKey;
+
     /**
      * 流程实例id
      */
     @ApiModelProperty("流程实例id")
     private String processInstanceId;
+
     /**
      * 流程执行id
      */
     @ApiModelProperty("流程执行id")
     private String executionId;
+
     /**
      * 流程定义id
      */
     @ApiModelProperty("流程定义id")
     private String processDefinitionId;
+
     /**
      * 办理人或候选人 （ 任务办理人: 如果是候选人则没有值，办理人才有）
      */
@@ -65,16 +80,19 @@ public class TaskWaitingVo implements Serializable {
      */
     @ApiModelProperty("办理人或候选人Id")
     private Long assigneeId;
+
     /**
      * 流程定义名称
      */
     @ApiModelProperty("流程定义名称")
     private String processDefinitionName;
+
     /**
      * 流程定义版本
      */
     @ApiModelProperty("流程定义版本")
     private Integer processDefinitionVersion;
+
     /**
      * 流程启动人
      */
@@ -86,6 +104,7 @@ public class TaskWaitingVo implements Serializable {
      */
     @ApiModelProperty("流程启动人ID")
     private String startUserId;
+
     /**
      * 业务id
      */
@@ -103,6 +122,18 @@ public class TaskWaitingVo implements Serializable {
      */
     @ApiModelProperty("认领或归还")
     private Boolean isClaim;
+
+    /**
+     * 是否会签
+     */
+    @ApiModelProperty("是否会签")
+    private Boolean multiInstance;
+
+    /**
+     * 是否可减签人员
+     */
+    @ApiModelProperty("是否可减签人员")
+    private List<TaskVo> taskVoList;
 
     /**
      * 业务状态

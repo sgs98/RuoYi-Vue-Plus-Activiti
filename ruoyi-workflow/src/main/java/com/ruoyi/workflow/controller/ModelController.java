@@ -5,7 +5,10 @@ import com.ruoyi.common.annotation.RepeatSubmit;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.core.validate.AddGroup;
+import com.ruoyi.common.core.validate.EditGroup;
 import com.ruoyi.common.enums.BusinessType;
+import com.ruoyi.workflow.domain.bo.ModeBo;
 import com.ruoyi.workflow.domain.bo.ModelREQ;
 import com.ruoyi.workflow.service.IModelService;
 import io.swagger.annotations.*;
@@ -39,10 +42,10 @@ public class ModelController extends BaseController {
      * @Date: 2022/5/22 13:47
      */
     @ApiOperation("保存模型")
-    @Log(title = "模型管理", businessType = BusinessType.INSERT)
+    @Log(title = "模型管理", businessType = BusinessType.UPDATE)
     @RepeatSubmit()
     @PutMapping()
-    public R<Void> saveModelXml(@RequestBody Map<String,String> data) {
+    public R<Void> saveModelXml(@Validated(EditGroup.class) @RequestBody ModeBo data) {
         return iModelService.saveModelXml(data);
     }
 
@@ -86,7 +89,7 @@ public class ModelController extends BaseController {
     @Log(title = "模型管理", businessType = BusinessType.INSERT)
     @RepeatSubmit()
     @PostMapping()
-    public R<Model> add(@RequestBody Map<String,String> data) {
+    public R<Model> add(@Validated(AddGroup.class)  @RequestBody ModeBo data) {
         return iModelService.add(data);
     }
 
@@ -162,7 +165,7 @@ public class ModelController extends BaseController {
     @GetMapping("/convertToModel/{processDefinitionId}")
     public R<Void> convertToModel(@NotEmpty(message = "流程定义id不能为空") @PathVariable String processDefinitionId){
         Boolean convertToModel = iModelService.convertToModel(processDefinitionId);
-        return convertToModel==true?R.ok():R.fail();
+        return convertToModel ?R.ok():R.fail();
     }
 
 }

@@ -37,11 +37,9 @@ public class BsLeaveServiceImpl implements IBsLeaveService {
 
     private final BsLeaveMapper baseMapper;
 
-    @Autowired
-    private IProcessInstanceService iProcessInstanceService;
+    private final IProcessInstanceService iProcessInstanceService;
 
-    @Autowired
-    private WorkFlowUtils workFlowUtils;
+    private final WorkFlowUtils workFlowUtils;
     @Override
     public BsLeaveVo queryById(String id){
         BsLeaveVo vo = baseMapper.selectVoById(id);
@@ -114,6 +112,12 @@ public class BsLeaveServiceImpl implements IBsLeaveService {
             //TODO 做一些业务上的校验,判断是否需要校验
         }
         int i = baseMapper.deleteBatchIds(ids);
+        for (String id : ids) {
+            String processInstanceId = iProcessInstanceService.getProcessInstanceId(id);
+            if(StringUtils.isNotBlank(processInstanceId)){
+                iProcessInstanceService.deleteRuntimeProcessAndHisInst(processInstanceId);
+            }
+        }
         return i>0;
     }
 }

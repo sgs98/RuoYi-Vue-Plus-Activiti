@@ -49,7 +49,7 @@
 
   <!-- 选择人员组件开始 -->
   <chooseWorkflowUser :dataObj="dataObj" :nodeId="nodeId" @confirmUser="clickUser" ref="wfUserRef"/>
-  <sys-user :propUserList="copyUserList" ref="userCopyRef" @confirmUser="confirmCopyUser"/>
+  <sys-dept-user :propUserList="copyUserList" ref="userCopyRef" @confirmUser="confirmCopyUser"/>
   <!-- 选择人员组件结束 -->
   <!-- 委托申请开始 -->
   <el-dialog :close-on-click-modal="false" title="委托申请" :visible.sync="delegateVisible" width="700px"  append-to-body>
@@ -67,7 +67,7 @@
         <el-button size="small" @click="delegateVisible = false">取消</el-button>
       </el-form-item>
     </el-form>
-    <sys-user :propUserList="delegateUserList" :multiple = false ref="delegateUserRef" @confirmUser="confirmDelegateUser"/>
+    <sys-dept-user :propUserList="delegateUserList" :multiple = false ref="delegateUserRef" @confirmUser="confirmDelegateUser"/>
   </el-dialog>
   <!-- 委托申请结束 -->
   <!-- 转办申请开始 -->
@@ -86,7 +86,7 @@
         <el-button size="small" @click="transmitVisible = false">取消</el-button>
       </el-form-item>
     </el-form>
-    <sys-user :propUserList="transmitUserList" :multiple = false ref="transmitUserRef" @confirmUser="confirmTransmitUser"/>
+    <sys-dept-user :propUserList="transmitUserList" :multiple = false ref="transmitUserRef" @confirmUser="confirmTransmitUser"/>
   </el-dialog>
   <!-- 转办申请结束 -->
   <!-- 加签开始 -->
@@ -128,7 +128,7 @@
 <script>
 import api from "@/api/workflow/task";
 import ChooseWorkflowUser from "@/views/components/user/choose-workflow-user ";
-import  SysUser from "@/views/components/user/sys-user";
+import  SysDeptUser from "@/views/components/user/sys-dept-user";
 import  MultiUser from "@/views/components/user/multi-user";
 import Back from "@/components/Process/Back";
 export default {
@@ -139,7 +139,7 @@ export default {
   },
   components: {
     ChooseWorkflowUser,
-    SysUser,
+    SysDeptUser,
     Back,
     MultiUser
   },
@@ -264,6 +264,9 @@ export default {
                 title: this.sendMessage.title,
                 type: this.sendMessageType,
                 messageContent: this.$store.state.user.name+"提交了"+this.sendMessage.messageContent
+            }
+            if(this.businessStatus.status === 'draft'){
+                 this.formData.message = '提交单据'
             }
             let response = await api.completeTask(this.formData);
             if (response.code === 200) {

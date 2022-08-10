@@ -147,14 +147,63 @@ spring:
 minidao :
   base-package: org.jeecg.modules.jmreport.desreport.dao*
   db-type: mysql
-#JimuReport[上传配置]
+
+#JimuReport[全配置]
 jeecg :
-  # local|minio|alioss
-  uploadType: local
-  # local
-  path :
-    #文件路径
-    upload: /opt/upload
+  jmreport:
+    #数据字典是否进行saas数据隔离(限制只能看自己的字典)
+    saas: false
+    #是否 禁用导出PDF和图片的按钮 默认为false
+    exportDisabled: false
+    #是否自动保存
+    autoSave: true
+    #自动保存间隔时间毫秒
+    interval: 20000
+    # 列索引
+    col: 100
+    #自定义项目前缀
+#    customPrePath:
+    # 自定义API接口的前缀 #{api_base_path}的值
+#    apiBasePath: http://localhost:8080/jeecg-boot
+    #数据源标识
+    datasource: master
+    #预览分页自定义
+    pageSize:
+      - 20
+      - 40
+      - 60
+      - 80
+    #打印纸张自定义
+    printPaper:
+      - title: A5纸
+        size:
+          - 148
+          - 210
+      - title: B4纸
+        size:
+          - 250
+          - 353
+      - title: A4纸
+        size:
+          - 210
+          - 297
+    #接口超时设置（毫秒）
+    connect-timeout: 300000
+    #Excel导出模式(fast/快、primary/精致模式，默认fast)
+    export-excel-pattern: fast
+    #Excel导出数据每个sheet的行数,每个sheet最大1048576行
+    page-size-number: 10000
+    #excel样式超过多少行显示默认样式（只在fast模式下有效）
+    excel-style-row: 1000
+    #设计页面表格的线是否显示 默认true
+    line: true
+    #sql数据源不写字典下拉框显示条数 版本1.4.2之后被放弃
+    select-show-total: 10
+    #是否启用签名校验,默认不开启，开启后会对执行sql的接口进行参数校验
+    safeMode: true
+    #预览页面的工具条 是否显示 默认true（3.1.0+版本（包含3.1.0）已移除）
+    viewToolbar: true
+
 --- # redis 单机配置(单机与集群只能开启一个另一个需要注释掉)
 spring:
   redis:

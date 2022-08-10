@@ -71,7 +71,7 @@ public class ActNodeAssignee extends BaseEntity{
     /**
      * 业务规则id
      */
-    private Long fullClassId;
+    private Long businessRuleId;
 
     /**
      * 是否弹出选人
@@ -128,6 +128,11 @@ public class ActNodeAssignee extends BaseEntity{
      * 任务监听
      */
     private String taskListener;
+
+    /**
+     * 自动审批,当前节点自动办理,下一节点不可弹窗选人
+     */
+    private Boolean autoComplete;
 
     /**
      * 任务监听

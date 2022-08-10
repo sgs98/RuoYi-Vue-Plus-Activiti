@@ -38,7 +38,7 @@ public interface ISysMessageService {
      *
      * @return 消息通知集合
      */
-    TableDataInfo<SysMessageVo> queryPage(PageQuery pageQuery,String userName);
+    TableDataInfo<SysMessageVo> queryPage();
 
     /**
      * 查询消息通知列表

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.report.mapper.JimuReportDbMapper">
+
+    <resultMap type="com.ruoyi.report.domain.JimuReportDb" id="JimuReportDbResult">
+        <result property="id" column="id"/>
+        <result property="jimuReportId" column="jimu_report_id"/>
+        <result property="createBy" column="create_by"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="dbCode" column="db_code"/>
+        <result property="dbChName" column="db_ch_name"/>
+        <result property="dbType" column="db_type"/>
+        <result property="dbTableName" column="db_table_name"/>
+        <result property="dbDynSql" column="db_dyn_sql"/>
+        <result property="dbKey" column="db_key"/>
+        <result property="tbDbKey" column="tb_db_key"/>
+        <result property="tbDbTableName" column="tb_db_table_name"/>
+        <result property="javaType" column="java_type"/>
+        <result property="javaValue" column="java_value"/>
+        <result property="apiUrl" column="api_url"/>
+        <result property="apiMethod" column="api_method"/>
+        <result property="isList" column="is_list"/>
+        <result property="isPage" column="is_page"/>
+        <result property="dbSource" column="db_source"/>
+        <result property="dbSourceType" column="db_source_type"/>
+        <result property="jsonData" column="json_data"/>
+        <result property="apiConvert" column="api_convert"/>
+    </resultMap>
+
+
+</mapper>

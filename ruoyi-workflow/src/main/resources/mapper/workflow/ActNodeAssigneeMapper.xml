@@ -12,7 +12,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="nodeName" column="node_name"/>
         <result property="assignee" column="assignee"/>
         <result property="assigneeId" column="assignee_id"/>
-        <result property="fullClassId" column="full_class_id"/>
+        <result property="businessRuleId" column="business_rule_id"/>
         <result property="isShow" column="is_show"/>
         <result property="multiple" column="multiple"/>
         <result property="multipleColumn" column="multiple_column"/>
@@ -23,6 +23,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="addMultiInstance" column="add_multi_instance"/>
         <result property="deleteMultiInstance" column="delete_multi_instance"/>
         <result property="taskListener" column="task_listener"/>
+        <result property="autoComplete" column="auto_complete"/>
         <result property="createTime" column="create_time"/>
         <result property="createBy" column="create_by"/>
         <result property="updateTime" column="update_time"/>

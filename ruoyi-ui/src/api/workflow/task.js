@@ -125,5 +125,27 @@ export default {
       method: 'post',
       data: data
     })
+  },
+  // 会签任务减签
+  updateAssignee(data) {
+    return request({
+      url: '/workflow/task/updateAssignee',
+      method: 'post',
+      data: data
+    })
+  },
+  //查询流程变量
+  getProcessInstVariable(taskId) {
+    return request({
+      url: '/workflow/task/getProcessInstVariable/'+taskId,
+      method: 'get'
+    })
+  },
+  //修改审批意见
+  editComment(commentId,comment) {
+    return request({
+      url: `/workflow/task/editComment/${commentId}/${comment}`,
+      method: 'put'
+    })
   }
 }

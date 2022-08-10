@@ -176,6 +176,12 @@
             <artifactId>activiti-json-converter</artifactId>
         </dependency>
 
+        <!--JimuReport-->
+        <dependency>
+            <groupId>org.jeecgframework.jimureport</groupId>
+            <artifactId>jimureport-spring-boot-starter</artifactId>
+        </dependency>
+
     </dependencies>
 
 </project>

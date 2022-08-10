@@ -78,22 +78,16 @@
             <artifactId>ruoyi-demo</artifactId>
         </dependency>
 
-	<!--  工作流模块  -->
+	    <!--  工作流模块  -->
         <dependency>
             <groupId>com.ruoyi</groupId>
             <artifactId>ruoyi-workflow</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.xmlbeans</groupId>
-                    <artifactId>xmlbeans</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
-        <!-- 即时通信模块 -->
+        <!--  工报表模块  -->
         <dependency>
             <groupId>com.ruoyi</groupId>
-            <artifactId>ruoyi-websocket</artifactId>
+            <artifactId>ruoyi-report</artifactId>
         </dependency>
 
     </dependencies>

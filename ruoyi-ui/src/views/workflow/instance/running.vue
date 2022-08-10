@@ -32,22 +32,22 @@
         <el-table v-loading="loading" :data="dataList" @selection-change="handleSelectionChange">
             <el-table-column type="selection" width="55" align="center" />
             <el-table-column fixed align="center" type="index" label="序号" width="50"></el-table-column>
-            <el-table-column fixed align="center" prop="name" label="流程定义名称" width="120"></el-table-column>
+            <el-table-column fixed align="center" prop="name" label="流程定义名称" width="150"></el-table-column>
             <el-table-column  align="center" prop="processDefinitionKey" label="流程定义KEY" width="120"></el-table-column>
             <el-table-column align="center" prop="processDefinitionVersion" label="版本号" width="90" >
               <template slot-scope="{row}"> v{{row.processDefinitionVersion}}.0</template>
             </el-table-column>
-            <el-table-column  align="center" prop="startUserNickName" label="流程发起人"  min-width="130"></el-table-column>
+            <el-table-column  align="center" prop="startUserNickName" label="流程发起人" width="120"></el-table-column>
             <el-table-column  align="center" prop="isSuspended" label="流程状态" width="75">
               <template slot-scope="scope">
                 <el-tag type="success" v-if="scope.row.isSuspended=='激活'">激活</el-tag>
                 <el-tag type="danger" v-else>挂起</el-tag>
               </template>
             </el-table-column>
-            <el-table-column  align="center" prop="currTaskInfo" :show-overflow-tooltip="true" label="当前办理人" width="100"></el-table-column>
-            <el-table-column  align="center" prop="businessKey" :show-overflow-tooltip="true" label="流程关联业务ID" width="120"></el-table-column>
-            <el-table-column  align="center" prop="startTime" :show-overflow-tooltip="true" label="流程启动时间" width="100"></el-table-column>
-            <el-table-column  align="center" prop="actBusinessStatus.suspendedReason" :show-overflow-tooltip="true" label="挂起或激活原因" width="150"></el-table-column>
+            <el-table-column  align="center" prop="currTaskInfo" :show-overflow-tooltip="true" label="当前办理人"></el-table-column>
+            <el-table-column  align="center" prop="businessKey" :show-overflow-tooltip="true" label="流程关联业务ID" width="150"></el-table-column>
+            <el-table-column  align="center" prop="startTime" :show-overflow-tooltip="true" label="流程启动时间" width="150"></el-table-column>
+            <el-table-column  align="center" prop="actBusinessStatus.suspendedReason" :show-overflow-tooltip="true" label="挂起或激活原因" width="180"></el-table-column>
             <el-table-column label="操作" align="center" width="120" class-name="small-padding fixed-width">
             <template slot-scope="scope">
               <el-row :gutter="10" class="mb8">
@@ -70,6 +70,11 @@
                   <el-button size="mini" type="text"  icon="el-icon-delete" @click="handleDelete(scope.row)">删除</el-button>
                 </el-col>
               </el-row>
+              <el-row :gutter="10" class="mb8">
+                <el-col :span="1.5">
+                  <el-button size="mini" type="text"  icon="el-icon-circle-close" @click="invalidRuntimeProcessInst(scope.row)">作废</el-button>
+                </el-col>
+              </el-row>
             </template>
           </el-table-column>
         </el-table>
@@ -79,19 +84,19 @@
           :page.sync="queryParams.pageNum"
           :limit.sync="queryParams.pageSize"
           @pagination="getList" />
-          <el-dialog
-            title="挂起或激活流程"
-            :close-on-click-modal="false"
-            :visible.sync="dialogVisible"
-            v-if="dialogVisible"
-            width="60%">
-            <el-input  type="textarea" v-model="reason" maxlength="300" placeholder="请输入原因"
-            :autosize="{ minRows: 4 }" show-word-limit ></el-input>
-            <span slot="footer" class="dialog-footer">
-              <el-button type="primary" size="small" v-loading = "buttonLoading" @click="clickUpdateProcDefState">确 定</el-button>
-              <el-button size="small" @click="dialogVisible = false">取 消</el-button>
-            </span>
-          </el-dialog>
+        <el-dialog
+          title="挂起或激活流程"
+          :close-on-click-modal="false"
+          :visible.sync="dialogVisible"
+          v-if="dialogVisible"
+          width="60%">
+          <el-input  type="textarea" v-model="reason" maxlength="300" placeholder="请输入原因"
+          :autosize="{ minRows: 4 }" show-word-limit ></el-input>
+          <span slot="footer" class="dialog-footer">
+            <el-button type="primary" size="small" v-loading = "buttonLoading" @click="clickUpdateProcDefState">确 定</el-button>
+            <el-button size="small" @click="dialogVisible = false">取 消</el-button>
+          </span>
+        </el-dialog>
     </div>
 </template>
 
@@ -172,6 +177,18 @@
            this.loading = false;
            this.getList();
            this.$modal.msgSuccess("删除成功");
+         }).finally(() => {
+           this.loading = false;
+         });
+      },
+      invalidRuntimeProcessInst(row){
+        this.$modal.confirm('是否确认作废流程实例ID为"' + row.processInstanceId + '"的数据项？').then(() => {
+           this.loading = true;
+           return api.deleteRuntimeProcessInst(row.processInstanceId);
+         }).then(() => {
+           this.loading = false;
+           this.getList();
+           this.$modal.msgSuccess("作废成功");
          }).finally(() => {
            this.loading = false;
          });

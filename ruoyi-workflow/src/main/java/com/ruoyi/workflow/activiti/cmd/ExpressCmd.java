@@ -16,9 +16,9 @@ import org.activiti.engine.impl.persistence.entity.ExecutionEntityImpl;
  */
 public class ExpressCmd implements Command<Boolean> {
 
-    private SequenceFlow sequenceFlow;
-    private ExecutionEntityImpl executionEntity;
-    private String conditionExpression;
+    private final SequenceFlow sequenceFlow;
+    private final ExecutionEntityImpl executionEntity;
+    private final String conditionExpression;
 
     public ExpressCmd(SequenceFlow sequenceFlow, ExecutionEntityImpl executionEntity, String conditionExpression) {
         this.sequenceFlow = sequenceFlow;

@@ -3,8 +3,10 @@ package com.ruoyi.workflow.service.impl;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ruoyi.common.exception.ServiceException;
+import com.ruoyi.common.helper.LoginHelper;
 import com.ruoyi.common.utils.JsonUtils;
 import com.ruoyi.workflow.common.constant.ActConstant;
 import com.ruoyi.workflow.domain.ActNodeAssignee;
@@ -15,11 +17,9 @@ import com.ruoyi.workflow.mapper.ActNodeAssigneeMapper;
 import com.ruoyi.workflow.service.IActNodeAssigneeService;
 import com.ruoyi.workflow.utils.WorkFlowUtils;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
-import org.activiti.bpmn.model.BpmnModel;
-import org.activiti.bpmn.model.FlowElement;
+import org.activiti.bpmn.model.*;
 import org.activiti.bpmn.model.Process;
-import org.activiti.bpmn.model.UserTask;
+import org.apache.commons.lang3.StringUtils;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.springframework.beans.BeanUtils;
@@ -27,6 +27,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 
@@ -55,32 +57,32 @@ public class ActNodeAssigneeServiceImpl extends ServiceImpl<ActNodeAssigneeMappe
     @Transactional(rollbackFor = Exception.class)
     public ActNodeAssignee add(ActNodeAssignee actNodeAssignee) {
 
-        if(actNodeAssignee.getIndex() == 1 && StringUtils.isBlank(actNodeAssignee.getChooseWay())){
+        if (actNodeAssignee.getIndex() == 1 && StringUtils.isBlank(actNodeAssignee.getChooseWay())) {
             throw new ServiceException("请选择选人方式");
         }
 
-        if(ActConstant.WORKFLOW_RULE .equals(actNodeAssignee.getChooseWay())){
-            actNodeAssignee.setFullClassId(null);
+        if (!ActConstant.WORKFLOW_RULE.equals(actNodeAssignee.getChooseWay())) {
+            actNodeAssignee.setBusinessRuleId(null);
         }
 
-        if(StringUtils.isNotBlank(actNodeAssignee.getId())){
+        if (StringUtils.isNotBlank(actNodeAssignee.getId())) {
             del(actNodeAssignee.getId());
         }
 
         //判断是否会签
-        if(!actNodeAssignee.getMultiple()){
+        if (!actNodeAssignee.getMultiple()) {
             actNodeAssignee.setAddMultiInstance(false);
             actNodeAssignee.setDeleteMultiInstance(false);
             actNodeAssignee.setMultipleColumn("");
         }
-        if(CollectionUtil.isNotEmpty(actNodeAssignee.getTaskListenerList())){
+        if (CollectionUtil.isNotEmpty(actNodeAssignee.getTaskListenerList())) {
             List<TaskListenerVo> taskListenerList = new ArrayList<>();
-            actNodeAssignee.getTaskListenerList().forEach(e->{
-                if(StringUtils.isNotBlank(e.getEventType())&&StringUtils.isNotBlank(e.getBeanName())){
+            actNodeAssignee.getTaskListenerList().forEach(e -> {
+                if (StringUtils.isNotBlank(e.getEventType()) && StringUtils.isNotBlank(e.getBeanName())) {
                     taskListenerList.add(e);
                 }
             });
-            if(CollectionUtil.isNotEmpty(taskListenerList)){
+            if (CollectionUtil.isNotEmpty(taskListenerList)) {
                 String jsonString = JsonUtils.toJsonString(taskListenerList);
                 actNodeAssignee.setTaskListener(jsonString);
             }
@@ -98,11 +100,10 @@ public class ActNodeAssigneeServiceImpl extends ServiceImpl<ActNodeAssigneeMappe
      */
     @Override
     public ActNodeAssignee getInfo(String processDefinitionId, String nodeId) {
-        LambdaQueryWrapper<ActNodeAssignee> wrapper = new LambdaQueryWrapper();
-        wrapper.eq(ActNodeAssignee::getProcessDefinitionId,processDefinitionId);
-        wrapper.eq(ActNodeAssignee::getNodeId,nodeId);
-        ActNodeAssignee nodeAssignee = baseMapper.selectOne(wrapper);
-        return nodeAssignee;
+        LambdaQueryWrapper<ActNodeAssignee> wrapper = Wrappers.lambdaQuery();
+        wrapper.eq(ActNodeAssignee::getProcessDefinitionId, processDefinitionId);
+        wrapper.eq(ActNodeAssignee::getNodeId, nodeId);
+        return baseMapper.selectOne(wrapper);
     }
 
     /**
@@ -114,12 +115,12 @@ public class ActNodeAssigneeServiceImpl extends ServiceImpl<ActNodeAssigneeMappe
      */
     @Override
     public ActNodeAssignee getInfoSetting(String processDefinitionId, String nodeId) {
-        LambdaQueryWrapper<ActNodeAssignee> wrapper = new LambdaQueryWrapper();
-        wrapper.eq(ActNodeAssignee::getProcessDefinitionId,processDefinitionId);
-        wrapper.eq(ActNodeAssignee::getNodeId,nodeId);
+        LambdaQueryWrapper<ActNodeAssignee> wrapper = Wrappers.lambdaQuery();
+        wrapper.eq(ActNodeAssignee::getProcessDefinitionId, processDefinitionId);
+        wrapper.eq(ActNodeAssignee::getNodeId, nodeId);
         ActNodeAssignee nodeAssignee = baseMapper.selectOne(wrapper);
 
-        if(ObjectUtil.isEmpty(nodeAssignee)){
+        if (ObjectUtil.isEmpty(nodeAssignee)) {
             nodeAssignee = new ActNodeAssignee();
             nodeAssignee.setProcessDefinitionId(processDefinitionId);
             nodeAssignee.setNodeId(nodeId);
@@ -134,22 +135,22 @@ public class ActNodeAssigneeServiceImpl extends ServiceImpl<ActNodeAssigneeMappe
             nodeAssignee.setDeleteMultiInstance(false);
         }
         MultiVo multiInstance = workFlowUtils.isMultiInstance(processDefinitionId, nodeId);
-        if(ObjectUtil.isNotEmpty(multiInstance)){
+        if (ObjectUtil.isNotEmpty(multiInstance)) {
             nodeAssignee.setMultiple(true);
-            if(StringUtils.isBlank(multiInstance.getAssigneeList())){
+            if (StringUtils.isBlank(multiInstance.getAssigneeList())) {
                 nodeAssignee.setMultipleColumn("获取会签集合变量为空，请检查流程");
-            }else{
+            } else {
                 nodeAssignee.setMultipleColumn(multiInstance.getAssigneeList());
             }
-        }else{
+        } else {
             nodeAssignee.setMultiple(false);
             nodeAssignee.setMultipleColumn("");
             nodeAssignee.setAddMultiInstance(false);
             nodeAssignee.setDeleteMultiInstance(false);
         }
-        if(ObjectUtil.isNotEmpty(nodeAssignee)&&StringUtils.isNotBlank(nodeAssignee.getTaskListener())){
-            nodeAssignee.setTaskListenerList(JsonUtils.parseArray(nodeAssignee.getTaskListener(),TaskListenerVo.class));
-        }else{
+        if (ObjectUtil.isNotEmpty(nodeAssignee) && StringUtils.isNotBlank(nodeAssignee.getTaskListener())) {
+            nodeAssignee.setTaskListenerList(JsonUtils.parseArray(nodeAssignee.getTaskListener(), TaskListenerVo.class));
+        } else {
             nodeAssignee.setTaskListenerList(new ArrayList<>());
         }
         return nodeAssignee;
@@ -164,8 +165,8 @@ public class ActNodeAssigneeServiceImpl extends ServiceImpl<ActNodeAssigneeMappe
      */
     @Override
     public List<ActNodeAssignee> getInfoByProcessDefinitionId(String processDefinitionId) {
-        LambdaQueryWrapper<ActNodeAssignee> wrapper = new LambdaQueryWrapper();
-        wrapper.eq(ActNodeAssignee::getProcessDefinitionId,processDefinitionId);
+        LambdaQueryWrapper<ActNodeAssignee> wrapper = Wrappers.lambdaQuery();
+        wrapper.eq(ActNodeAssignee::getProcessDefinitionId, processDefinitionId);
         return this.baseMapper.selectList(wrapper);
     }
 
@@ -179,7 +180,7 @@ public class ActNodeAssigneeServiceImpl extends ServiceImpl<ActNodeAssigneeMappe
     @Override
     public Boolean del(String id) {
         int i = baseMapper.deleteById(id);
-        return i==1?true:false;
+        return i == 1;
     }
 
     /**
@@ -193,10 +194,10 @@ public class ActNodeAssigneeServiceImpl extends ServiceImpl<ActNodeAssigneeMappe
     @Transactional(rollbackFor = Exception.class)
     public Boolean delByDefinitionId(String definitionId) {
         LambdaQueryWrapper<ActNodeAssignee> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(ActNodeAssignee::getProcessDefinitionId,definitionId);
+        queryWrapper.eq(ActNodeAssignee::getProcessDefinitionId, definitionId);
         List<ActNodeAssignee> list = baseMapper.selectList(queryWrapper);
         int i = baseMapper.delete(queryWrapper);
-        if(list.size()!=i){
+        if (list.size() != i) {
             throw new ServiceException("删除失败");
         }
         return true;
@@ -214,11 +215,11 @@ public class ActNodeAssigneeServiceImpl extends ServiceImpl<ActNodeAssigneeMappe
     @Transactional(rollbackFor = Exception.class)
     public Boolean delByDefinitionIdAndNodeId(String definitionId, String nodeId) {
         LambdaQueryWrapper<ActNodeAssignee> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(ActNodeAssignee::getProcessDefinitionId,definitionId);
-        queryWrapper.eq(ActNodeAssignee::getNodeId,nodeId);
+        queryWrapper.eq(ActNodeAssignee::getProcessDefinitionId, definitionId);
+        queryWrapper.eq(ActNodeAssignee::getNodeId, nodeId);
         List<ActNodeAssignee> list = baseMapper.selectList(queryWrapper);
         int i = baseMapper.delete(queryWrapper);
-        if(list.size()!=i){
+        if (list.size() != i) {
             throw new ServiceException("删除失败");
         }
         return true;
@@ -234,44 +235,60 @@ public class ActNodeAssigneeServiceImpl extends ServiceImpl<ActNodeAssigneeMappe
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean copy(String id,String key) {
+    public Boolean copy(String id, String key) {
         LambdaQueryWrapper<ActNodeAssignee> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(ActNodeAssignee::getProcessDefinitionId,id);
+        wrapper.eq(ActNodeAssignee::getProcessDefinitionId, id);
         List<ActNodeAssignee> oldNodeAssigneeList = baseMapper.selectList(wrapper);
 
         ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery().processDefinitionKey(key).latestVersion().singleResult();
-        if(ObjectUtil.isEmpty(processDefinition)){
+        if (ObjectUtil.isEmpty(processDefinition)) {
             throw new ServiceException("流程定义不存在");
         }
+        List<ActProcessNodeVo> processNodeVoList = new ArrayList<>();
         BpmnModel bpmnModel = repositoryService.getBpmnModel(processDefinition.getId());
         List<Process> processes = bpmnModel.getProcesses();
-        List<ActProcessNodeVo> processNodeVoList = new ArrayList<>();
-        List<UserTask> userTaskList = processes.get(0).findFlowElementsOfType(UserTask.class);
-
-        for (FlowElement element : userTaskList) {
-            ActProcessNodeVo actProcessNodeVo = new ActProcessNodeVo();
+        Collection<FlowElement> elements = processes.get(0).getFlowElements();
+        for (FlowElement element : elements) {
+            if (element instanceof UserTask) {
+                ActProcessNodeVo actProcessNodeVo = new ActProcessNodeVo();
                 actProcessNodeVo.setNodeId(element.getId());
                 actProcessNodeVo.setNodeName(element.getName());
                 actProcessNodeVo.setProcessDefinitionId(processDefinition.getId());
                 processNodeVoList.add(actProcessNodeVo);
+            } else if (element instanceof SubProcess) {
+                Collection<FlowElement> flowElements = ((SubProcess) element).getFlowElements();
+                for (FlowElement flowElement : flowElements) {
+                    if (flowElement instanceof UserTask) {
+                        ActProcessNodeVo actProcessNodeVo = new ActProcessNodeVo();
+                        actProcessNodeVo.setNodeId(flowElement.getId());
+                        actProcessNodeVo.setNodeName(flowElement.getName());
+                        actProcessNodeVo.setProcessDefinitionId(processDefinition.getId());
+                        processNodeVoList.add(actProcessNodeVo);
+                    }
+                }
+            }
         }
         delByDefinitionId(processDefinition.getId());
         List<ActNodeAssignee> actNodeAssigneeList = new ArrayList<>();
         for (ActNodeAssignee oldNodeAssignee : oldNodeAssigneeList) {
             ActProcessNodeVo actProcessNodeVo = processNodeVoList.stream().filter(e -> e.getNodeId().equals(oldNodeAssignee.getNodeId())).findFirst().orElse(null);
-            if(ObjectUtil.isNotEmpty(actProcessNodeVo)){
+            if (ObjectUtil.isNotEmpty(actProcessNodeVo)) {
 
                 ActNodeAssignee actNodeAssignee = new ActNodeAssignee();
-                BeanUtils.copyProperties(oldNodeAssignee,actNodeAssignee);
+                BeanUtils.copyProperties(oldNodeAssignee, actNodeAssignee);
                 actNodeAssignee.setId("");
                 actNodeAssignee.setProcessDefinitionId(processDefinition.getId());
-                if(actNodeAssignee.getMultiple()){
+                if (actNodeAssignee.getMultiple()) {
                     actNodeAssignee.setMultipleColumn("");
                 }
+                actNodeAssignee.setCreateTime(new Date());
+                actNodeAssignee.setUpdateTime(new Date());
+                actNodeAssignee.setCreateBy(LoginHelper.getUsername());
+                actNodeAssignee.setUpdateBy(LoginHelper.getUsername());
                 actNodeAssigneeList.add(actNodeAssignee);
             }
         }
-        if(CollectionUtil.isNotEmpty(actNodeAssigneeList)){
+        if (CollectionUtil.isNotEmpty(actNodeAssigneeList)) {
             return saveBatch(actNodeAssigneeList);
         }
         return false;

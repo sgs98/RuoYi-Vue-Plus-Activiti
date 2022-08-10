@@ -46,7 +46,7 @@ public class SysMessageServiceImpl implements ISysMessageService {
      * @return 消息通知
      */
     @Override
-    public SysMessageVo queryById(Long id){
+    public SysMessageVo queryById(Long id) {
         return baseMapper.selectVoById(id);
     }
 
@@ -60,20 +60,20 @@ public class SysMessageServiceImpl implements ISysMessageService {
     public TableDataInfo<SysMessageVo> queryPageList(SysMessageBo bo, PageQuery pageQuery) {
         LambdaQueryWrapper<SysMessage> lqw = buildQueryWrapper(bo);
         Page<SysMessageVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
-        if(CollectionUtil.isNotEmpty(result.getRecords())){
-            List<Long> userIds= result.getRecords().stream().map(SysMessageVo::getSendId).collect(Collectors.toList());
+        if (CollectionUtil.isNotEmpty(result.getRecords())) {
+            List<Long> userIds = result.getRecords().stream().map(SysMessageVo::getSendId).collect(Collectors.toList());
             List<Long> recordIds = result.getRecords().stream().map(SysMessageVo::getRecordId).collect(Collectors.toList());
             userIds.addAll(recordIds);
             LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<>();
-            wrapper.in(SysUser::getUserId,userIds);
+            wrapper.in(SysUser::getUserId, userIds);
             List<SysUser> sysUsers = sysUserMapper.selectList(wrapper);
-            result.getRecords().forEach(e->{
+            result.getRecords().forEach(e -> {
                 SysUser recordUser = sysUsers.stream().filter(t -> t.getUserId().compareTo(e.getRecordId()) == 0).findFirst().orElse(null);
                 SysUser sendUser = sysUsers.stream().filter(t -> t.getUserId().compareTo(e.getSendId()) == 0).findFirst().orElse(null);
-                if(ObjectUtil.isNotEmpty(recordUser)){
+                if (ObjectUtil.isNotEmpty(recordUser)) {
                     e.setRecordName(recordUser.getNickName());
                 }
-                if(ObjectUtil.isNotEmpty(sendUser)){
+                if (ObjectUtil.isNotEmpty(sendUser)) {
                     e.setSendName(sendUser.getNickName());
                 }
             });
@@ -87,11 +87,13 @@ public class SysMessageServiceImpl implements ISysMessageService {
      * @return 消息通知
      */
     @Override
-    public TableDataInfo<SysMessageVo> queryPage(PageQuery pageQuery,String userName) {
-        SysUser sysUser = sysUserMapper.selectUserByUserName(userName);
+    public TableDataInfo<SysMessageVo> queryPage() {
+        PageQuery pageQuery = new PageQuery();
+        pageQuery.setPageNum(1);
+        pageQuery.setPageSize(3);
         LambdaQueryWrapper<SysMessage> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(SysMessage::getStatus,false);
-        wrapper.eq(SysMessage::getRecordId, sysUser.getUserId());
+        wrapper.eq(SysMessage::getStatus, false);
+        wrapper.eq(SysMessage::getRecordId, LoginHelper.getUserId());
         Page<SysMessageVo> result = baseMapper.selectVoPage(pageQuery.build(), wrapper);
         return TableDataInfo.build(result);
     }
@@ -111,8 +113,8 @@ public class SysMessageServiceImpl implements ISysMessageService {
     private LambdaQueryWrapper<SysMessage> buildQueryWrapper(SysMessageBo bo) {
         Map<String, Object> params = bo.getParams();
         LambdaQueryWrapper<SysMessage> lqw = Wrappers.lambdaQuery();
-        if(!LoginHelper.isAdmin()){
-            lqw.eq(SysMessage::getRecordId,LoginHelper.getUserId());
+        if (!LoginHelper.isAdmin()) {
+            lqw.eq(SysMessage::getRecordId, LoginHelper.getUserId());
         }
         lqw.eq(bo.getSendId() != null, SysMessage::getSendId, bo.getSendId());
         lqw.eq(bo.getRecordId() != null, SysMessage::getRecordId, bo.getRecordId());
@@ -120,7 +122,7 @@ public class SysMessageServiceImpl implements ISysMessageService {
         lqw.eq(bo.getStatus() != null, SysMessage::getStatus, bo.getStatus());
         lqw.like(StringUtils.isNotBlank(bo.getMessageContent()), SysMessage::getMessageContent, bo.getMessageContent());
         lqw.between(params.get("beginReadTime") != null && params.get("endReadTime") != null,
-            SysMessage::getReadTime ,params.get("beginReadTime"), params.get("endReadTime"));
+            SysMessage::getReadTime, params.get("beginReadTime"), params.get("endReadTime"));
         return lqw;
     }
 
@@ -197,11 +199,11 @@ public class SysMessageServiceImpl implements ISysMessageService {
         SysMessage sysMessage = baseMapper.selectById(id);
         sysMessage.setStatus(1);
         sysMessage.setReadTime(new Date());
-        return baseMapper.updateById(sysMessage)> 0;
+        return baseMapper.updateById(sysMessage) > 0;
     }
 
     /**
-     * @Description:  批量阅读消息
+     * @Description: 批量阅读消息
      * @return: boolean
      * @author: gssong
      * @Date: 2022/6/19 17:16
@@ -211,10 +213,10 @@ public class SysMessageServiceImpl implements ISysMessageService {
         LambdaQueryWrapper<SysMessage> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(SysMessage::getRecordId, LoginHelper.getUserId());
         List<SysMessage> messageList = baseMapper.selectList(wrapper);
-            messageList.forEach(e->{
-                e.setStatus(1);
-                e.setReadTime(new Date());
-            });
+        messageList.forEach(e -> {
+            e.setStatus(1);
+            e.setReadTime(new Date());
+        });
         return baseMapper.updateBatchById(messageList);
     }
 }

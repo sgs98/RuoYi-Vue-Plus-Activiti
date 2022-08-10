@@ -9,6 +9,14 @@ export function listMessage(query) {
   })
 }
 
+// 获取个人站内信
+export function listWaitingMessage() {
+  return request({
+    url: '/workflow/message/waitingMessage',
+    method: 'get'
+  })
+}
+
 // 查询消息通知详细
 export function getMessage(id) {
   return request({

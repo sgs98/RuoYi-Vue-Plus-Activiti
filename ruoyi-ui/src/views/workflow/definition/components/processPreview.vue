@@ -1,11 +1,13 @@
 <template>
-  <el-dialog title="预览" :visible.sync="visible" align="center" width="70%" append-to-body>
-      <el-image :src="url" v-if="type==='png'">
-        <div slot="placeholder">流程图加载中 <i class="el-icon-loading"></i></div>
-      </el-image>
+  <el-dialog title="预览" :visible.sync="visible" width="70%" append-to-body>
+     <div v-if="type==='png'" style="align:center">
+        <el-image :src="url[0]" v-if="type==='png'">
+          <div slot="placeholder">流程图加载中 <i class="el-icon-loading"></i></div>
+        </el-image>
+      </div>
       <div class="xml-data" v-if="type==='xml'">
-        <div class="xml-data-line">
-          <code class="xml-data-code" v-if="url" v-html="parseXML" />
+        <div v-for="(xml,index) in url" :key="index">
+          <pre class="font">{{xml}}</pre>
        </div>
       </div>
       <span slot="footer" v-if="type==='xml'" class="dialog-footer">
@@ -15,12 +17,13 @@
 </template>
 
 <script>
-import 'highlight.js/styles/a11y-dark.css'
-import Hljs from 'highlight.js'
 import ClipboardJS from 'clipboard'
 export default {
     props: {
-      url: String,
+      url: {
+        type: Array,
+        default:()=>[]
+      },
       type: String,
     },
     data() {
@@ -32,19 +35,10 @@ export default {
         copyText: ''
       }
     },
-    computed: {
-      parseXML() {
-        /* const codeArry = []
-        this.url.split('\n').forEach(lineCode => {
-          codeArry.push(Hljs.highlightAuto(lineCode).value)
-        }) */
-        return Hljs.highlightAuto(this.url).value
-      }
-    },
     methods: {
       copy(){
           const clipboard = new ClipboardJS('.copyText');
-          this.copyText= this.url
+          this.copyText =  this.url.join("")
           clipboard.on('success', e => {
             this.$message.success('复制成功');
             clipboard.destroy();
@@ -69,32 +63,17 @@ export default {
   padding: 8px 0px;
   height: 500px;
   width: inherit;
+  line-height: 1px;
 }
-
+.font{
+  font-family:'幼圆';
+  font-weight:500;
+}
 /* 修改滚动条样式 */
 .xml-data::-webkit-scrollbar {
 	width: 4px;
 }
 .xml-data::-webkit-scrollbar-thumb {
 	border-radius: 10px;
-	-webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
-	background: rgba(198, 198, 198, 1);
-}
-
-.xml-data-line {
-  line-height: 22px;
-}
-
-.xml-data-line-no {
-  display: inline-block;
-  width: 20px;
-  font-size: 12px;
-  margin-right: 15px;
-  text-align: right;
-  color: #858585;
-}
-
-.xml-data-code {
-  color: #C5C8C6;
 }
 </style>

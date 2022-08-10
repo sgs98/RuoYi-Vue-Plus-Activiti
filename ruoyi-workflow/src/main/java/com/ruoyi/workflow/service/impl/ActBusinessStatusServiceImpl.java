@@ -49,7 +49,7 @@ public class ActBusinessStatusServiceImpl extends ServiceImpl<ActBusinessStatusM
                 if(procInstId != null) {
                     actBusinessStatus.setProcessInstanceId(procInstId);
                 }
-                return baseMapper.insert(actBusinessStatus)==1?true:false;
+                return baseMapper.insert(actBusinessStatus) == 1;
             }else{
                 // 设置状态值
                 bs.setStatus(statusEnum.getStatus());
@@ -59,11 +59,11 @@ public class ActBusinessStatusServiceImpl extends ServiceImpl<ActBusinessStatusM
                     bs.setProcessInstanceId(procInstId);
                 }
                 // 3. 更新操作
-                return baseMapper.updateById(bs)==1?true:false;
+                return baseMapper.updateById(bs) == 1;
             }
         }catch (Exception e){
             e.printStackTrace();
-            throw new ServiceException("更新失败!");
+            throw new ServiceException("更新失败:"+e.getMessage());
         }
     }
 
@@ -79,31 +79,27 @@ public class ActBusinessStatusServiceImpl extends ServiceImpl<ActBusinessStatusM
 
     @Override
     public ActBusinessStatus getInfoByBusinessKey(String businessKey) {
-        ActBusinessStatus actBusinessStatus = baseMapper.selectOne(new LambdaQueryWrapper<ActBusinessStatus>().eq(ActBusinessStatus::getBusinessKey, businessKey));
-        return actBusinessStatus;
+        return baseMapper.selectOne(new LambdaQueryWrapper<ActBusinessStatus>().eq(ActBusinessStatus::getBusinessKey, businessKey));
     }
 
     @Override
     public List<ActBusinessStatus> getListInfoByBusinessKey(List<String> businessKeys) {
-        List<ActBusinessStatus> list = baseMapper.selectList(new LambdaQueryWrapper<ActBusinessStatus>().in(ActBusinessStatus::getBusinessKey, businessKeys));
-        return list;
+        return baseMapper.selectList(new LambdaQueryWrapper<ActBusinessStatus>().in(ActBusinessStatus::getBusinessKey, businessKeys));
     }
 
     @Override
     public boolean deleteState(String businessKey) {
         int delete = baseMapper.delete(new LambdaQueryWrapper<ActBusinessStatus>().eq(ActBusinessStatus::getBusinessKey, businessKey));
-        return delete==1?true:false;
+        return delete == 1;
     }
 
     @Override
     public ActBusinessStatus getInfoByProcessInstId(String processInstanceId) {
-        ActBusinessStatus actBusinessStatus = baseMapper.selectOne(new LambdaQueryWrapper<ActBusinessStatus>().eq(ActBusinessStatus::getProcessInstanceId, processInstanceId));
-        return actBusinessStatus;
+        return baseMapper.selectOne(new LambdaQueryWrapper<ActBusinessStatus>().eq(ActBusinessStatus::getProcessInstanceId, processInstanceId));
     }
 
     @Override
     public List<ActBusinessStatus> getInfoByProcessInstIds(List<String> processInstanceIds) {
-        List<ActBusinessStatus> list = baseMapper.selectList(new LambdaQueryWrapper<ActBusinessStatus>().in(ActBusinessStatus::getProcessInstanceId, processInstanceIds));
-        return list;
+        return baseMapper.selectList(new LambdaQueryWrapper<ActBusinessStatus>().in(ActBusinessStatus::getProcessInstanceId, processInstanceIds));
     }
 }

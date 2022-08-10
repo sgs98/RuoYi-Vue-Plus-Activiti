@@ -38,20 +38,6 @@ import VueMeta from 'vue-meta'
 // 字典数据组件
 import DictData from '@/components/DictData'
 
-//bpmn.js开始
-import { vuePlugin } from "@/components/Bpmn/package/highlight/index.js";
-import "highlight.js/styles/atom-one-dark-reasonable.css";
-Vue.use(vuePlugin);
-
-import MyPD from "@/components/Bpmn/package/index.js";
-Vue.use(MyPD);
-import "@/components/Bpmn/package/theme/index.scss";
-
-import "bpmn-js/dist/assets/diagram-js.css";
-import "bpmn-js/dist/assets/bpmn-font/css/bpmn.css";
-import "bpmn-js/dist/assets/bpmn-font/css/bpmn-codes.css";
-//bpmn.js结束
-
 // 全局方法挂载
 Vue.prototype.getDicts = getDicts
 Vue.prototype.getConfigKey = getConfigKey
