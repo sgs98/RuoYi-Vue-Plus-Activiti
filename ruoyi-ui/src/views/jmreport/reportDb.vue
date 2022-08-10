@@ -29,12 +29,17 @@
     </el-row>
 
     <el-table v-loading="loading" @row-click="handdleClick" class="reportTable" :data="reportDbList" @selection-change="handleSelectionChange">
-      <el-table-column label="主键字段" align="center" prop="jimuReportId" />
-      <el-table-column label="数据集编码" align="center" prop="dbCode" />
-      <el-table-column label="数据集名字" align="center" prop="dbChName" />
-      <el-table-column label="数据源类型" align="center" prop="dbType" />
-      <el-table-column label="动态查询SQL" align="center" prop="dbDynSql" />
-      <el-table-column label="请求地址" align="center" prop="apiUrl" />
+      <el-table-column label="主键字段" :show-overflow-tooltip="true" align="center" prop="jimuReportId" />
+      <el-table-column label="数据集编码" :show-overflow-tooltip="true" align="center" prop="dbCode" />
+      <el-table-column label="数据集名字" :show-overflow-tooltip="true" align="center" prop="dbChName" />
+      <el-table-column label="数据源类型" :show-overflow-tooltip="true" align="center" prop="dbType" />
+      <el-table-column label="动态查询SQL" :show-overflow-tooltip="true" align="center">
+        <template slot-scope="scope">
+         <span v-if="scope.row.dbDynSql.length < 30" >{{scope.row.dbDynSql}}</span>
+         <span v-else >{{`${scope.row.dbDynSql.substring(0, 30)}...`}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="请求地址" :show-overflow-tooltip="true" align="center" prop="apiUrl" />
     </el-table>
 
     <pagination
