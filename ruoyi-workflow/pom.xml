@@ -22,12 +22,6 @@
 
     <dependencies>
 
-        <!-- 通用工具-->
-        <dependency>
-            <groupId>com.ruoyi</groupId>
-            <artifactId>ruoyi-common</artifactId>
-        </dependency>
-
         <!-- 核心模块-->
         <dependency>
             <groupId>com.ruoyi</groupId>
@@ -40,10 +34,17 @@
             <artifactId>ruoyi-system</artifactId>
         </dependency>
 
-        <!--JimuReport-->
+        <!-- svg转png图片工具-->
         <dependency>
-            <groupId>org.jeecgframework.jimureport</groupId>
-            <artifactId>spring-boot-starter-jimureport</artifactId>
+            <groupId>org.apache.xmlgraphics</groupId>
+            <artifactId>batik-all</artifactId>
+            <version>${batik.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>xalan</groupId>
+                    <artifactId>xalan</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!--解决部署xml错误-->
@@ -51,13 +52,6 @@
             <groupId>xerces</groupId>
             <artifactId>xercesImpl</artifactId>
             <version>${xerces.version}</version>
-        </dependency>
-
-        <!-- svg转png图片工具-->
-        <dependency>
-            <groupId>org.apache.xmlgraphics</groupId>
-            <artifactId>batik-all</artifactId>
-            <version>${batik.version}</version>
         </dependency>
 
     </dependencies>

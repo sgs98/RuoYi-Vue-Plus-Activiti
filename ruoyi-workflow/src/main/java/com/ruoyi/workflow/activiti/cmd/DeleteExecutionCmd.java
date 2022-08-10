@@ -2,21 +2,30 @@ package com.ruoyi.workflow.activiti.cmd;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
+import com.ruoyi.common.utils.spring.SpringUtils;
+import org.activiti.engine.TaskService;
 import org.activiti.engine.impl.interceptor.Command;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.persistence.entity.*;
+import org.activiti.engine.task.Task;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-
+/**
+ * @program: ruoyi-vue-plus
+ * @description: 删除执行实例
+ * @author: gssong
+ * @created: 2022/4/21
+ */
 public class DeleteExecutionCmd implements Command<Void> {
 
     /**
      * 执行id
      */
-    private String executionId;
+    private final String executionId;
 
     public DeleteExecutionCmd(String executionId) {
         this.executionId=executionId;
@@ -27,19 +36,22 @@ public class DeleteExecutionCmd implements Command<Void> {
         //获得用到的Manager
         ExecutionEntityManager executionEntityManager = commandContext.getExecutionEntityManager();
         VariableInstanceEntityManager variableInstanceEntityManager = commandContext.getVariableInstanceEntityManager();
-        ExecutionEntity executionEntity = executionEntityManager.findById(executionId);
-        if(ObjectUtil.isNotEmpty(executionEntity)){
-            //设置需要删除参数的流程实例
-            Set<String> executionIds = new HashSet<>();
-            executionIds.add(executionId);
-            //删除相关的参数
-            if(CollectionUtil.isNotEmpty(executionIds)){
-                List<VariableInstanceEntity> variableInstanceEntities = variableInstanceEntityManager.findVariableInstancesByExecutionIds(executionIds);
-                for (VariableInstanceEntity variableInstanceEntity : variableInstanceEntities) {
-                    variableInstanceEntityManager.delete(variableInstanceEntity, true);
+        ExecutionEntity execution = executionEntityManager.findById(executionId);
+        TaskService taskService = SpringUtils.getBean(TaskService.class);
+        List<Task> list = taskService.createTaskQuery().processInstanceId(execution.getProcessInstanceId()).list();
+        if(CollectionUtil.isNotEmpty(list)){
+            List<ExecutionEntity> childExecutions = executionEntityManager.findChildExecutionsByParentExecutionId(execution.getParentId());
+            for (ExecutionEntity childExecution : childExecutions) {
+                List<String> collect = list.stream().map(Task::getExecutionId).collect(Collectors.toList());
+                if(!collect.contains(childExecution.getId())){
+                    executionEntityManager.delete(childExecution);
+                    List<VariableInstanceEntity> variableList= variableInstanceEntityManager.findVariableInstancesByExecutionId(childExecution.getId());
+                    if(CollectionUtil.isNotEmpty(variableList)){
+                        for (VariableInstanceEntity variableInstanceEntity : variableList) {
+                            variableInstanceEntityManager.delete(variableInstanceEntity);
+                        }
+                    }
                 }
-                //删除流程实例
-                executionEntityManager.delete(executionId);
             }
         }
         return null;

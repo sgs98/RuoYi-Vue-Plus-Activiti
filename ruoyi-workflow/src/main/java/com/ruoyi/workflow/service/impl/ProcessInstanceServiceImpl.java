@@ -7,7 +7,6 @@ import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.helper.LoginHelper;
 import com.ruoyi.workflow.activiti.cmd.DeleteTaskCmd;
-import com.ruoyi.workflow.activiti.cmd.DeleteVariableCmd;
 import com.ruoyi.workflow.activiti.config.CustomProcessDiagramGenerator;
 import com.ruoyi.workflow.activiti.config.ICustomProcessDiagramGenerator;
 import com.ruoyi.workflow.activiti.config.WorkflowConstants;
@@ -34,7 +33,6 @@ import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricProcessInstanceQuery;
 import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.impl.identity.Authentication;
-import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.runtime.ProcessInstanceQuery;
 import org.activiti.engine.task.Comment;
@@ -494,7 +492,7 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
 
     /**
      * @Description: 撤销申请
-     * @param processInstId
+     * @param: processInstId
      * @return: boolean
      * @author: gssong
      * @Date: 2022/1/21
@@ -577,18 +575,13 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
             List<Task> newTasks = taskService.createTaskQuery().processInstanceId(processInstId).list().stream().filter(e->StringUtils.isBlank(e.getParentTaskId())).collect(Collectors.toList());
             for (Task newTask : newTasks) {
                 Map<String, Object> variables =new HashMap<>();
-                variables.put("status",BusinessStatusEnum.CANCEL.getStatus());
                 taskService.setVariables(newTask.getId(),variables);
-                Execution execution = runtimeService.createExecutionQuery().executionId(newTask.getExecutionId()).singleResult();
-                DeleteVariableCmd deleteExecutionChildCmd = new DeleteVariableCmd(execution.getParentId(),true,false);
-                managementService.executeCommand(deleteExecutionChildCmd);
                 taskService.setAssignee(newTask.getId(), LoginHelper.getUserId().toString());
                 iActTaskNodeService.deleteBackTaskNode(newTask.getProcessInstanceId(),newTask.getTaskDefinitionKey());
             }
 
             // 13. 更新业务状态
-            boolean b = iActBusinessStatusService.updateState(processInstance.getBusinessKey(), BusinessStatusEnum.CANCEL);
-            return b;
+            return iActBusinessStatusService.updateState(processInstance.getBusinessKey(), BusinessStatusEnum.CANCEL);
         }catch (Exception e){
             e.printStackTrace();
             throw new ServiceException("撤销失败:" + e.getMessage());

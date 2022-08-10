@@ -21,17 +21,17 @@ public class AddSequenceMultiInstanceCmd implements Command<Void> {
     /**
      * 执行id
      */
-    private String executionId;
+    private final String executionId;
 
     /**
      * 会签人员集合KEY
      */
-    private String assigneeList;
+    private final String assigneeList;
 
     /**
      * 加签人员
      */
-    private List<Long> assignees;
+    private final List<Long> assignees;
 
     public AddSequenceMultiInstanceCmd(String executionId, String  assigneeList, List<Long> assignees) {
         this.executionId = executionId;

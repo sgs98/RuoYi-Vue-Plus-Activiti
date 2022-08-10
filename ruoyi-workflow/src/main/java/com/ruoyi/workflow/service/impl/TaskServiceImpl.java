@@ -26,17 +26,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.activiti.bpmn.model.*;
 import org.activiti.engine.ManagementService;
-import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.history.HistoricTaskInstanceQuery;
 import org.activiti.engine.impl.bpmn.behavior.ParallelMultiInstanceBehavior;
 import org.activiti.engine.impl.bpmn.behavior.SequentialMultiInstanceBehavior;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntityImpl;
-import org.activiti.engine.impl.persistence.entity.IdentityLinkEntity;
 import org.activiti.engine.impl.persistence.entity.TaskEntity;
 import org.activiti.engine.impl.persistence.entity.VariableInstance;
 import org.activiti.engine.repository.ProcessDefinition;
-import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.IdentityLink;
 import org.activiti.engine.task.Task;
@@ -789,9 +786,6 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         try {
             //流程实例id
             String processInstanceId = task.getProcessInstanceId();
-            MultiVo currentMultiInstance = workFlowUtils.isMultiInstance(task.getProcessDefinitionId(), task.getTaskDefinitionKey());
-            MultiVo targetMultiInstance = workFlowUtils.isMultiInstance(task.getProcessDefinitionId(), backProcessBo.getTargetActivityId());
-
             // 1. 获取流程模型实例 BpmnModel
             BpmnModel bpmnModel = repositoryService.getBpmnModel(task.getProcessDefinitionId());
             // 2.当前节点信息
@@ -823,48 +817,28 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
                 targetSequenceFlow.addAll(sequenceFlows);
             }
             // 9. 将当前节点的出口设置为新节点
-            curFlowNode.setOutgoingFlows(targetSequenceFlow);
-            // 10. 完成当前任务，流程就会流向目标节点创建新目标任务
+
+            List<SequenceFlow> targetSequenceList = targetSequenceFlow.stream().collect(Collectors
+                .collectingAndThen(
+                    Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(e -> e.getTargetFlowElement().getId()))),
+                    ArrayList::new));
+
+            curFlowNode.setOutgoingFlows(targetSequenceList);
+
             List<Task> list = taskService.createTaskQuery().processInstanceId(processInstanceId).list();
-            if(list.size() == 1){
-                if(ObjectUtil.isEmpty(currentMultiInstance)){
-                    DeleteExecutionChildCmd deleteExecutionChildCmd = new DeleteExecutionChildCmd(task.getExecutionId());
-                    managementService.executeCommand(deleteExecutionChildCmd);
-                }
-                // 当前任务，完成当前任务
-                taskService.addComment(task.getId(), processInstanceId, StringUtils.isNotBlank(backProcessBo.getComment()) ? backProcessBo.getComment() : "驳回");
-                Execution execution = runtimeService.createExecutionQuery().executionId(task.getExecutionId()).singleResult();
-                // 完成任务，就会进行驳回到目标节点，产生目标节点的任务数据
-                taskService.complete(backProcessBo.getTaskId());
-                if(ObjectUtil.isNotEmpty(currentMultiInstance)&&ObjectUtil.isEmpty(targetMultiInstance)){
-                    DeleteVariableCmd deleteVariableCmd = new DeleteVariableCmd(execution.getParentId(),true,true);
-                    managementService.executeCommand(deleteVariableCmd);
-                }
-            }else{
-                for (Task t : list) {
-                    if (backProcessBo.getTaskId().equals(t.getId())) {
-                        // 当前任务，完成当前任务
-                        taskService.addComment(t.getId(), processInstanceId, StringUtils.isNotBlank(backProcessBo.getComment()) ? backProcessBo.getComment() : "驳回");
-                        // 完成任务，就会进行驳回到目标节点，产生目标节点的任务数据
-                        taskService.complete(t.getId());
-                    } else {
-                        Execution execution = runtimeService.createExecutionQuery().executionId(t.getExecutionId()).singleResult();
-                        DeleteTaskCmd deleteTaskCmd = new DeleteTaskCmd(t.getId());
-                        managementService.executeCommand(deleteTaskCmd);
-                        historyService.deleteHistoricTaskInstance(t.getId());
-                        if(ObjectUtil.isNotEmpty(currentMultiInstance)){
-                            DeleteVariableCmd deleteVariableCmd = new DeleteVariableCmd(execution.getId(),false,true);
-                            managementService.executeCommand(deleteVariableCmd);
-                        }else if(ObjectUtil.isNotEmpty(targetMultiInstance)){
-                            DeleteVariableCmd deleteVariableCmd = new DeleteVariableCmd(execution.getParentId(),true,true);
-                            managementService.executeCommand(deleteVariableCmd);
-                        }else{
-                            historyService.createNativeHistoricActivityInstanceQuery()
-                                .sql("DELETE  FROM ACT_HI_ACTINST WHERE EXECUTION_ID_ = '" + t.getExecutionId() + "'").list();
-                        }
-                    }
+            for (Task t : list) {
+                if (backProcessBo.getTaskId().equals(t.getId())) {
+                    // 当前任务，完成当前任务
+                    taskService.addComment(t.getId(), processInstanceId, StringUtils.isNotBlank(backProcessBo.getComment()) ? backProcessBo.getComment() : "驳回");
+                    // 完成任务，就会进行驳回到目标节点，产生目标节点的任务数据
+                    taskService.complete(backProcessBo.getTaskId());
+                } else {
+                    taskService.complete(t.getId());
+                    historyService.deleteHistoricTaskInstance(t.getId());
+                    taskMapper.deleteActHiActInstByTaskId(t.getId());
                 }
             }
+
             // 11. 完成驳回功能后，将当前节点的原出口方向进行恢复
             curFlowNode.setOutgoingFlows(oriSequenceFlows);
             // 判断是否会签
@@ -875,6 +849,9 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
             List<Task> newTaskList = taskService.createTaskQuery().processInstanceId(processInstanceId).list();
             if(ObjectUtil.isNotEmpty(actNodeAssignee)&&!actNodeAssignee.getMultiple()){
                 for (Task newTask : newTaskList) {
+
+                    DeleteExecutionCmd executionCmd = new DeleteExecutionCmd(newTask.getExecutionId());
+                    managementService.executeCommand(executionCmd);
                     // 取之前的历史办理人
                     List<HistoricTaskInstance> oldTargerTaskList = historyService.createHistoricTaskInstanceQuery()
                         .taskDefinitionKey(newTask.getTaskDefinitionKey()) // 节点id
@@ -896,7 +873,6 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
                 List<Task> newList = taskService.createTaskQuery().processInstanceId(processInstanceId).list();
                 for (Task ta : newList) {
                     Map<String, Object> variables = new HashMap<>();
-                    variables.put("status", BusinessStatusEnum.BACK.getStatus());
                     taskService.setVariables(ta.getId(), variables);
                 }
                 iActBusinessStatusService.updateState(processInstance.getBusinessKey(), BusinessStatusEnum.BACK);

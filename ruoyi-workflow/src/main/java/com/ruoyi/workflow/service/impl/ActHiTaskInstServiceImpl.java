@@ -13,7 +13,7 @@ import com.ruoyi.workflow.domain.ActHiTaskInst;
  * @date 2022-03-06
  */
 @Service
-public class ActHiTaskInstServiceImpl  extends ServiceImpl<ActHiTaskInstMapper, ActHiTaskInst> implements IActHiTaskInstService {
+public class ActHiTaskInstServiceImpl extends ServiceImpl<ActHiTaskInstMapper, ActHiTaskInst> implements IActHiTaskInstService {
 
 
 }
