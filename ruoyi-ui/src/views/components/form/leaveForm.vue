@@ -156,6 +156,7 @@ export default {
             }
       });
       this.$refs.verifyRef.visible = true
+      this.$refs.verifyRef.reset()
     },
     //提交流程
     submitFormAppply(){
