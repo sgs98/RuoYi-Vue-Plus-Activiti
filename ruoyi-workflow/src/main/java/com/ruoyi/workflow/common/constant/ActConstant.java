@@ -126,7 +126,7 @@ public interface ActConstant {
      */
     String HANDLE_PROCESS = "handleProcess";
 
-    String PARAM_BYTE = "Byte";
+    String PARAM_STRING = "String";
 
     String PARAM_SHORT = "Short";
 

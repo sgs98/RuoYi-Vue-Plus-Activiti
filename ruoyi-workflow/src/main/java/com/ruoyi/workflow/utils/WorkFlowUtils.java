@@ -294,7 +294,7 @@ public class WorkFlowUtils {
                         VariableInstance v = variables.get(businessRuleParams.get(i).getParam());
                         String variable = v.getTextValue();
                         switch (businessRuleParams.get(i).getParamType()) {
-                            case ActConstant.PARAM_BYTE:
+                            case ActConstant.PARAM_STRING:
                                 paramClass[i] = String.valueOf(variable).getClass();
                                 params.add(String.valueOf(variable));
                                 break;
@@ -507,7 +507,8 @@ public class WorkFlowUtils {
     /**
      * @Description: 创建子任务
      * @param: parentTask
-     * @return: org.flowable.task.api.Task
+     * @param: assignees
+     * @return: java.util.List<org.activiti.engine.task.Task>
      * @author: gssong
      * @Date: 2022/5/6 19:18
      */

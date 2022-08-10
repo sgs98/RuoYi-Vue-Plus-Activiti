@@ -5,6 +5,8 @@ import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.exception.user.UserException;
 import com.ruoyi.common.utils.spring.SpringUtils;
 import com.ruoyi.system.mapper.SysUserMapper;
+import org.activiti.engine.RuntimeService;
+import org.activiti.engine.runtime.ProcessInstance;
 import org.springframework.stereotype.Component;
 
 /**
@@ -28,4 +30,19 @@ public class WorkflowRuleUserComponent {
         }
         return sysUser.getUserId();
     }
+
+    /**
+     * @Description: 获取流程发起人
+     * @param: processInstanceId
+     * @return: java.lang.String
+     * @author: gssong
+     * @Date: 2022/8/10 22:41
+     */
+    public String startUserId(String processInstanceId){
+        RuntimeService runtimeService = SpringUtils.getBean(RuntimeService.class);
+        ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceId(processInstanceId).singleResult();
+        return processInstance.getStartUserId();
+    }
+
+
 }

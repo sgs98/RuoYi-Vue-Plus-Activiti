@@ -110,6 +110,7 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
             throw new ServiceException("请检查流程第一个环节是否为申请人！");
         }
         taskService.setAssignee(taskList.get(0).getId(), LoginHelper.getUserId().toString());
+        taskService.setVariable(taskList.get(0).getId(),"processInstanceId", pi.getProcessInstanceId());
         // 更新业务状态
         iActBusinessStatusService.updateState(startReq.getBusinessKey(), BusinessStatusEnum.DRAFT, taskList.get(0).getProcessInstanceId(), startReq.getClassFullName());
 
