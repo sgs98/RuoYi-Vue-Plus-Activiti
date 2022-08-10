@@ -13,7 +13,7 @@ import java.util.Map;
  *
  * @author gssong
  */
-public class ReportHandlerInterceptor implements HandlerInterceptor {
+public class JmReportHandlerInterceptor implements HandlerInterceptor {
 
 
     @Override
@@ -22,7 +22,6 @@ public class ReportHandlerInterceptor implements HandlerInterceptor {
         String loginId = null;
         if(CollectionUtil.isNotEmpty(parameterMap) && parameterMap.containsKey("token")){
             String[] tokens = parameterMap.get("token");
-            System.out.println(tokens[0]);
             loginId = StpUtil.stpLogic.getLoginIdNotHandle(tokens[0]);
         }
         if(StringUtils.isBlank(loginId)){
