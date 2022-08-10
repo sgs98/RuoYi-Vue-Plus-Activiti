@@ -9,7 +9,7 @@ import cn.dev33.satoken.stp.StpUtil;
 import com.ruoyi.common.utils.spring.SpringUtils;
 import com.ruoyi.framework.config.properties.ExcludeUrlProperties;
 import com.ruoyi.framework.config.properties.SecurityProperties;
-import com.ruoyi.framework.interceptor.ReportHandlerInterceptor;
+import com.ruoyi.framework.interceptor.JmReportHandlerInterceptor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -58,7 +58,7 @@ public class SaTokenConfig implements WebMvcConfigurer {
                 });
         })).addPathPatterns("/**");
         registry.addInterceptor(new SaAnnotationInterceptor()).addPathPatterns("/**");
-        registry.addInterceptor(new ReportHandlerInterceptor()).addPathPatterns("/jmreport/view/**","/jmreport/list/**");
+        registry.addInterceptor(new JmReportHandlerInterceptor()).addPathPatterns("/jmreport/view/**","/jmreport/list/**");
     }
 
     @Bean
