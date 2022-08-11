@@ -1,12 +1,9 @@
 package com.ruoyi.workflow.activiti.cmd;
 
 import cn.hutool.core.collection.CollectionUtil;
-import org.activiti.bpmn.model.Process;
 import org.activiti.engine.impl.cmd.NeedsActiveTaskCmd;
-import org.activiti.engine.impl.interceptor.Command;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.persistence.entity.*;
-import org.activiti.engine.impl.util.ProcessDefinitionUtil;
 
 import java.util.HashSet;
 import java.util.List;
@@ -40,13 +37,13 @@ public class DeleteTaskCmd extends NeedsActiveTaskCmd<Void> {
             executionIds.add(childExecutionEntity.getId());
         }
         //删除相关的参数
-        if(CollectionUtil.isNotEmpty(executionIds)){
+        if (CollectionUtil.isNotEmpty(executionIds)) {
             List<VariableInstanceEntity> variableInstanceEntities = variableInstanceEntityManager.findVariableInstancesByExecutionIds(executionIds);
             for (VariableInstanceEntity variableInstanceEntity : variableInstanceEntities) {
                 variableInstanceEntityManager.delete(variableInstanceEntity, true);
             }
         }
-        taskEntityManager.deleteTask(taskEntity, "删除任务", true,true);
+        taskEntityManager.deleteTask(taskEntity, "删除任务", true, true);
         for (ExecutionEntity child : childExecutions) {
             //删除相关的办理人
             identityLinkEntityManager.deleteIdentityLink(executionEntity, null, null, null);

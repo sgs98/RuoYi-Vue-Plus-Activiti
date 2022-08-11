@@ -8,6 +8,7 @@ import org.activiti.engine.impl.el.UelExpressionCondition;
 import org.activiti.engine.impl.interceptor.Command;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntityImpl;
+
 /**
  * @program: ruoyi-vue-plus
  * @description: 校验分支网关
@@ -30,7 +31,6 @@ public class ExpressCmd implements Command<Boolean> {
     public Boolean execute(CommandContext commandContext) {
         Expression expression = Context.getProcessEngineConfiguration().getExpressionManager().createExpression(conditionExpression);
         Condition condition = new UelExpressionCondition(expression);
-        boolean evaluate = condition.evaluate(sequenceFlow.getId(), executionEntity);
-        return evaluate;
+        return condition.evaluate(sequenceFlow.getId(), executionEntity);
     }
 }

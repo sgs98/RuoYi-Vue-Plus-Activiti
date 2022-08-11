@@ -17,7 +17,7 @@ import java.util.Map;
 
 import static com.ruoyi.workflow.common.constant.ActConstant.NUMBER_OF_INSTANCES;
 
-public class AddMultiInstanceExecutionCmd  implements Command<Execution>, Serializable {
+public class AddMultiInstanceExecutionCmd implements Command<Execution>, Serializable {
 
     private static final long serialVersionUID = 1L;
 

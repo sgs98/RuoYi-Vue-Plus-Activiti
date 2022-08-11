@@ -18,6 +18,7 @@ import java.io.Serializable;
 
 import static com.ruoyi.workflow.common.constant.ActConstant.NUMBER_OF_COMPLETED_INSTANCES;
 import static com.ruoyi.workflow.common.constant.ActConstant.NUMBER_OF_INSTANCES;
+
 /**
  * @author Tijs Rademakers
  */
@@ -95,11 +96,11 @@ public class DeleteMultiInstanceExecutionCmd implements Command<Void>, Serializa
     protected Integer getLoopVariable(DelegateExecution execution, String variableName) {
         Object value = execution.getVariableLocal(variableName);
 
-        for(DelegateExecution parent = execution.getParent(); value == null && parent != null; parent = parent.getParent()) {
+        for (DelegateExecution parent = execution.getParent(); value == null && parent != null; parent = parent.getParent()) {
             value = parent.getVariableLocal(variableName);
         }
 
-        return (Integer)((Integer)(value != null ? value : 0));
+        return (Integer) ((Integer) (value != null ? value : 0));
     }
 
     public void continueSequentialMultiInstance(CommandContext commandContext, DelegateExecution execution, int loopCounter, ExecutionEntity multiInstanceRootExecution, Activity miActivityElement) {

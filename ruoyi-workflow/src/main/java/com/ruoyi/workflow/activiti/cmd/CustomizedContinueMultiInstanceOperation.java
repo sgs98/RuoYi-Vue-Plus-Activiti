@@ -27,8 +27,8 @@ public class CustomizedContinueMultiInstanceOperation extends AbstractOperation 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CustomizedContinueMultiInstanceOperation.class);
 
-    private ExecutionEntity multiInstanceRootExecution;
-    private int loopCounter;
+    private final ExecutionEntity multiInstanceRootExecution;
+    private final int loopCounter;
 
     public CustomizedContinueMultiInstanceOperation(CommandContext commandContext, ExecutionEntity execution, ExecutionEntity multiInstanceRootExecution, int loopCounter) {
         super(commandContext, execution);

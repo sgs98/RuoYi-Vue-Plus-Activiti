@@ -1,7 +1,6 @@
 package com.ruoyi.workflow.activiti.cmd;
 
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.util.ObjectUtil;
 import com.ruoyi.common.utils.spring.SpringUtils;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.impl.interceptor.Command;
@@ -9,9 +8,7 @@ import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.persistence.entity.*;
 import org.activiti.engine.task.Task;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -28,7 +25,7 @@ public class DeleteExecutionCmd implements Command<Void> {
     private final String executionId;
 
     public DeleteExecutionCmd(String executionId) {
-        this.executionId=executionId;
+        this.executionId = executionId;
     }
 
     @Override
@@ -39,14 +36,14 @@ public class DeleteExecutionCmd implements Command<Void> {
         ExecutionEntity execution = executionEntityManager.findById(executionId);
         TaskService taskService = SpringUtils.getBean(TaskService.class);
         List<Task> list = taskService.createTaskQuery().processInstanceId(execution.getProcessInstanceId()).list();
-        if(CollectionUtil.isNotEmpty(list)){
+        if (CollectionUtil.isNotEmpty(list)) {
             List<ExecutionEntity> childExecutions = executionEntityManager.findChildExecutionsByParentExecutionId(execution.getParentId());
             for (ExecutionEntity childExecution : childExecutions) {
                 List<String> collect = list.stream().map(Task::getExecutionId).collect(Collectors.toList());
-                if(!collect.contains(childExecution.getId())){
+                if (!collect.contains(childExecution.getId())) {
                     executionEntityManager.delete(childExecution);
-                    List<VariableInstanceEntity> variableList= variableInstanceEntityManager.findVariableInstancesByExecutionId(childExecution.getId());
-                    if(CollectionUtil.isNotEmpty(variableList)){
+                    List<VariableInstanceEntity> variableList = variableInstanceEntityManager.findVariableInstancesByExecutionId(childExecution.getId());
+                    if (CollectionUtil.isNotEmpty(variableList)) {
                         for (VariableInstanceEntity variableInstanceEntity : variableList) {
                             variableInstanceEntityManager.delete(variableInstanceEntity);
                         }

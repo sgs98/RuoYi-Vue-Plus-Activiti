@@ -1,4 +1,5 @@
 package com.ruoyi.workflow.activiti.cmd;
+
 import org.activiti.engine.impl.interceptor.Command;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
@@ -33,7 +34,7 @@ public class AddSequenceMultiInstanceCmd implements Command<Void> {
      */
     private final List<Long> assignees;
 
-    public AddSequenceMultiInstanceCmd(String executionId, String  assigneeList, List<Long> assignees) {
+    public AddSequenceMultiInstanceCmd(String executionId, String assigneeList, List<Long> assignees) {
         this.executionId = executionId;
         this.assigneeList = assigneeList;
         this.assignees = assignees;
@@ -44,13 +45,13 @@ public class AddSequenceMultiInstanceCmd implements Command<Void> {
         ExecutionEntityManager executionEntityManager = commandContext.getExecutionEntityManager();
         ExecutionEntity entity = executionEntityManager.findById(executionId);
         //多实例任务总数加assignees.size()
-        Integer nrOfInstances = (Integer)entity.getVariable(NUMBER_OF_INSTANCES);
+        Integer nrOfInstances = (Integer) entity.getVariable(NUMBER_OF_INSTANCES);
         entity.setVariable(NUMBER_OF_INSTANCES, nrOfInstances + assignees.size());
         // 设置流程变量
-        List<Long> userIds = (List)entity.getVariable(assigneeList);
+        List<Long> userIds = (List) entity.getVariable(assigneeList);
         userIds.addAll(assignees);
         Map<String, Object> variables = new HashMap<>();
-        variables.put(assigneeList,userIds);
+        variables.put(assigneeList, userIds);
         entity.setVariables(variables);
         return null;
     }

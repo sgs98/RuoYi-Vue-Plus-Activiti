@@ -25,24 +25,24 @@ public class DeleteSequenceMultiInstanceCmd implements Command<Void> {
     /**
      * 当前节点审批人员id
      */
-    private String currentUserId;
+    private final String currentUserId;
 
     /**
      * 执行id
      */
-    private String executionId;
+    private final String executionId;
 
     /**
      * 会签人员集合KEY
      */
-    private String assigneeList;
+    private final String assigneeList;
 
     /**
      * 减签人员
      */
-    private List<Long> assignees;
+    private final List<Long> assignees;
 
-    public DeleteSequenceMultiInstanceCmd(String currentUserId, String executionId, String  assigneeList, List<Long> assignees) {
+    public DeleteSequenceMultiInstanceCmd(String currentUserId, String executionId, String assigneeList, List<Long> assignees) {
         this.currentUserId = currentUserId;
         this.executionId = executionId;
         this.assigneeList = assigneeList;
@@ -54,28 +54,28 @@ public class DeleteSequenceMultiInstanceCmd implements Command<Void> {
         ExecutionEntityManager executionEntityManager = commandContext.getExecutionEntityManager();
         ExecutionEntity entity = executionEntityManager.findById(executionId);
         //多实例任务总数加assignees.size()
-        Integer nrOfInstances = (Integer)entity.getVariable(NUMBER_OF_INSTANCES);
+        Integer nrOfInstances = (Integer) entity.getVariable(NUMBER_OF_INSTANCES);
         entity.setVariable(NUMBER_OF_INSTANCES, nrOfInstances + assignees.size());
         // 设置流程变量
-        List<Long> userIds = (List)entity.getVariable(assigneeList);
+        List<Long> userIds = (List) entity.getVariable(assigneeList);
         List<Long> userIdList = new ArrayList<>();
-        userIds.forEach(e->{
+        userIds.forEach(e -> {
             Long userId = assignees.stream().filter(id -> id.equals(e)).findFirst().orElse(null);
-            if(userId == null){
+            if (userId == null) {
                 userIdList.add(e);
             }
         });
         //当前任务执行位置
         int loopCounterIndex = -1;
-        for (int i = 0; i < userIdList.size() ; i++) {
+        for (int i = 0; i < userIdList.size(); i++) {
             Long userId = userIdList.get(i);
-            if(currentUserId.equals(userId.toString())){
+            if (currentUserId.equals(userId.toString())) {
                 loopCounterIndex = i;
             }
         }
         Map<String, Object> variables = new HashMap<>();
         variables.put(NUMBER_OF_INSTANCES, userIdList.size());
-        variables.put(assigneeList,userIdList);
+        variables.put(assigneeList, userIdList);
         variables.put(LOOP_COUNTER, loopCounterIndex);
         entity.setVariables(variables);
         return null;
