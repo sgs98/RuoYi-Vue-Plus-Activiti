@@ -17,13 +17,4 @@ public interface TaskMapper {
 
     @Delete("delete from act_hi_actinst  where task_id_ = #{taskId}")
     void deleteActHiActInstByTaskId(@Param("taskId") String taskId);
-
-    @Delete("delete from act_ru_variable  where execution_id_ = #{executionId}")
-    void deleteRuVariableExecutionId(@Param("executionId") String executionId);
-
-    @Delete("delete from act_ru_execution  where id_ = #{executionId} and rev_ = #{revision}")
-    void deleteRuExecutionByExecutionId(@Param("executionId") String executionId, @Param("revision")int revision);
-
-    @Delete("delete from act_ru_task a left join act_ru_execution b  on a.EXECUTION_ID_ = b.id_  where  a.id_ = #{taskId}")
-    void deleteRuTaskId(@Param("taskId") String taskId);
 }
