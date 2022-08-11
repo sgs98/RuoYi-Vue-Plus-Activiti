@@ -828,9 +828,7 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
             List<Task> list = taskService.createTaskQuery().processInstanceId(processInstanceId).list();
             for (Task t : list) {
                 if (backProcessBo.getTaskId().equals(t.getId())) {
-                    // 当前任务，完成当前任务
                     taskService.addComment(t.getId(), processInstanceId, StringUtils.isNotBlank(backProcessBo.getComment()) ? backProcessBo.getComment() : "驳回");
-                    // 完成任务，就会进行驳回到目标节点，产生目标节点的任务数据
                     taskService.complete(backProcessBo.getTaskId());
                 } else {
                     if(StringUtils.isBlank(t.getParentTaskId())){
