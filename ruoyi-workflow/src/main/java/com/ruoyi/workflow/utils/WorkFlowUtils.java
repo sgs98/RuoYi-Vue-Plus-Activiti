@@ -354,10 +354,10 @@ public class WorkFlowUtils {
         Class<?> aClass = o.getClass();
         Field businessStatus;
         try {
-            businessStatus = aClass.getDeclaredField(ACT_BUSINESSS_TATUS);
+            businessStatus = aClass.getDeclaredField(ACT_BUSINESS_STATUS);
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
-            throw new ServiceException("未找到" + ACT_BUSINESSS_TATUS + "属性");
+            throw new ServiceException("未找到" + ACT_BUSINESS_STATUS + "属性");
         }
         businessStatus.setAccessible(true);
         List<ActBusinessStatus> infoByBusinessKey = iActBusinessStatusService.getListInfoByBusinessKey(idList);

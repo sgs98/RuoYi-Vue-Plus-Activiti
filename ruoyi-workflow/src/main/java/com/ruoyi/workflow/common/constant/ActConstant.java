@@ -94,7 +94,7 @@ public interface ActConstant {
     /**
      * 流程状态对象
      */
-    String ACT_BUSINESSS_TATUS = "actBusinessStatus";
+    String ACT_BUSINESS_STATUS = "actBusinessStatus";
 
     /**
      * 流程

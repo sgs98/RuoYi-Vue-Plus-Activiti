@@ -833,9 +833,11 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
                     // 完成任务，就会进行驳回到目标节点，产生目标节点的任务数据
                     taskService.complete(backProcessBo.getTaskId());
                 } else {
-                    taskService.complete(t.getId());
-                    historyService.deleteHistoricTaskInstance(t.getId());
-                    taskMapper.deleteActHiActInstByTaskId(t.getId());
+                    if(StringUtils.isBlank(t.getParentTaskId())){
+                        taskService.complete(t.getId());
+                        historyService.deleteHistoricTaskInstance(t.getId());
+                        taskMapper.deleteActHiActInstByTaskId(t.getId());
+                    }
                 }
             }
 
