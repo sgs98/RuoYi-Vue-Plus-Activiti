@@ -12,10 +12,14 @@
  */
 package com.ruoyi.workflow.activiti;
 
+import cn.hutool.core.io.IoUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.ruoyi.common.annotation.Anonymous;
+import org.activiti.bpmn.converter.BpmnXMLConverter;
+import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.editor.constants.ModelDataJsonConstants;
+import org.activiti.editor.language.json.converter.BpmnJsonConverter;
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.repository.Model;
@@ -29,7 +33,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
-import java.nio.charset.StandardCharsets;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamReader;
+import java.io.ByteArrayInputStream;
 
 /**
  * @author Tijs Rademakers
@@ -61,9 +67,14 @@ public class ModelEditorJsonRestResource implements ModelDataJsonConstants {
           modelNode.put(MODEL_NAME, model.getName());
         }
         modelNode.put(MODEL_ID, model.getId());
-        ObjectNode editorJsonNode = (ObjectNode) objectMapper.readTree(
-            new String(repositoryService.getModelEditorSource(model.getId()), StandardCharsets.UTF_8));
-        modelNode.put("model", editorJsonNode);
+        byte[] modelEditorSource = repositoryService.getModelEditorSource(model.getId());
+        ByteArrayInputStream byteArrayInputStream = IoUtil.toStream(modelEditorSource);
+        XMLInputFactory xif = XMLInputFactory.newInstance();
+        XMLStreamReader xtr = xif.createXMLStreamReader(byteArrayInputStream);
+        BpmnModel bpmnModel = new BpmnXMLConverter().convertToBpmnModel(xtr);
+        BpmnJsonConverter bpmnJsonConverter = new BpmnJsonConverter();
+        ObjectNode jsonNodes = bpmnJsonConverter.convertToJson(bpmnModel);
+        modelNode.put("model", jsonNodes);
 
       } catch (Exception e) {
         LOGGER.error("Error creating model JSON", e);
