@@ -129,19 +129,44 @@ public class UserServiceImpl implements IUserService {
                 return map;
             }
         } else {
-            LambdaQueryWrapper<SysUser> queryWrapper = new LambdaQueryWrapper<>();
-            //检索条件
-            queryWrapper.eq(StringUtils.isNotEmpty(sysUserBo.getDeptId()), SysUser::getDeptId, sysUserBo.getDeptId());
-            queryWrapper.eq(SysUser::getStatus, UserStatus.OK.getCode());
-            queryWrapper.like(StringUtils.isNotEmpty(sysUserBo.getUserName()), SysUser::getUserName, sysUserBo.getUserName());
-            queryWrapper.like(StringUtils.isNotEmpty(sysUserBo.getPhonenumber()), SysUser::getPhonenumber, sysUserBo.getPhonenumber());
-            Page<SysUser> page = new Page<>(sysUserBo.getPageNum(), sysUserBo.getPageSize());
-            Page<SysUser> userPage = userMapper.selectPage(page, queryWrapper);
-            if (CollectionUtil.isNotEmpty(sysUserBo.getIds())) {
-                List<SysUser> list = userMapper.selectList(new LambdaQueryWrapper<SysUser>().in(SysUser::getUserId, sysUserBo.getIds()));
-                map.put("list", list);
+            if (WORKFLOW_ROLE.equals(sysUserBo.getType())) {
+                LambdaQueryWrapper<SysRole> roleWrapper = new LambdaQueryWrapper<>();
+                Page<SysRole> rolePage = new Page<>(sysUserBo.getPageNum(), sysUserBo.getPageSize());
+
+                //检索条件
+                roleWrapper.like(StringUtils.isNotEmpty(sysUserBo.getRoleName()), SysRole::getRoleName, sysUserBo.getRoleName());
+                roleWrapper.like(StringUtils.isNotEmpty(sysUserBo.getRoleKey()), SysRole::getRoleKey, sysUserBo.getRoleKey());
+                roleWrapper.eq(SysRole::getStatus, UserStatus.OK.getCode());
+                Page<SysRole> roleListPage = roleMapper.selectPage(rolePage, roleWrapper);
+                if (CollectionUtil.isNotEmpty(sysUserBo.getIds())) {
+                    List<SysRole> list = roleMapper.selectList(new LambdaQueryWrapper<SysRole>().in(SysRole::getRoleId, sysUserBo.getIds()));
+                    map.put("list", list);
+                }
+                map.put("page", TableDataInfo.build(roleListPage));
+            } else if (WORKFLOW_PERSON.equals(sysUserBo.getType())) {
+                LambdaQueryWrapper<SysUser> userWrapper = new LambdaQueryWrapper<>();
+                Page<SysUser> page = new Page<>(sysUserBo.getPageNum(), sysUserBo.getPageSize());
+
+                //检索条件
+                userWrapper.eq(StringUtils.isNotEmpty(sysUserBo.getDeptId()), SysUser::getDeptId, sysUserBo.getDeptId());
+                userWrapper.eq(SysUser::getStatus, UserStatus.OK.getCode());
+                userWrapper.like(StringUtils.isNotEmpty(sysUserBo.getUserName()), SysUser::getUserName, sysUserBo.getUserName());
+                userWrapper.like(StringUtils.isNotEmpty(sysUserBo.getPhonenumber()), SysUser::getPhonenumber, sysUserBo.getPhonenumber());
+
+                Page<SysUser> userPage = userMapper.selectPage(page, userWrapper);
+                if (CollectionUtil.isNotEmpty(sysUserBo.getIds())) {
+                    List<SysUser> list = userMapper.selectList(new LambdaQueryWrapper<SysUser>().in(SysUser::getUserId, sysUserBo.getIds()));
+                    map.put("list", list);
+                }
+                map.put("page", TableDataInfo.build(recordPage(userPage)));
+                return map;
+            } else if (WORKFLOW_DEPT.equals(sysUserBo.getType())) {
+                LambdaQueryWrapper<SysDept> roleWrapper = new LambdaQueryWrapper<>();
+                roleWrapper.eq(SysDept::getStatus, UserStatus.OK.getCode());
+                List<SysDept> deptList = deptMapper.selectList(roleWrapper);
+                map.put("list", deptList);
+                return map;
             }
-            map.put("page", TableDataInfo.build(recordPage(userPage)));
 
         }
         return map;
