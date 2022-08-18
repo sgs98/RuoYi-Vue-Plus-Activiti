@@ -36,6 +36,7 @@ import javax.annotation.Resource;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
 import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author Tijs Rademakers
@@ -67,14 +68,21 @@ public class ModelEditorJsonRestResource implements ModelDataJsonConstants {
           modelNode.put(MODEL_NAME, model.getName());
         }
         modelNode.put(MODEL_ID, model.getId());
-        byte[] modelEditorSource = repositoryService.getModelEditorSource(model.getId());
-        ByteArrayInputStream byteArrayInputStream = IoUtil.toStream(modelEditorSource);
-        XMLInputFactory xif = XMLInputFactory.newInstance();
-        XMLStreamReader xtr = xif.createXMLStreamReader(byteArrayInputStream);
-        BpmnModel bpmnModel = new BpmnXMLConverter().convertToBpmnModel(xtr);
-        BpmnJsonConverter bpmnJsonConverter = new BpmnJsonConverter();
-        ObjectNode jsonNodes = bpmnJsonConverter.convertToJson(bpmnModel);
-        modelNode.put("model", jsonNodes);
+        Integer version = model.getVersion();
+        if(version>0){
+            byte[] modelEditorSource = repositoryService.getModelEditorSource(model.getId());
+            ByteArrayInputStream byteArrayInputStream = IoUtil.toStream(modelEditorSource);
+            XMLInputFactory xif = XMLInputFactory.newInstance();
+            XMLStreamReader xtr = xif.createXMLStreamReader(byteArrayInputStream);
+            BpmnModel bpmnModel = new BpmnXMLConverter().convertToBpmnModel(xtr);
+            BpmnJsonConverter bpmnJsonConverter = new BpmnJsonConverter();
+            ObjectNode jsonNodes = bpmnJsonConverter.convertToJson(bpmnModel);
+            modelNode.put("model", jsonNodes);
+        }else{
+            ObjectNode editorJsonNode = (ObjectNode) objectMapper.readTree(
+                new String(repositoryService.getModelEditorSource(model.getId()), StandardCharsets.UTF_8));
+            modelNode.put("model", editorJsonNode);
+        }
 
       } catch (Exception e) {
         LOGGER.error("Error creating model JSON", e);
