@@ -817,14 +817,13 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
                 targetSequenceFlow.addAll(sequenceFlows);
             }
             // 9. 将当前节点的出口设置为新节点
-
             List<SequenceFlow> targetSequenceList = targetSequenceFlow.stream().collect(Collectors
                 .collectingAndThen(
                     Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(e -> e.getTargetFlowElement().getId()))),
                     ArrayList::new));
 
             curFlowNode.setOutgoingFlows(targetSequenceList);
-
+            // 10. 完成任务
             List<Task> list = taskService.createTaskQuery().processInstanceId(processInstanceId).list();
             for (Task t : list) {
                 if (backProcessBo.getTaskId().equals(t.getId())) {

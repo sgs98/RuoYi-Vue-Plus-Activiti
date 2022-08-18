@@ -33,6 +33,7 @@ import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricProcessInstanceQuery;
 import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.impl.identity.Authentication;
+import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.runtime.ProcessInstanceQuery;
 import org.activiti.engine.task.Comment;
@@ -220,7 +221,7 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
             List<String> highLightedFlows = generator.getHighLightedFlows(bpmnModel, historicActivityInstanceList);
             // 4. 正在执行的节点 （红色）
             Set<String> executedActivityIdList = runtimeService.createExecutionQuery().processInstanceId(processInstanceId).list()
-                .stream().map(e->e.getActivityId()).collect(Collectors.toSet());
+                .stream().map(Execution::getActivityId).collect(Collectors.toSet());
 
             ICustomProcessDiagramGenerator diagramGenerator = (ICustomProcessDiagramGenerator) processEngine.getProcessEngineConfiguration().getProcessDiagramGenerator();
             inputStream = diagramGenerator.generateDiagram(bpmnModel, "png", histExecutedActivityIdList,

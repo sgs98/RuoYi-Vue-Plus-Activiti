@@ -8,6 +8,7 @@ import org.activiti.engine.impl.el.UelExpressionCondition;
 import org.activiti.engine.impl.interceptor.Command;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntityImpl;
+import org.activiti.engine.impl.util.condition.ConditionUtil;
 
 /**
  * @program: ruoyi-vue-plus
@@ -19,18 +20,14 @@ public class ExpressCmd implements Command<Boolean> {
 
     private final SequenceFlow sequenceFlow;
     private final ExecutionEntityImpl executionEntity;
-    private final String conditionExpression;
 
-    public ExpressCmd(SequenceFlow sequenceFlow, ExecutionEntityImpl executionEntity, String conditionExpression) {
+    public ExpressCmd(SequenceFlow sequenceFlow, ExecutionEntityImpl executionEntity) {
         this.sequenceFlow = sequenceFlow;
         this.executionEntity = executionEntity;
-        this.conditionExpression = conditionExpression;
     }
 
     @Override
     public Boolean execute(CommandContext commandContext) {
-        Expression expression = Context.getProcessEngineConfiguration().getExpressionManager().createExpression(conditionExpression);
-        Condition condition = new UelExpressionCondition(expression);
-        return condition.evaluate(sequenceFlow.getId(), executionEntity);
+        return ConditionUtil.hasTrueCondition(sequenceFlow, executionEntity);
     }
 }

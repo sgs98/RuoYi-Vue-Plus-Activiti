@@ -178,8 +178,8 @@ public class WorkFlowUtils {
             String conditionExpression = sequenceFlow.getConditionExpression();
             //判断是否有条件
             if (StringUtils.isNotBlank(conditionExpression)) {
-                ExpressCmd expressCmd = new ExpressCmd(sequenceFlow,executionEntity,conditionExpression);
-                Boolean condition  = managementService.executeCommand(expressCmd);
+                ExpressCmd expressCmd = new ExpressCmd(sequenceFlow, executionEntity);
+                Boolean condition = managementService.executeCommand(expressCmd);
                 processNodeBuildList(processNode, outFlowElement, ActConstant.EXCLUSIVE_GATEWAY, taskId, condition, nextNodes);
             } else {
                 tempNodeBuildList(tempNodes, taskId, tempNode, outFlowElement);
@@ -190,8 +190,8 @@ public class WorkFlowUtils {
             if (StringUtils.isBlank(conditionExpression)) {
                 processNodeBuildList(processNode, outFlowElement, ActConstant.INCLUSIVE_GATEWAY, taskId, true, nextNodes);
             } else {
-                ExpressCmd expressCmd = new ExpressCmd(sequenceFlow,executionEntity,conditionExpression);
-                Boolean condition  = managementService.executeCommand(expressCmd);
+                ExpressCmd expressCmd = new ExpressCmd(sequenceFlow, executionEntity);
+                Boolean condition = managementService.executeCommand(expressCmd);
                 processNodeBuildList(processNode, outFlowElement, ActConstant.INCLUSIVE_GATEWAY, taskId, condition, nextNodes);
             }
         } else {
