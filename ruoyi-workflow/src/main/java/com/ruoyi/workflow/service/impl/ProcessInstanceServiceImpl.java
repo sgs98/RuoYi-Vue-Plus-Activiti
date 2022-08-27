@@ -26,7 +26,6 @@ import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.FlowNode;
 import org.activiti.bpmn.model.ParallelGateway;
 import org.activiti.bpmn.model.SequenceFlow;
-import org.activiti.engine.ManagementService;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.history.HistoricActivityInstance;
 import org.activiti.engine.history.HistoricProcessInstance;
@@ -67,7 +66,6 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
     private final IUserService iUserService;
     private final IActTaskNodeService iActTaskNodeService;
     private final ProcessEngine processEngine;
-    private final ManagementService managementService;
 
 
     /**
@@ -571,7 +569,7 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
                 newTaskList.remove(0);
                 for (Task task : newTaskList) {
                     DeleteTaskCmd deleteTaskCmd = new DeleteTaskCmd(task.getId());
-                    managementService.executeCommand(deleteTaskCmd);
+                    processEngine.getManagementService().executeCommand(deleteTaskCmd);
                 }
             }
             List<Task> newTasks = taskService.createTaskQuery().processInstanceId(processInstId).list().stream().filter(e->StringUtils.isBlank(e.getParentTaskId())).collect(Collectors.toList());

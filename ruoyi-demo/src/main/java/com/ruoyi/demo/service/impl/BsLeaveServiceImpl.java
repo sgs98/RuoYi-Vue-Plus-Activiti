@@ -16,7 +16,6 @@ import com.ruoyi.demo.service.IBsLeaveService;
 import com.ruoyi.workflow.service.IProcessInstanceService;
 import com.ruoyi.workflow.utils.WorkFlowUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -38,13 +37,11 @@ public class BsLeaveServiceImpl implements IBsLeaveService {
     private final BsLeaveMapper baseMapper;
 
     private final IProcessInstanceService iProcessInstanceService;
-
-    private final WorkFlowUtils workFlowUtils;
     @Override
     public BsLeaveVo queryById(String id){
         BsLeaveVo vo = baseMapper.selectVoById(id);
         vo.setProcessInstanceId(iProcessInstanceService.getProcessInstanceId(id));
-        workFlowUtils.setStatusFileValue(vo, Arrays.asList(vo.getId()),vo.getId());
+        WorkFlowUtils.setStatusFileValue(vo, Arrays.asList(vo.getId()),vo.getId());
         return vo;
     }
 
@@ -56,8 +53,8 @@ public class BsLeaveServiceImpl implements IBsLeaveService {
         if(CollectionUtil.isNotEmpty(records)){
             List<String> collectIds = records.stream().map(BsLeaveVo::getId).collect(Collectors.toList());
             for (BsLeaveVo record : records) {
-                workFlowUtils.setStatusFileValue(record,collectIds,record.getId());
-                workFlowUtils.setProcessInstIdFileValue(record,collectIds,record.getId());
+                WorkFlowUtils.setStatusFileValue(record,collectIds,record.getId());
+                WorkFlowUtils.setProcessInstIdFileValue(record,collectIds,record.getId());
             }
         }
         result.setRecords(records);

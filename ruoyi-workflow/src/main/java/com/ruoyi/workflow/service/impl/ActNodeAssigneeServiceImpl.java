@@ -44,8 +44,6 @@ public class ActNodeAssigneeServiceImpl extends ServiceImpl<ActNodeAssigneeMappe
 
     private final RepositoryService repositoryService;
 
-    private final WorkFlowUtils workFlowUtils;
-
     /**
      * @Description: 保存流程定义设置
      * @param: actNodeAssignee
@@ -134,7 +132,7 @@ public class ActNodeAssigneeServiceImpl extends ServiceImpl<ActNodeAssigneeMappe
             nodeAssignee.setAddMultiInstance(false);
             nodeAssignee.setDeleteMultiInstance(false);
         }
-        MultiVo multiInstance = workFlowUtils.isMultiInstance(processDefinitionId, nodeId);
+        MultiVo multiInstance = WorkFlowUtils.isMultiInstance(processDefinitionId, nodeId);
         if (ObjectUtil.isNotEmpty(multiInstance)) {
             nodeAssignee.setMultiple(true);
             if (StringUtils.isBlank(multiInstance.getAssigneeList())) {

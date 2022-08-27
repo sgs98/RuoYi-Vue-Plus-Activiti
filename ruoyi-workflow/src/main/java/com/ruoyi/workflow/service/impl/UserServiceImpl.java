@@ -43,7 +43,6 @@ public class UserServiceImpl implements IUserService {
     private final SysUserRoleMapper userRoleMapper;
     private final TaskService taskService;
     private final RuntimeService runtimeService;
-    private final WorkFlowUtils workFlowUtils;
 
     /**
      * @Description: 按照用户id查询用户集合
@@ -209,7 +208,7 @@ public class UserServiceImpl implements IUserService {
     public Map<String, Object> getWorkflowAddMultiListByPage(SysUserMultiBo sysUserMultiBo) {
         Map<String, Object> map = new HashMap<>();
         Task task = taskService.createTaskQuery().taskId(sysUserMultiBo.getTaskId()).singleResult();
-        MultiVo multiInstance = workFlowUtils.isMultiInstance(task.getProcessDefinitionId(), task.getTaskDefinitionKey());
+        MultiVo multiInstance = WorkFlowUtils.isMultiInstance(task.getProcessDefinitionId(), task.getTaskDefinitionKey());
         LambdaQueryWrapper<SysUser> queryWrapper = new LambdaQueryWrapper<>();
         //检索条件
         queryWrapper.eq(StringUtils.isNotEmpty(sysUserMultiBo.getDeptId()), SysUser::getDeptId, sysUserMultiBo.getDeptId());

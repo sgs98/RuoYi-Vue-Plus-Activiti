@@ -14,7 +14,7 @@ import java.io.Serializable;
  */
 @Data
 @ApiModel("节点信息")
-public class ProcessNode  implements Serializable {
+public class ProcessNodePath implements Serializable {
 
     private static final long serialVersionUID=1L;
 
@@ -47,6 +47,12 @@ public class ProcessNode  implements Serializable {
      */
     @ApiModelProperty("表达式是否成立")
     private Boolean expression;
+
+    /**
+     * 是否存在表达式 true 存在 false 不存在
+     */
+    @ApiModelProperty("是否存在表达式")
+    private Boolean expressionStr;
 
     /**
      * 选择方式  role按角色选人  dept按部门选人  person自定义选人
@@ -89,4 +95,17 @@ public class ProcessNode  implements Serializable {
      */
     @ApiModelProperty("会签保存人员KEY值")
     private String multipleColumn;
+
+    /**
+     * 当前节点的上一节点(用户节点或者网关)
+     */
+    @ApiModelProperty("当前节点的上一节点(用户节点或者网关)")
+    private String sourceFlowElementId;
+
+    /**
+     * x坐标
+     */
+    @ApiModelProperty("x坐标")
+    private Double x;
+
 }
