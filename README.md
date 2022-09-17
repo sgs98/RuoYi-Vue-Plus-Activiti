@@ -12,10 +12,7 @@
 > RuoYi-Vue-Plus 是重写 RuoYi-Vue 针对 `分布式集群` 场景全方位升级(不兼容原框架)                                                                             
 > **master分支为activiti，flowable分支为flowable** 
 
-<<<<<<< HEAD
-=======
 [预览地址](https://ruoyi.lhailgl.cn/index)  
->>>>>>> activiti-develop
 | 功能介绍     | 使用技术                | 文档地址                                                                                              | 特性注意事项                     |
 |----------|---------------------|---------------------------------------------------------------------------------------------------|----------------------------|
 | 当前框架     | RuoYi-Vue-Plus-Activiti      | [RuoYi-Vue-Plus-Activiti文档](https://gitee.com/sgs98/RuoYi-Vue-Plus-Activiti/wikis/pages)                       | 重写RuoYi-Vue全方位升级(不兼容原框架)   |
