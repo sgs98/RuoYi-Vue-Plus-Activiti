@@ -49,8 +49,7 @@ public interface IBsLeaveService{
 	/**
 	 * 校验并删除数据
 	 * @param ids 主键集合
-	 * @param isValid 是否校验,true-删除前校验,false-不校验
 	 * @return
 	 */
-	Boolean deleteWithValidByIds(Collection<String> ids, Boolean isValid);
+	Boolean deleteWithValidByIds(Collection<String> ids);
 }

@@ -8,21 +8,21 @@ import java.util.List;
 
 /**
  * @program: ruoyi-vue-plus
- * @description: 流程定义设置接口
+ * @description: 流程节点人员设置接口
  * @author: gssong
  * @created: 2021/11/21
  */
 public interface IActNodeAssigneeService extends IService<ActNodeAssignee> {
 
     /**
-     * 保存流程定义设置
+     * 保存流程节点人员设置
      * @param actNodeAssignee
      * @return
      */
     ActNodeAssignee add(ActNodeAssignee actNodeAssignee);
 
     /**
-     * 按照流程定义id和流程节点id查询流程定义设置
+     * 按照流程定义id和流程节点id查询流程节点人员设置
      * @param processDefinitionId
      * @param nodeId
      * @return
@@ -30,7 +30,7 @@ public interface IActNodeAssigneeService extends IService<ActNodeAssignee> {
     ActNodeAssignee getInfo(String processDefinitionId, String nodeId);
 
     /**
-     * 按照流程定义id和流程节点id查询流程定义设置
+     * 按照流程定义id和流程节点id查询流程节点人员设置
      * @param processDefinitionId
      * @param nodeId
      * @return
@@ -45,7 +45,7 @@ public interface IActNodeAssigneeService extends IService<ActNodeAssignee> {
     List<ActNodeAssignee> getInfoByProcessDefinitionId(String processDefinitionId);
 
     /**
-     * 删除流程定义设置
+     * 删除流程节点人员设置
      * @param id
      * @return
      */
@@ -67,7 +67,7 @@ public interface IActNodeAssigneeService extends IService<ActNodeAssignee> {
     Boolean delByDefinitionIdAndNodeId(String definitionId,String nodeId);
 
     /**
-     * 复制给最新流程定义设置
+     * 复制给最新流程节点人员设置
      * @param id
      * @param key
      * @return

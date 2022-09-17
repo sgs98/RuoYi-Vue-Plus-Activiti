@@ -95,7 +95,7 @@
 
 <script>
 import { getWorkflowUserListByPage } from "@/api/workflow/workflowUser";
-import { treeselect } from "@/api/system/dept";
+import { deptTreeSelect } from "@/api/system/user";
 
 export default {
   props: {
@@ -199,7 +199,7 @@ export default {
     },
     /** 查询部门下拉树结构 */
     getTreeselect() {
-      treeselect().then(response => {
+      deptTreeSelect().then(response => {
         this.deptOptions = response.data;
       });
     },

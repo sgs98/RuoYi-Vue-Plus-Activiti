@@ -2,17 +2,20 @@ package com.ruoyi.workflow.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.workflow.common.constant.ActConstant;
 import com.ruoyi.workflow.domain.ActNodeAssignee;
-import com.ruoyi.workflow.domain.bo.DefREQ;
+import com.ruoyi.workflow.domain.bo.DefinitionBo;
+import com.ruoyi.workflow.domain.vo.ActProcessDefSettingVo;
 import com.ruoyi.workflow.domain.vo.ActProcessNodeVo;
 import com.ruoyi.workflow.domain.vo.ProcessDefinitionVo;
 import com.ruoyi.workflow.activiti.factory.WorkflowService;
 import com.ruoyi.workflow.mapper.ProcessDefinitionMapper;
 import com.ruoyi.workflow.service.IActNodeAssigneeService;
+import com.ruoyi.workflow.service.IActProcessDefSetting;
 import com.ruoyi.workflow.service.IProcessDefinitionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,11 +36,11 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.zip.ZipInputStream;
 
 /**
@@ -55,31 +58,44 @@ public class ProcessDefinitionServiceImpl extends WorkflowService implements IPr
 
     private final ProcessDefinitionMapper processDefinitionMapper;
 
+    private final IActProcessDefSetting iActProcessDefSetting;
+
     /**
      * @Description: 查询流程定义列表
-     * @param: defReq
+     * @param: definitionBo
      * @return: com.ruoyi.common.core.page.TableDataInfo<com.ruoyi.workflow.domain.vo.ProcessDefinitionVo>
      * @author: gssong
      * @Date: 2021/10/7
      */
     @Override
-    public TableDataInfo<ProcessDefinitionVo> getByPage(DefREQ defReq) {
+    public TableDataInfo<ProcessDefinitionVo> getByPage(DefinitionBo definitionBo) {
         ProcessDefinitionQuery query = repositoryService.createProcessDefinitionQuery();
-        if (StringUtils.isNotEmpty(defReq.getKey())) {
-            query.processDefinitionKeyLike("%" + defReq.getKey() + "%");
+        if (StringUtils.isNotEmpty(definitionBo.getKey())) {
+            query.processDefinitionKeyLike("%" + definitionBo.getKey() + "%");
         }
-        if (StringUtils.isNotEmpty(defReq.getName())) {
-            query.processDefinitionNameLike("%" + defReq.getName() + "%");
+        if (StringUtils.isNotEmpty(definitionBo.getName())) {
+            query.processDefinitionNameLike("%" + definitionBo.getName() + "%");
         }
         // 分页查询
         List<ProcessDefinitionVo> processDefinitionVoList = new ArrayList<>();
-        List<ProcessDefinition> definitionList = query.latestVersion().listPage(defReq.getFirstResult(), defReq.getPageSize());
+        List<ProcessDefinition> definitionList = query.latestVersion().listPage(definitionBo.getFirstResult(), definitionBo.getPageSize());
+        List<ActProcessDefSettingVo> processDefSettingList = null;
+        if (CollectionUtil.isNotEmpty(definitionList)) {
+            List<String> defIds = definitionList.stream().map(ProcessDefinition::getId).collect(Collectors.toList());
+            processDefSettingList = iActProcessDefSetting.getProcessDefSettingByDefIds(defIds);
+        }
         for (ProcessDefinition processDefinition : definitionList) {
             // 部署时间
             Deployment deployment = repositoryService.createDeploymentQuery()
                 .deploymentId(processDefinition.getDeploymentId()).singleResult();
             ProcessDefinitionVo processDefinitionVo = BeanUtil.toBean(processDefinition, ProcessDefinitionVo.class);
-            processDefinitionVo.setDeploymentTime(deployment.getDeploymentTime());
+            if (ObjectUtil.isNotEmpty(deployment) && deployment.getDeploymentTime() != null) {
+                processDefinitionVo.setDeploymentTime(deployment.getDeploymentTime());
+            }
+            // 流程定义设置
+            if(CollectionUtil.isNotEmpty(processDefSettingList)){
+                processDefSettingList.stream().filter(e->processDefinition.getId().equals(e.getProcessDefinitionId())).findFirst().ifPresent(processDefinitionVo::setActProcessDefSettingVo);
+            }
             processDefinitionVoList.add(processDefinitionVo);
         }
         // 总记录数
@@ -90,23 +106,23 @@ public class ProcessDefinitionServiceImpl extends WorkflowService implements IPr
 
     /**
      * @Description: 查询历史流程定义列表
-     * @param: defReq
+     * @param: definitionBo
      * @return: java.util.List<com.ruoyi.workflow.domain.vo.ProcessDefinitionVo>
      * @author: gssong
      * @Date: 2021/10/7
      */
     @Override
-    public List<ProcessDefinitionVo> getHisByPage(DefREQ defReq) {
+    public List<ProcessDefinitionVo> getHisByPage(DefinitionBo definitionBo) {
         ProcessDefinitionQuery query = repositoryService.createProcessDefinitionQuery();
-        if (StringUtils.isNotBlank(defReq.getKey())) {
-            query.processDefinitionKey(defReq.getKey());
+        if (StringUtils.isNotBlank(definitionBo.getKey())) {
+            query.processDefinitionKey(definitionBo.getKey());
         }
 
         // 分页查询
         List<ProcessDefinitionVo> processDefinitionVoList = new ArrayList<>();
         List<ProcessDefinition> definitionList = query.list();
         for (ProcessDefinition processDefinition : definitionList) {
-            if (!processDefinition.getId().equals(defReq.getId())) {
+            if (!processDefinition.getId().equals(definitionBo.getId())) {
                 // 部署时间
                 Deployment deployment = repositoryService.createDeploymentQuery()
                     .deploymentId(processDefinition.getDeploymentId()).singleResult();
@@ -228,10 +244,10 @@ public class ProcessDefinitionServiceImpl extends WorkflowService implements IPr
     public String getXml(String definitionId) {
         StringBuilder xml = new StringBuilder();
         ProcessDefinition processDefinition = repositoryService.getProcessDefinition(definitionId);
-        InputStream inputStream = null;
+        InputStream inputStream;
         try {
             inputStream = repositoryService.getResourceAsStream(processDefinition.getDeploymentId(), processDefinition.getResourceName());
-            xml.append(IOUtils.toString(inputStream, StandardCharsets.UTF_8));
+            xml.append(IOUtils.toString(inputStream, ActConstant.UTF_8));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -329,15 +345,18 @@ public class ProcessDefinitionServiceImpl extends WorkflowService implements IPr
         }
         ActProcessNodeVo actProcessNodeVo = processNodeVoList.get(0);
         ActNodeAssignee actNodeAssignee = new ActNodeAssignee();
-        actNodeAssignee.setProcessDefinitionId(actProcessNodeVo.getProcessDefinitionId());
+        actNodeAssignee.setProcessDefinitionId(processDefinitionId);
         actNodeAssignee.setNodeId(actProcessNodeVo.getNodeId());
         actNodeAssignee.setNodeName(actProcessNodeVo.getNodeName());
         actNodeAssignee.setIsShow(false);
         actNodeAssignee.setIsBack(true);
         actNodeAssignee.setMultiple(false);
         actNodeAssignee.setIndex(0);
-        iActNodeAssigneeService.delByDefinitionIdAndNodeId(actProcessNodeVo.getProcessDefinitionId(), actProcessNodeVo.getNodeId());
-        iActNodeAssigneeService.add(actNodeAssignee);
+        ActNodeAssignee info = iActNodeAssigneeService.getInfo(actProcessNodeVo.getProcessDefinitionId(), actProcessNodeVo.getNodeId());
+        if (ObjectUtil.isEmpty(info)) {
+            iActNodeAssigneeService.delByDefinitionIdAndNodeId(actProcessNodeVo.getProcessDefinitionId(), actProcessNodeVo.getNodeId());
+            iActNodeAssigneeService.add(actNodeAssignee);
+        }
         return R.ok(processNodeVoList);
     }
 }

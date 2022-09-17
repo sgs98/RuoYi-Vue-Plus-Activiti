@@ -39,13 +39,13 @@
         <el-table-column align="center" prop="version" label="版本号" width="90" >
           <template slot-scope="{row}"> v{{row.version}}.0</template>
         </el-table-column>
-        <el-table-column align="center" prop="resourceName" label="流程XML" min-width="120" show-overflow-tooltip>
+        <el-table-column align="center" prop="resourceName" label="流程XML" min-width="100" show-overflow-tooltip>
         <template slot-scope="{row}">
           <!-- 注意组件上使用原生事件，要加 .active -->
           <el-link type="primary" @click.native="clickExportXML(row.id)">{{ row.resourceName }}</el-link>
         </template>
         </el-table-column>
-        <el-table-column align="center" prop="diagramResourceName" label="流程图片" min-width="120" show-overflow-tooltip>
+        <el-table-column align="center" prop="diagramResourceName" label="流程图片" min-width="100" show-overflow-tooltip>
         <template slot-scope="{row}">
           <el-link type="primary" @click="clickPreviewImg(row.id)">{{ row.diagramResourceName }}</el-link>
         </template>
@@ -56,7 +56,20 @@
             <el-tag type="danger" v-else>挂起</el-tag>
           </template>
         </el-table-column>
-        <el-table-column  align="center" prop="deploymentTime" label="部署时间" width="150"></el-table-column>
+        <el-table-column  align="center" prop="deploymentTime" label="部署时间" :show-overflow-tooltip="true" width="100"></el-table-column>
+        <el-table-column  align="center" prop="actProcessDefSettingVo.businessType" label="表单Key" width="80">
+          <template slot-scope="scope">
+            <el-tag type="success" v-if="scope.row.actProcessDefSettingVo && scope.row.actProcessDefSettingVo.businessType===0">动态表单</el-tag>
+            <el-tag type="primary" v-else-if="scope.row.actProcessDefSettingVo && scope.row.actProcessDefSettingVo.businessType===1">业务表单</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column  align="center" label="表单Key/组件名称" width="150">
+          <template slot-scope="scope">
+            <span v-if="scope.row.actProcessDefSettingVo && scope.row.actProcessDefSettingVo.businessType===0">{{scope.row.actProcessDefSettingVo.formKey}}</span>
+            <span v-if="scope.row.actProcessDefSettingVo && scope.row.actProcessDefSettingVo.businessType===1">{{scope.row.actProcessDefSettingVo.componentName}}</span>
+          </template>
+        </el-table-column>
+        
         <el-table-column  align="center" prop="description" :show-overflow-tooltip="true" label="挂起或激活原因" width="150"></el-table-column>
         <el-table-column label="操作" align="center" width="210" class-name="small-padding fixed-width">
         <template slot-scope="scope">
@@ -112,6 +125,14 @@
                 @click="handleSetting(scope.row)"
                 >设置</el-button>
             </el-col>
+            <el-col :span="1.5">
+              <el-button
+                size="mini"
+                type="text"
+                icon="el-icon-postcard"
+                @click="handleForm(scope.row)"
+                >表单</el-button>
+            </el-col>
           </el-row>
         </template>
       </el-table-column>
@@ -140,28 +161,31 @@
     <!-- 预览图片或xml -->
     <process-preview ref="previewRef" :url="url" :type="type"/>
 
-     <!-- 历史版本 -->
+    <!-- 历史版本 -->
     <process-his-list ref="hisListRef" :propKey="propKey" :definitionId="definitionId" />
 
-     <!-- 流程设置 -->
+    <!-- 流程设置 -->
     <process-setting ref="settingRef"/>
+
+    <!-- 表单设置 -->
+    <process-form-list ref="formRef" @callbackFn="getList" :formData="formData"/>
 
 
   </div>
 </template>
 <script>
 import {list,del,updateProcDefState,getXml} from "@/api/workflow/definition";
+import { getProcessDefSettingByDefId } from "@/api/workflow/processDefSetting";
 import {convertToModel} from "@/api/workflow/model";
 import processDeploy from './components/processDeploy'
 import processPreview from './components/processPreview'
 import processHisList from './components/processHisList'
 import processSetting from './components/processSetting'
-
-
+import processFormList from './components/processFormList'
 
 export default {
     name: 'Definition', // 和对应路由表中配置的name值一致
-    components: { processDeploy, processPreview,processHisList,processSetting },
+    components: { processDeploy, processPreview,processHisList,processSetting,processFormList },
     data() {
         return {
             // 弹窗
@@ -204,6 +228,8 @@ export default {
             // 流程定义对象
             procedefData: {},
             type: '',//png,xml
+            // 表单数据
+            formData: {}
         }
     },
     created() {
@@ -331,6 +357,23 @@ export default {
         this.$nextTick(() => {
           this.$refs.settingRef.visible = true
           this.$refs.settingRef.init(row.id)
+        })
+      },
+      //打开表单
+      handleForm(row){
+        this.loading = true
+        getProcessDefSettingByDefId(row.id).then(response => {
+          this.formData = {}
+          if(response.data){
+            this.formData = response.data
+          }else{
+            this.formData.businessType = 0
+          }
+          this.formData.processDefinitionId = row.id
+          this.formData.processDefinitionKey = row.key
+          this.formData.processDefinitionName = row.name         
+          this.loading = false
+          this.$refs.formRef.visible = true
         })
       }
     }

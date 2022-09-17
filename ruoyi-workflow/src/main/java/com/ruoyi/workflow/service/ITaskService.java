@@ -24,46 +24,46 @@ public interface ITaskService {
      * @param req
      * @return
      */
-    TableDataInfo<TaskWaitingVo> getTaskWaitByPage(TaskREQ req);
+    TableDataInfo<TaskWaitingVo> getTaskWaitByPage(TaskBo req);
 
     /**
      * 完成任务
      * @param req
      * @return
      */
-    Boolean completeTask(TaskCompleteREQ req);
+    Boolean completeTask(TaskCompleteBo req);
 
     /**
      * 查询当前用户的已办任务
      * @param req
      * @return
      */
-    TableDataInfo<TaskFinishVo> getTaskFinishByPage(TaskREQ req);
+    TableDataInfo<TaskFinishVo> getTaskFinishByPage(TaskBo req);
 
     /**
      * 获取目标节点（下一个节点）
      * @param req
      * @return
      */
-    Map<String,Object> getNextNodeInfo(NextNodeREQ req);
+    Map<String,Object> getNextNodeInfo(NextNodeBo req);
 
     /**
      * 查询所有用户的已办任务
      * @param req
      * @return
      */
-    TableDataInfo<TaskFinishVo> getAllTaskFinishByPage(TaskREQ req);
+    TableDataInfo<TaskFinishVo> getAllTaskFinishByPage(TaskBo req);
 
     /**
      * 查询所有用户的待办任务
      * @param req
      * @return
      */
-    TableDataInfo<TaskWaitingVo> getAllTaskWaitByPage(TaskREQ req);
+    TableDataInfo<TaskWaitingVo> getAllTaskWaitByPage(TaskBo req);
 
     /**
      * 驳回审批
-     * @param: backProcessBo
+     * @param backProcessBo
      * @return
      */
     String backProcess(BackProcessBo backProcessBo);
@@ -77,31 +77,31 @@ public interface ITaskService {
 
     /**
      * 委托
-     * @param delegateREQ
+     * @param delegateBo
      * @return
      */
-    Boolean delegateTask(DelegateREQ delegateREQ);
+    Boolean delegateTask(DelegateBo delegateBo);
 
     /**
      * 转办任务
-     * @param transmitREQ
+     * @param transmitBo
      * @return
      */
-    R<Boolean> transmitTask(TransmitREQ transmitREQ);
+    R<Boolean> transmitTask(TransmitBo transmitBo);
 
     /**
      * 会签任务加签
-     * @param addMultiREQ
+     * @param addMultiBo
      * @return
      */
-    R<Boolean> addMultiInstanceExecution(AddMultiREQ addMultiREQ);
+    R<Boolean> addMultiInstanceExecution(AddMultiBo addMultiBo);
 
     /**
      * 会签任务减签
-     * @param deleteMultiREQ
+     * @param deleteMultiBo
      * @return
      */
-    R<Boolean> deleteMultiInstanceExecution(DeleteMultiREQ deleteMultiREQ);
+    R<Boolean> deleteMultiInstanceExecution(DeleteMultiBo deleteMultiBo);
 
     /**
      * 修改办理人

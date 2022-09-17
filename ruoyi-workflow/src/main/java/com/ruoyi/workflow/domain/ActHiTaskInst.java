@@ -1,7 +1,6 @@
 package com.ruoyi.workflow.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
-import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -15,7 +14,6 @@ import java.util.Date;
  */
 @Data
 @TableName("act_hi_taskinst")
-@ApiModel("历史任务信息对象")
 public class ActHiTaskInst implements Serializable {
 
     private static final long serialVersionUID=1L;

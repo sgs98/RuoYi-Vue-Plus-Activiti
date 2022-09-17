@@ -1,16 +1,17 @@
 package com.ruoyi.workflow.utils;
 
 import cn.hutool.core.collection.CollectionUtil;
+import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.spring.SpringUtils;
 import com.ruoyi.workflow.activiti.cmd.ExpressCheckCmd;
 import com.ruoyi.workflow.common.constant.ActConstant;
 import com.ruoyi.workflow.domain.vo.ProcessNodePath;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.activiti.bpmn.model.*;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -21,13 +22,13 @@ import java.util.stream.Collectors;
  * @author: gssong
  * @created: 2022/8/22 18:40
  */
-@RequiredArgsConstructor
-public class ProcessRunningPathUtils{
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+public class ProcessRunningPathUtils {
 
     /**
      * 流程引擎
      */
-    private static final ProcessEngine processEngine = SpringUtils.getBean(ProcessEngine.class);
+    private static final ProcessEngine PROCESS_ENGINE = SpringUtils.getBean(ProcessEngine.class);
 
     /**
      * @Description: 获取流程审批路线
@@ -38,12 +39,12 @@ public class ProcessRunningPathUtils{
      */
     public static List<ProcessNodePath> getProcessNodeList(String processInstanceId) {
 
-        ProcessInstance processInstance = processEngine.getRuntimeService().createProcessInstanceQuery().processInstanceId(processInstanceId).singleResult();
-        BpmnModel bpmnModel = processEngine.getRepositoryService().getBpmnModel(processInstance.getProcessDefinitionId());
+        ProcessInstance processInstance = PROCESS_ENGINE.getRuntimeService().createProcessInstanceQuery().processInstanceId(processInstanceId).singleResult();
+        BpmnModel bpmnModel = PROCESS_ENGINE.getRepositoryService().getBpmnModel(processInstance.getProcessDefinitionId());
         Collection<FlowElement> flowElements = bpmnModel.getMainProcess().getFlowElements();
-        List<Task> list = processEngine.getTaskService().createTaskQuery().processInstanceId(processInstanceId).list();
+        List<Task> list = PROCESS_ENGINE.getTaskService().createTaskQuery().processInstanceId(processInstanceId).list();
         List<ProcessNodePath> processNodePathList = new ArrayList<>();
-        Map<String, Object> variables = processEngine.getRuntimeService().getVariables(list.get(0).getExecutionId());
+        Map<String, Object> variables = PROCESS_ENGINE.getRuntimeService().getVariables(list.get(0).getExecutionId());
         FlowElement startElement = flowElements.stream().filter(f -> f instanceof StartEvent).findFirst().orElse(null);
         assert startElement != null;
         List<SequenceFlow> outgoingFlows = ((StartEvent) startElement).getOutgoingFlows();
@@ -54,22 +55,22 @@ public class ProcessRunningPathUtils{
         List<ProcessNodePath> buildList = new ArrayList<>();
         for (Map.Entry<String, List<ProcessNodePath>> exclusiveListEntry : listMap.entrySet()) {
             List<ProcessNodePath> nodeList = exclusiveListEntry.getValue();
-            if(ActConstant.EXCLUSIVE_GATEWAY.equals(nodeList.get(0).getNodeType())){
+            if (ActConstant.EXCLUSIVE_GATEWAY.equals(nodeList.get(0).getNodeType())) {
                 List<ProcessNodePath> expressionTrueList = nodeList.stream().filter(ProcessNodePath::getExpression).collect(Collectors.toList());
-                if(CollectionUtil.isNotEmpty(expressionTrueList)){
+                if (CollectionUtil.isNotEmpty(expressionTrueList)) {
                     buildList.addAll(expressionTrueList);
-                }else{
+                } else {
                     List<ProcessNodePath> expressionStrTrueList = nodeList.stream().filter(e -> !e.getExpressionStr()).collect(Collectors.toList());
                     buildList.addAll(expressionStrTrueList);
                 }
-            }else if(ActConstant.INCLUSIVE_GATEWAY.equals(nodeList.get(0).getNodeType())){
+            } else if (ActConstant.INCLUSIVE_GATEWAY.equals(nodeList.get(0).getNodeType())) {
                 List<ProcessNodePath> expressionTrueList = nodeList.stream().filter(ProcessNodePath::getExpression).collect(Collectors.toList());
-                if(CollectionUtil.isNotEmpty(expressionTrueList)){
+                if (CollectionUtil.isNotEmpty(expressionTrueList)) {
                     buildList.addAll(expressionTrueList);
                 }
                 List<ProcessNodePath> expressionStrTrueList = nodeList.stream().filter(e -> !e.getExpressionStr()).collect(Collectors.toList());
                 buildList.addAll(expressionStrTrueList);
-            }else{
+            } else {
                 buildList.addAll(nodeList);
             }
         }
@@ -99,11 +100,14 @@ public class ProcessRunningPathUtils{
             FlowElement currentFlowElement = outgoingFlow.getTargetFlowElement();
             if (currentFlowElement instanceof UserTask) {
                 nextNodeBuild(processNodePathList, flowElements, currentFlowElement, outgoingFlow, variables, processInstanceId, gateway);
-            } else if (currentFlowElement instanceof ExclusiveGateway) { // 排他网关
+                // 排他网关
+            } else if (currentFlowElement instanceof ExclusiveGateway) {
                 getNextNodeList(processNodePathList, flowElements, outgoingFlow, variables, processInstanceId, ActConstant.EXCLUSIVE_GATEWAY);
-            } else if (currentFlowElement instanceof ParallelGateway) { //并行网关
+                //并行网关
+            } else if (currentFlowElement instanceof ParallelGateway) {
                 getNextNodeList(processNodePathList, flowElements, outgoingFlow, variables, processInstanceId, ActConstant.PARALLEL_GATEWAY);
-            } else if (currentFlowElement instanceof InclusiveGateway) { //包含网关
+                //包含网关
+            } else if (currentFlowElement instanceof InclusiveGateway) {
                 getNextNodeList(processNodePathList, flowElements, outgoingFlow, variables, processInstanceId, ActConstant.INCLUSIVE_GATEWAY);
             } else if (currentFlowElement instanceof EndEvent) {
                 FlowElement subProcess = WorkFlowUtils.getSubProcess(flowElements, currentFlowElement);
@@ -132,9 +136,11 @@ public class ProcessRunningPathUtils{
         String conditionExpression = sequenceFlow.getConditionExpression();
         ProcessNodePath processNodePath = new ProcessNodePath();
         FlowElement sourceFlowElement = sequenceFlow.getSourceFlowElement();
-        if (ActConstant.EXCLUSIVE_GATEWAY.equals(gateway)) {//排他网关
+        //排他网关
+        if (ActConstant.EXCLUSIVE_GATEWAY.equals(gateway)) {
             buildData(processNodePath, conditionExpression, processInstanceId, variableMap, currentFlowElement, sourceFlowElement, ActConstant.EXCLUSIVE_GATEWAY, processNodePathList);
-        } else if (ActConstant.INCLUSIVE_GATEWAY.equals(gateway)) {//包含网关
+            //包含网关
+        } else if (ActConstant.INCLUSIVE_GATEWAY.equals(gateway)) {
             buildData(processNodePath, conditionExpression, processInstanceId, variableMap, currentFlowElement, sourceFlowElement, ActConstant.INCLUSIVE_GATEWAY, processNodePathList);
         } else {
             buildData(processNodePath, conditionExpression, processInstanceId, variableMap, currentFlowElement, sourceFlowElement, ActConstant.USER_TASK, processNodePathList);
@@ -166,7 +172,7 @@ public class ProcessRunningPathUtils{
             processNodePath.setExpressionStr(false);
             if (StringUtils.isNotBlank(conditionExpression)) {
                 ExpressCheckCmd expressCheckCmd = new ExpressCheckCmd(processInstanceId, conditionExpression, variableMap);
-                condition = processEngine.getManagementService().executeCommand(expressCheckCmd);
+                condition = PROCESS_ENGINE.getManagementService().executeCommand(expressCheckCmd);
                 processNodePath.setExpressionStr(true);
             }
             processNodePath.setExpression(condition);

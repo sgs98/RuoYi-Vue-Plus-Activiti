@@ -8,8 +8,6 @@ import org.springframework.validation.annotation.Validated;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.PageQuery;
 import com.ruoyi.report.service.IJimuReportDbService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 
 /**
  * 报表数据Controller
@@ -18,7 +16,6 @@ import io.swagger.annotations.ApiOperation;
  * @date 2022-08-07
  */
 @Validated
-@Api(value = "报表数据控制器", tags = {"报表数据管理"})
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/report/reportDb")
@@ -29,7 +26,6 @@ public class JimuReportDbController extends BaseController {
     /**
      * 查询报表数据列表
      */
-    @ApiOperation("查询报表数据列表")
     @GetMapping("/list")
     public TableDataInfo<JimuReportDb> list(JimuReportDb bo, PageQuery pageQuery) {
         return iJimuReportDbService.queryPageList(bo, pageQuery);

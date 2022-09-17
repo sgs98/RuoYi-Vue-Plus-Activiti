@@ -4,8 +4,6 @@ import com.ruoyi.common.core.domain.R;
 import com.ruoyi.workflow.domain.bo.SysUserBo;
 import com.ruoyi.workflow.domain.bo.SysUserMultiBo;
 import com.ruoyi.workflow.service.IUserService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,8 +11,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
+/**
+ * @program: ruoyi-vue-plus
+ * @description: 工作流用户信息控制器
+ * @author: gssong
+ * @created: 2022-03-25
+ */
 @Validated
-@Api(value = "工作流用户信息控制器", tags = {"工作流用户信息管理"})
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/workflow/user")
@@ -29,7 +32,6 @@ public class UserController {
      * @Author: gssong
      * @Date: 2021/12/10
      */
-    @ApiOperation("分页查询工作流选人,角色，部门等")
     @PostMapping("/getWorkflowUserListByPage")
     public R<Map<String,Object>> getWorkflowUserListByPage(@RequestBody SysUserBo sysUserBo){
         Map<String,Object> map = iUserService.getWorkflowUserListByPage(sysUserBo);
@@ -43,7 +45,6 @@ public class UserController {
      * @author: gssong
      * @Date: 2022/4/22 21:17
      */
-    @ApiOperation("分页查询工作流选择加签人员")
     @PostMapping("/getWorkflowAddMultiListByPage")
     public R<Map<String,Object>> getWorkflowAddMultiListByPage(@RequestBody SysUserMultiBo sysUserMultiBo){
         Map<String,Object> map = iUserService.getWorkflowAddMultiListByPage(sysUserMultiBo);

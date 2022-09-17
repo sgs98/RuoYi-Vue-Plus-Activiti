@@ -12,6 +12,11 @@ import org.apache.ibatis.annotations.Update;
  */
 public interface TaskMapper {
 
+    /**
+     * 修改审批信息
+     * @param commentId 批注id
+     * @param comment 批注
+     */
     @Update("update act_hi_comment set message_=#{comment},full_msg_=#{comment} where id_ = #{commentId}")
     void editComment(@Param("commentId") String commentId, @Param("comment") String comment);
 

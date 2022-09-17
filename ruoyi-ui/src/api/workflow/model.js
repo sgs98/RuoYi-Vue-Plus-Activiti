@@ -56,7 +56,7 @@ export function deploy(id) {
  export function convertToModel(processDefinitionId) {
   return request({
     url: '/workflow/model/convertToModel/' + processDefinitionId,
-    method: 'get'
+    method: 'put'
   })
 }
 

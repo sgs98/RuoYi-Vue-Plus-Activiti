@@ -7,6 +7,12 @@ import com.ruoyi.workflow.domain.bo.SysUserMultiBo;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @program: ruoyi-vue-plus
+ * @description: 用户接口
+ * @author: gssong
+ * @created: 2022-03-25
+ */
 public interface IUserService {
 
     /**

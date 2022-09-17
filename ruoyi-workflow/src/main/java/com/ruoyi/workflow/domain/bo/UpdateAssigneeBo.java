@@ -2,7 +2,6 @@ package com.ruoyi.workflow.domain.bo;
 
 import com.ruoyi.common.core.validate.AddGroup;
 import lombok.Data;
-import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -16,7 +15,6 @@ import java.util.List;
  * @created: 2022/04/10 14:50
  */
 @Data
-@Validated
 public class UpdateAssigneeBo implements Serializable {
 
     private static final long serialVersionUID=1L;

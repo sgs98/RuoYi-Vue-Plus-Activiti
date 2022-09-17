@@ -3,7 +3,6 @@ package com.ruoyi.workflow.domain;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.ruoyi.common.core.domain.BaseEntity;
-import io.swagger.annotations.ApiModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -17,7 +16,6 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("act_task_Node")
-@ApiModel("审批历史任务节点")
 public class ActTaskNode extends BaseEntity{
 
     private static final long serialVersionUID = 1L;

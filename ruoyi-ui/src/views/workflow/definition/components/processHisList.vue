@@ -136,7 +136,7 @@ export default {
             // 弹出层
             visible: false,
             // 流程图
-            url: null,
+            url: [],
             // 按钮loading
             buttonLoading: false,
             // 遮罩层
@@ -215,7 +215,7 @@ export default {
       // 预览图片 downFile
       clickPreviewImg(id) {
         this.type = 'png'
-        this.url = process.env.VUE_APP_BASE_API+'/workflow/definition/export/png/'+id
+        this.url.push(process.env.VUE_APP_BASE_API+'/workflow/definition/export/png/'+id)
         this.$refs.previewRef.visible = true
       },
       //打开弹窗

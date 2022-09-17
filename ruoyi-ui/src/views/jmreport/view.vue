@@ -88,6 +88,7 @@
   
   <el-main class="main">
     <i-frame v-if="url" :src="url" />
+    <el-empty class="el-empty-icon" v-else description="暂无数据"></el-empty>
   </el-main>
 </el-container>
 </template>
@@ -330,6 +331,10 @@ export default {
     padding: 0;
     margin: 0;
     width: calc(100%-350px);
+  }
+  .el-empty-icon{
+    height: 100%;
+    padding: 200px;
   }
   
 </style>>

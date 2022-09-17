@@ -1,96 +1,84 @@
 <template>
     <div class="app-container">
-         <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="100px">
-          <el-form-item label="流程名称" prop="name">
-            <el-input
-              v-model="queryParams.name"
-              placeholder="请输入流程名称"
-              clearable
-              size="small"
-              @keyup.enter.native="handleQuery"
-            />
-          </el-form-item>
-          <el-form-item>
-            <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-            <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
-          </el-form-item>
-        </el-form>
+        <div v-if="dataViewVisible">
+            <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="100px">
+                <el-form-item label="流程名称" prop="name">
+                    <el-input
+                    v-model="queryParams.name"
+                    placeholder="请输入流程名称"
+                    clearable
+                    size="small"
+                    @keyup.enter.native="handleQuery"
+                    />
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
+                    <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+                </el-form-item>
+            </el-form>
 
-         <el-row :gutter="10" class="mb8">
-            <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
-        </el-row>
+            <el-row :gutter="10" class="mb8">
+                <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
+            </el-row>
 
-        <el-table v-loading="loading" :data="dataList" @selection-change="handleSelectionChange">
-            <el-table-column type="selection" width="55" align="center" />
-            <el-table-column fixed align="center" type="index" label="序号" width="50"/>
-            <el-table-column fixed align="center" prop="name" label="任务名称"/>
-            <el-table-column  align="center" prop="processDefinitionName" label="流程定义名称" />
-            <el-table-column align="center" prop="processDefinitionVersion" label="版本号" width="90" >
-              <template slot-scope="{row}"> v{{row.processDefinitionVersion}}.0</template>
-            </el-table-column>
-            <el-table-column  align="center" prop="startUserNickName" label="流程发起人"  min-width="130"/>
-            <el-table-column  align="center" prop="assignee" label="当前流程办理人"  min-width="130"/>
-            <el-table-column  align="center" prop="isSuspended" label="流程状态" width="160">
-              <template slot-scope="scope">
-                <el-tag type="success" v-if="scope.row.processStatus=='激活'">激活</el-tag>
-                <el-tag type="danger" v-else>挂起</el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column  align="center" prop="businessKey" :show-overflow-tooltip="true" label="流程关联业务ID" width="160"/>
-            <el-table-column  align="center" prop="createTime" label="创建时间" width="160"/>
-            <el-table-column label="操作" align="center" width="200" class-name="small-padding fixed-width">
-              <template slot-scope="scope">
-                  <el-row :gutter="10" class="mb8">
-                    <el-col :span="1.5">
-                      <el-button size="mini" icon="el-icon-sort" v-if="scope.row.isClaim===false" type="text"
-                      @click="clickClaim(scope.row)">签收 &nbsp;</el-button>
-                      <el-button size="mini" icon="el-icon-sort" v-if="scope.row.isClaim===true" type="text"
-                      @click="returnTask(scope.row)">归还 &nbsp;</el-button>
-                      <el-button
-                          v-if="scope.row.isClaim===null||scope.row.isClaim===true"
-                          type="text"
-                          @click="clickTaskPop(scope.row)"
-                          size="mini"
-                          icon="el-icon-s-check"
-                      >办理</el-button>
-                      <el-button
-                          type="text"
-                          @click="clickHistPop(scope.row)"
-                          size="mini"
-                          icon="el-icon-tickets"
-                      >审批记录</el-button>
-                      </el-col>
-                  </el-row>
+            <el-table v-loading="loading" :data="dataList" @selection-change="handleSelectionChange">
+                <el-table-column type="selection" width="55" align="center" />
+                <el-table-column fixed align="center" type="index" label="序号" width="50"/>
+                <el-table-column fixed align="center" prop="name" label="任务名称"/>
+                <el-table-column  align="center" prop="processDefinitionName" label="流程定义名称" />
+                <el-table-column align="center" prop="processDefinitionVersion" label="版本号" width="90" >
+                <template slot-scope="{row}"> v{{row.processDefinitionVersion}}.0</template>
+                </el-table-column>
+                <el-table-column  align="center" prop="startUserNickName" label="流程发起人"  min-width="130"/>
+                <el-table-column  align="center" prop="assignee" label="当前流程办理人"  min-width="130"/>
+                <el-table-column  align="center" prop="isSuspended" label="流程状态" width="160">
+                <template slot-scope="scope">
+                    <el-tag type="success" v-if="scope.row.processStatus=='激活'">激活</el-tag>
+                    <el-tag type="danger" v-else>挂起</el-tag>
                 </template>
-            </el-table-column>
-        </el-table>
+                </el-table-column>
+                <el-table-column  align="center" prop="businessKey" :show-overflow-tooltip="true" label="流程关联业务ID" width="160"/>
+                <el-table-column  align="center" prop="createTime" label="创建时间" width="160"/>
+                <el-table-column label="操作" align="center" width="150" class-name="small-padding fixed-width">
+                  <template slot-scope="scope">
+                    <el-button size="mini" icon="el-icon-sort" v-if="scope.row.isClaim===false" type="text"
+                    @click="clickClaim(scope.row)">签收 &nbsp;</el-button>
+                    <el-button size="mini" icon="el-icon-sort" v-if="scope.row.isClaim===true" type="text"
+                    @click="returnTask(scope.row)">归还 &nbsp;</el-button>
+                    <el-button
+                        v-if="scope.row.isClaim===null||scope.row.isClaim===true"
+                        type="text"
+                        @click="clickTaskPop(scope.row)"
+                        size="mini"
+                        icon="el-icon-s-check"
+                    >办理</el-button>
+                  </template>
+                </el-table-column>
+            </el-table>
 
-        <pagination v-show="total>0"
-          :total="total"
-          :page.sync="queryParams.pageNum"
-          :limit.sync="queryParams.pageSize"
-          @pagination="getList" />
-        <!-- 通过 -->
-        <verify ref="verifyRef" :taskId="taskId" :taskVariables="taskVariables"></verify>
-        <!-- 审批记录开始 -->
-        <el-dialog title="审批记录" :visible.sync="visible" v-if="visible" width="60%" :close-on-click-modal="false">
-           <history :processInstanceId="processInstanceId"></history>
-        </el-dialog>
-         <!-- 审批记录结束 -->
-        <approvalForm ref="approvalForm" :businessKey = 'businessKey' :taskId = 'taskId' :parentTaskId = 'parentTaskId'
-        @refresh = 'refresh' :currProcessForm = 'currProcessForm' :processInstanceId = 'processInstanceId'/>
+            <pagination v-show="total>0"
+            :total="total"
+            :page.sync="queryParams.pageNum"
+            :limit.sync="queryParams.pageSize"
+            @pagination="getList" />
+        </div>
+        <!-- 单据信息开始 -->
+        <div class="form-container" v-if="dynamicFormEditVisible">
+            <div class="form-container-header form-container-header"><i class="el-dialog__close el-icon el-icon-close" @click="closeDynamicEdit"></i></div>
+            <approvalForm ref="approvalForm" :businessKey = 'businessKey' :taskId = 'taskId' :parentTaskId = 'parentTaskId'
+            @closeForm = 'closeDynamicEdit' :currProcessForm = 'currProcessForm' :processInstanceId = 'processInstanceId' :dynamicFormData = 'dynamicFormData'/>
+        </div>
+        <!-- 单据信息结束 -->
     </div>
 </template>
 
 <script>
   import api from '@/api/workflow/task'
-  import verify from "@/components/Process/Verify";
   import history from "@/components/Process/History";
-  import  approvalForm from "@/views/components/approvalForm";
-
+  import approvalForm from "@/views/components/approvalForm";
+  import { getBusinessForm } from "@/api/workflow/businessForm";
   export default {
     components: {
-      verify,
       history,
       approvalForm
     },
@@ -100,6 +88,8 @@
         buttonLoading: false,
         // 遮罩层
         loading: true,
+        dataViewVisible: true,
+        dynamicFormEditVisible: false,
         // 导出遮罩层
         exportLoading: false,
         // 选中数组
@@ -128,8 +118,8 @@
         processInstanceId: undefined,
         parentTaskId: undefined,
         businessKey: undefined, // 业务唯一标识
-        visible: false,
-        currProcessForm: '' //表单组件名称
+        currProcessForm: '', //表单组件名称
+        dynamicFormData: '' //表单组件名称
       }
     },
     created() {
@@ -172,22 +162,25 @@
           this.processInstanceId = row.processInstanceId
           this.taskId = row.id
           this.parentTaskId = row.parentTaskId
-          if(row.actBusinessStatus){
-               if(row.actBusinessStatus.classFullName === 'com.ruoyi.demo.domain.BsLeave'){
-                  this.currProcessForm = 'leaveForm'
-               }else if(row.actBusinessStatus.classFullName === '其他业务全类名'){
-                  this.currProcessForm = 'xxxForm'
-               }
-               this.$refs.approvalForm.visible = true
+          if(row.actProcessDefSetting && row.actProcessDefSetting.businessType === 0){
+            getBusinessForm(this.businessKey).then(response => {
+                this.dynamicFormData = response.data;
+                this.dynamicFormEditVisible = true;
+                this.dataViewVisible = false
+                this.currProcessForm = 'dynamicFormEdit'
+            });
           }else{
-              this.$modal.msgError("业务不存在");
+            this.currProcessForm = row.actProcessDefSetting.componentName
+            this.dynamicFormEditVisible = true    
+            this.dataViewVisible = false  
           }
       },
-      //审批记录
-      clickHistPop(row){
-         this.processInstanceId = row.processInstanceId
-         this.visible = true
-      },
+      //关闭办理弹出层
+      closeDynamicEdit(){
+         this.dynamicFormEditVisible = false;
+         this.dataViewVisible = true
+         this.getList()
+       },
       //签收
       clickClaim(row){
          this.$modal.confirm('是否确认签收此任务？').then(() => {
@@ -217,3 +210,13 @@
     }
   }
 </script>
+<style scoped>
+.form-container-header{
+    height: 30px;
+    padding-bottom: 10px;
+}
+.el-icon-close{
+    float: right;
+    cursor: pointer;
+}
+</style>

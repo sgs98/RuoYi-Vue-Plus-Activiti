@@ -5,7 +5,7 @@ spring.servlet.multipart.location: /ruoyi/server/temp
 spring.boot.admin.client:
   # 增加客户端开关
   enabled: true
-  url: http://172.30.0.90:9090/admin
+  url: http://localhost:9090/admin
   instance:
     service-host-type: IP
   username: ruoyi
@@ -16,7 +16,7 @@ xxl.job:
   # 执行器开关
   enabled: true
   # 调度中心地址：如调度中心集群部署存在多个地址则用逗号分隔。
-  admin-addresses: http://172.30.0.92:9100/xxl-job-admin
+  admin-addresses: http://localhost:9100/xxl-job-admin
   # 执行器通讯TOKEN：非空时启用
   access-token: xxl-job
   executor:
@@ -51,7 +51,7 @@ spring:
           driverClassName: com.mysql.cj.jdbc.Driver
           # jdbc 所有参数配置参考 https://lionli.blog.csdn.net/article/details/122018562
           # rewriteBatchedStatements=true 批处理优化 大幅提升批量插入更新删除性能(对数据库有性能损耗 使用批量操作应考虑性能问题)
-          url: jdbc:mysql://172.30.0.36:3306/ry-vue?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true
+          url: jdbc:mysql://localhost:3306/ry-vue?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true
           username: root
           password: root
         # 从库数据源
@@ -70,12 +70,12 @@ spring:
 #            validationQuery: SELECT 1 FROM DUAL
 #        postgres:
 #          driverClassName: org.postgresql.Driver
-#          url: jdbc:postgresql://172.30.0.36:5432/postgres?useUnicode=true&characterEncoding=utf8&useSSL=true&autoReconnect=true&reWriteBatchedInserts=true
+#          url: jdbc:postgresql://localhost:5432/postgres?useUnicode=true&characterEncoding=utf8&useSSL=true&autoReconnect=true&reWriteBatchedInserts=true
 #          username: root
 #          password: root
 #        sqlserver:
 #          driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
-#          url: jdbc:sqlserver://172.30.0.36:1433;DatabaseName=tempdb;SelectMethod=cursor;rewriteBatchedStatements=true
+#          url: jdbc:sqlserver://localhost:1433;DatabaseName=tempdb;SelectMethod=cursor;rewriteBatchedStatements=true
 #          username: SA
 #          password: root
       druid:
@@ -128,7 +128,7 @@ spring.datasource.druid:
 spring:
   redis:
     # 地址
-    host: 172.30.0.48
+    host: localhost
     # 端口，默认为6379
     port: 6379
     # 数据库索引
@@ -141,6 +141,8 @@ spring:
     ssl: false
 
 redisson:
+  # redis key前缀
+  keyPrefix:
   # 线程池数量
   threads: 16
   # Netty线程池数量
@@ -193,3 +195,64 @@ sms:
   signName: 测试
   # 腾讯专用
   sdkAppId:
+
+#JimuReport[minidao配置]
+minidao :
+  base-package: org.jeecg.modules.jmreport.desreport.dao*
+  db-type: mysql
+
+#JimuReport[全配置]
+jeecg :
+  jmreport:
+    #数据字典是否进行saas数据隔离(限制只能看自己的字典)
+    saas: false
+    #是否 禁用导出PDF和图片的按钮 默认为false
+    exportDisabled: false
+    #是否自动保存
+    autoSave: true
+    #自动保存间隔时间毫秒
+    interval: 20000
+    # 列索引
+    col: 100
+    #自定义项目前缀
+    #    customPrePath:
+    # 自定义API接口的前缀 #{api_base_path}的值
+    #    apiBasePath: http://localhost:8080/jeecg-boot
+    #数据源标识
+    datasource: master
+    #预览分页自定义
+    pageSize:
+      - 10
+      - 20
+      - 30
+      - 40
+    #打印纸张自定义
+    printPaper:
+      - title: A5纸
+        size:
+          - 148
+          - 210
+      - title: B4纸
+        size:
+          - 250
+          - 353
+      - title: A4纸
+        size:
+          - 210
+          - 297
+    #接口超时设置（毫秒）
+    connect-timeout: 300000
+    #Excel导出模式(fast/快、primary/精致模式，默认fast)
+    export-excel-pattern: fast
+    #Excel导出数据每个sheet的行数,每个sheet最大1048576行
+    page-size-number: 10000
+    #excel样式超过多少行显示默认样式（只在fast模式下有效）
+    excel-style-row: 1000
+    #设计页面表格的线是否显示 默认true
+    line: true
+    #sql数据源不写字典下拉框显示条数 版本1.4.2之后被放弃
+    select-show-total: 10
+    #是否启用签名校验,默认不开启，开启后会对执行sql的接口进行参数校验
+    safeMode: true
+    #预览页面的工具条 是否显示 默认true（3.1.0+版本（包含3.1.0）已移除）
+    viewToolbar: true

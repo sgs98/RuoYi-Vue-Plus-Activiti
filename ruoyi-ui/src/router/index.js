@@ -161,6 +161,20 @@ export const dynamicRoutes = [
         meta: { title: '修改生成配置', activeMenu: '/tool/gen' }
       }
     ]
+  },
+  {
+    path: '/workflow/dynamicFormDesigner',
+    component: Layout,
+    hidden: true,
+    permissions: ['workflow:dynamicForm:edit'],
+    children: [
+      {
+        path: ':id(\\d+)',
+        component: () => import('@/views/workflow/dynamicForm/dynamicFormDesigner'),
+        name: 'dynamicFormDesigner',
+        meta: { title: '设计表单', activeMenu: '/workflow/dynamicForm' }
+      }
+    ]
   }
 ]
 

@@ -3,7 +3,6 @@ package com.ruoyi.workflow.controller;
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.workflow.domain.ActBusinessStatus;
 import com.ruoyi.workflow.service.IActBusinessStatusService;
-import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +18,6 @@ import javax.validation.constraints.NotBlank;
  * @created: 2021/10/16 16:18
  */
 @Validated
-@Api(value = "流程与业务关联控制器", tags = {"流程与业务关联管理"})
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/workflow/actBusiness")
@@ -34,10 +32,6 @@ public class ActBusinessStatusController {
      * @Author: gssong
      * @Date: 2021/10/16
      */
-    @ApiOperation("根据业务id查询流程实例")
-    @ApiImplicitParams({
-        @ApiImplicitParam(name = "businessKey",value = "业务id",required = true,dataTypeClass = String.class)
-    })
     @GetMapping("/getInfoByBusinessKey/{businessKey}")
     public R<ActBusinessStatus> getInfoByBusinessId(@NotBlank(message = "业务id不能为空") @PathVariable String  businessKey){
         ActBusinessStatus actBusinessStatus = iActBusinessStatusService.getInfoByBusinessKey(businessKey);

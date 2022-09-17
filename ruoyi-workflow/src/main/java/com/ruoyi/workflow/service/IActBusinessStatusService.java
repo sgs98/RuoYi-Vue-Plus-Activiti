@@ -49,18 +49,25 @@ public interface IActBusinessStatusService extends IService<ActBusinessStatus> {
     ActBusinessStatus getInfoByBusinessKey(String businessKey);
 
     /**
-     * 根据业务id查询流程实例
+     * 根据业务id集合查询流程实例
      * @param businessKeys
      * @return
      */
     List<ActBusinessStatus> getListInfoByBusinessKey(List<String> businessKeys);
 
     /**
-     * 删除业务状态
+     * 按照业务id删除业务状态
      * @param businessKey 业务id
      * @return
      */
-    boolean deleteState(String businessKey);
+    boolean deleteStateByBusinessKey(String businessKey);
+
+    /**
+     * 按照业务流程实例id删除业务状态
+     * @param processInstanceId 流程实例id
+     * @return
+     */
+    boolean deleteStateByProcessInstId(String processInstanceId);
 
     /**
      * 根据流程实例id查询流程实例
@@ -70,7 +77,7 @@ public interface IActBusinessStatusService extends IService<ActBusinessStatus> {
     ActBusinessStatus getInfoByProcessInstId(String processInstanceId);
 
     /**
-     * 根据流程实例ids查询流程实例
+     * 根据流程实例id集合查询流程实例
      * @param processInstanceIds 流程实例id
      * @return
      */

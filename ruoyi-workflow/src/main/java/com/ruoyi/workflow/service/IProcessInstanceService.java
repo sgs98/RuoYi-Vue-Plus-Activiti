@@ -1,9 +1,9 @@
 package com.ruoyi.workflow.service;
 
 import com.ruoyi.common.core.page.TableDataInfo;
-import com.ruoyi.workflow.domain.bo.ProcessInstFinishREQ;
-import com.ruoyi.workflow.domain.bo.ProcessInstRunningREQ;
-import com.ruoyi.workflow.domain.bo.StartREQ;
+import com.ruoyi.workflow.domain.bo.ProcessInstFinishBo;
+import com.ruoyi.workflow.domain.bo.ProcessInstRunningBo;
+import com.ruoyi.workflow.domain.bo.StartProcessBo;
 import com.ruoyi.workflow.domain.vo.ActHistoryInfoVo;
 import com.ruoyi.workflow.domain.vo.ProcessInstFinishVo;
 import com.ruoyi.workflow.domain.vo.ProcessInstRunningVo;
@@ -21,10 +21,10 @@ import java.util.Map;
 public interface IProcessInstanceService {
     /**
      * 提交申请，启动流程实例
-     * @param startReq
+     * @param startProcessBo
      * @return
      */
-    Map<String,Object> startWorkFlow(StartREQ startReq);
+    Map<String,Object> startWorkFlow(StartProcessBo startProcessBo);
 
     /**
      * 通过流程实例id查询流程审批记录
@@ -45,7 +45,7 @@ public interface IProcessInstanceService {
      * @param req
      * @return
      */
-    TableDataInfo<ProcessInstRunningVo> getProcessInstRunningByPage(ProcessInstRunningREQ req);
+    TableDataInfo<ProcessInstRunningVo> getProcessInstRunningByPage(ProcessInstRunningBo req);
 
     /**
      * 挂起或激活流程实例
@@ -73,7 +73,7 @@ public interface IProcessInstanceService {
      * @param req
      * @return
      */
-    TableDataInfo<ProcessInstFinishVo> getProcessInstFinishByPage(ProcessInstFinishREQ req);
+    TableDataInfo<ProcessInstFinishVo> getProcessInstFinishByPage(ProcessInstFinishBo req);
 
     /**
      * 删除已完成的实例，删除历史记录，删除业务与流程关联信息
