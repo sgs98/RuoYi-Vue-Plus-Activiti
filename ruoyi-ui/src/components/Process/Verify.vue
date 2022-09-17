@@ -227,7 +227,7 @@ export default {
   },
 
   watch: {
-    async taskVariables(newVal) {
+    async visible(newVal) {
       if (newVal) {
         try {
           this.loading = true;
@@ -277,7 +277,7 @@ export default {
               // 关闭窗口
               this.visible = false;
               // 回调事件
-              this.$emit("callSubmit")
+              this.$emit("submitCallback")
             }
             this.loading = false;
           } catch (e) {
@@ -351,7 +351,7 @@ export default {
         // 关闭窗口
         this.visible = false;
         // 回调事件
-        this.$emit("callSubmit")
+        this.$emit("submitCallback")
       }
       this.loading = false;
     },
@@ -419,7 +419,7 @@ export default {
             this.visible = false;
             this.transmitVisible = false;
             // 回调事件
-            this.$emit("callSubmit")
+            this.$emit("submitCallback")
           }
           this.loading = false;
         })
@@ -477,7 +477,7 @@ export default {
             this.visible = false;
             this.addMultiVisible = false;
             // 回调事件
-            this.$emit("callSubmit")
+            this.$emit("submitCallback")
         }
       })
     },
@@ -517,7 +517,7 @@ export default {
             this.visible = false;
             this.deleteMultiVisible = false;
             // 回调事件
-            this.$emit("callSubmit")
+            this.$emit("submitCallback")
         }
       })
     },
@@ -530,7 +530,7 @@ export default {
         // 关闭窗口
         this.visible = false;
         // 回调事件
-        this.$emit("callSubmit")
+        this.$emit("submitCallback")
     },
     //重置表单
     reset(){

@@ -12,8 +12,7 @@ import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.utils.JsonUtils;
 import com.ruoyi.workflow.common.constant.ActConstant;
 import com.ruoyi.workflow.activiti.factory.WorkflowService;
-import com.ruoyi.workflow.domain.bo.ModeBo;
-import com.ruoyi.workflow.domain.bo.ModelREQ;
+import com.ruoyi.workflow.domain.bo.ModelBo;
 import com.ruoyi.workflow.service.IModelService;
 import lombok.extern.slf4j.Slf4j;
 import org.activiti.bpmn.converter.BpmnXMLConverter;
@@ -60,7 +59,7 @@ public class ModelServiceImpl extends WorkflowService implements IModelService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<Void> saveModelXml(ModeBo data) {
+    public R<Void> saveModelXml(ModelBo data) {
         try {
             String xml = data.getXml();
             String svg = data.getSvg();
@@ -103,11 +102,9 @@ public class ModelServiceImpl extends WorkflowService implements IModelService {
             TranscoderInput input = new TranscoderInput(svgStream);
 
             PNGTranscoder transcoder = new PNGTranscoder();
-            // Setup output
             ByteArrayOutputStream outStream = new ByteArrayOutputStream();
             TranscoderOutput output = new TranscoderOutput(outStream);
 
-            // Do the transformation
             transcoder.transcode(input, output);
             final byte[] result = outStream.toByteArray();
             repositoryService.addModelEditorSourceExtra(model.getId(), result);
@@ -126,7 +123,7 @@ public class ModelServiceImpl extends WorkflowService implements IModelService {
      */
     @Override
     public R<Map<String,Object>> getEditorXml(String modelId) {
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>(16);
         Model model = repositoryService.getModel(modelId);
         if (model != null) {
             try {
@@ -143,25 +140,25 @@ public class ModelServiceImpl extends WorkflowService implements IModelService {
 
     /**
      * @Description: 查询模型列表
-     * @param: modelReq 请求参数
+     * @param: modelBo 请求参数
      * @return: com.ruoyi.common.core.page.TableDataInfo<org.activiti.engine.repository.Model>
      * @Author: gssong
      * @Date: 2021/10/3
      */
     @Override
-    public TableDataInfo<Model> getByPage(ModelREQ modelReq) {
+    public TableDataInfo<Model> getByPage(ModelBo modelBo) {
         ModelQuery query = repositoryService.createModelQuery();
-        if (StringUtils.isNotEmpty(modelReq.getName())) {
-            query.modelNameLike("%" + modelReq.getName() + "%");
+        if (StringUtils.isNotEmpty(modelBo.getName())) {
+            query.modelNameLike("%" + modelBo.getName() + "%");
         }
-        if (StringUtils.isNotEmpty(modelReq.getKey())) {
-            query.modelKey(modelReq.getKey());
+        if (StringUtils.isNotEmpty(modelBo.getKey())) {
+            query.modelKey(modelBo.getKey());
         }
         query.orderByLastUpdateTime().desc();
         //创建时间降序排列
         query.orderByCreateTime().desc();
         // 分页查询
-        List<Model> modelList = query.listPage(modelReq.getFirstResult(), modelReq.getPageSize());
+        List<Model> modelList = query.listPage(modelBo.getFirstResult(), modelBo.getPageSize());
         if (CollectionUtil.isNotEmpty(modelList)) {
             modelList.forEach(e -> {
                 boolean isNull = JSONUtil.isNull(JSONUtil.parseObj(e.getMetaInfo()).get(ModelDataJsonConstants.MODEL_DESCRIPTION));
@@ -186,7 +183,7 @@ public class ModelServiceImpl extends WorkflowService implements IModelService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<Model> add(ModeBo data){
+    public R<Model> add(ModelBo data){
         try {
             String xml = data.getXml();
             String svg = data.getSvg();
@@ -230,10 +227,8 @@ public class ModelServiceImpl extends WorkflowService implements IModelService {
             TranscoderInput input = new TranscoderInput(svgStream);
 
             PNGTranscoder transcoder = new PNGTranscoder();
-            // Setup output
             ByteArrayOutputStream outStream = new ByteArrayOutputStream();
             TranscoderOutput output = new TranscoderOutput(outStream);
-            // Do the transformation
             transcoder.transcode(input, output);
             final byte[] result = outStream.toByteArray();
             repositoryService.addModelEditorSourceExtra(model.getId(), result);
@@ -271,10 +266,14 @@ public class ModelServiceImpl extends WorkflowService implements IModelService {
 
             //3. 调用部署相关的api方法进行部署流程定义
             Deployment deployment = repositoryService.createDeployment()
-                .name(model.getName()) // 部署名称
-                .key(model.getKey()) // 部署标识key
-                .addBytes(processName, xmlBytes) // bpmn20.xml资源
-                .addBytes(pngName, pngBytes) // png资源
+                // 部署名称
+                .name(model.getName())
+                // 部署标识key
+                .key(model.getKey())
+                // bpmn20.xml资源
+                .addBytes(processName, xmlBytes)
+                // png资源
+                .addBytes(pngName, pngBytes)
                 .deploy();
 
             // 更新 部署id 到流程定义模型数据表中

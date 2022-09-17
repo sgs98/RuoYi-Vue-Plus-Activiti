@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Arrays;
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.ruoyi.common.core.domain.PageQuery;
-import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.*;
@@ -32,7 +31,6 @@ import com.ruoyi.common.core.page.TableDataInfo;
  * @date 2021-12-16
  */
 @Validated
-@Api(value = "业务规则控制器", tags = {"业务规则管理"})
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @RestController
 @RequestMapping("/workflow/businessRule")
@@ -43,7 +41,6 @@ public class ActBusinessRuleController extends BaseController {
     /**
      * 查询业务规则列表
      */
-    @ApiOperation("查询业务规则列表")
     @SaCheckPermission("workflow:businessRule:list")
     @GetMapping("/list")
     public TableDataInfo<ActBusinessRuleVo> list(@Validated(QueryGroup.class) ActBusinessRuleBo bo, PageQuery pageQuery) {
@@ -53,7 +50,6 @@ public class ActBusinessRuleController extends BaseController {
     /**
      * 导出业务规则列表
      */
-    @ApiOperation("导出业务规则列表")
     @SaCheckPermission("workflow:businessRule:export")
     @Log(title = "业务规则", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
@@ -65,10 +61,6 @@ public class ActBusinessRuleController extends BaseController {
     /**
      * 获取业务规则详细信息
      */
-    @ApiOperation("获取业务规则详细信息")
-    @ApiImplicitParams({
-        @ApiImplicitParam(name = "id",value = "主键",required = true,dataTypeClass = Long.class)
-    })
     @SaCheckPermission("workflow:businessRule:query")
     @GetMapping("/{id}")
     public R<ActBusinessRuleVo> getInfo(@NotNull(message = "主键不能为空") @PathVariable("id") Long id) {
@@ -78,7 +70,6 @@ public class ActBusinessRuleController extends BaseController {
     /**
      * 新增业务规则
      */
-    @ApiOperation("新增业务规则")
     @SaCheckPermission("workflow:businessRule:add")
     @Log(title = "业务规则", businessType = BusinessType.INSERT)
     @RepeatSubmit()
@@ -90,7 +81,6 @@ public class ActBusinessRuleController extends BaseController {
     /**
      * 修改业务规则
      */
-    @ApiOperation("修改业务规则")
     @SaCheckPermission("workflow:businessRule:edit")
     @Log(title = "业务规则", businessType = BusinessType.UPDATE)
     @RepeatSubmit()
@@ -102,10 +92,6 @@ public class ActBusinessRuleController extends BaseController {
     /**
      * 删除业务规则
      */
-    @ApiOperation("删除业务规则")
-    @ApiImplicitParams({
-        @ApiImplicitParam(name = "ids",value = "主键串",required = true,dataTypeClass = Long.class,allowMultiple = true)
-    })
     @SaCheckPermission("workflow:businessRule:remove")
     @Log(title = "业务规则" , businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")

@@ -44,6 +44,18 @@
       </el-form-item>
     </el-form>
 
+    <el-form label-width="68px">
+      <el-form-item label="流程Key" prop="processKey">
+        <el-input
+          v-model="processKey"
+          placeholder="请输入流程Key"
+          clearable
+          size="small"
+          style="width:200px"
+        />
+      </el-form-item>
+    </el-form>
+
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
         <el-button
@@ -227,13 +239,13 @@
       </el-tabs>
     </el-dialog>
     <!-- 提交 -->
-    <verify ref="verifyRef" @callSubmit="callSubmit" :taskId="taskId" :taskVariables="taskVariables" :sendMessage="sendMessage"></verify>
+    <verify ref="verifyRef" @submitCallback="submitCallback" :taskId="taskId" :taskVariables="taskVariables" :sendMessage="sendMessage"></verify>
   </div>
 </template>
 
 <script>
 import { listLeave, getLeave, delLeave, addLeave, updateLeave } from "@/api/demo/leave";
-import processAip from "@/api/workflow/processInst";
+import processApi from "@/api/workflow/processInst";
 import history from "@/components/Process/History";
 import verify from "@/components/Process/Verify";
 export default {
@@ -317,7 +329,8 @@ export default {
       taskId: undefined, //任务id
       flag: true,
       // 消息提醒
-      sendMessage: {}
+      sendMessage: {},
+      processKey: 'huiqian'
     };
   },
   created() {
@@ -388,7 +401,7 @@ export default {
         this.loading = false;
         this.form = response.data;
         this.$nextTick(() => {
-          this.processInstanceId=response.data.processInstanceId
+          this.processInstanceId=response.data.actBusinessStatus.processInstanceId
         })
         this.open = true;
         this.title = "修改请假业务";
@@ -408,7 +421,7 @@ export default {
         this.loading = false;
         this.form = response.data;
         this.$nextTick(() => {
-          this.processInstanceId=response.data.processInstanceId
+          this.processInstanceId=response.data.actBusinessStatus.processInstanceId
         })
         this.open = true;
         this.title = "查看请假业务";
@@ -423,7 +436,7 @@ export default {
             updateLeave(this.form).then(response => {
               this.$modal.msgSuccess("修改成功");
               if(flag === 'submit'){
-                this.submitFormAppply(response.data)
+                this.submitFormApply(response.data)
               }
             }).finally(() => {
               this.buttonLoading = false;
@@ -441,7 +454,7 @@ export default {
       });
     },
     // 提交成功回调
-    callSubmit(){
+    submitCallback(){
       this.open = false;
       this.getList();
     },
@@ -466,29 +479,25 @@ export default {
       }, `demo_${new Date().getTime()}.xlsx`)
     },
     //提交流程
-    submitFormAppply(entity){
-        let variables = {
-            entity: entity
-        }
-        const data = {
-            processKey: 'leave', // key
-            businessKey: entity.id, // 业务id
-            variables: variables,
-            classFullName: 'com.ruoyi.demo.domain.BsLeave'
-        }
-        // 启动流程
+    submitFormApply(entity){
         let assigneeList = []
         assigneeList.push(1)
         assigneeList.push(2)
-        processAip.startProcessApply(data).then(response => {
+        //流程变量
+        this.taskVariables = {
+            entity: entity,
+            userId: '1',
+            //assigneeList: assigneeList
+        }
+        const data = {
+            processKey: this.processKey, // key
+            businessKey: entity.id, // 业务id
+            variables: this.taskVariables,
+            classFullName: 'com.ruoyi.demo.domain.BsLeave'
+        }
+        // 启动流程
+        processApi.startProcessApply(data).then(response => {
             this.taskId = response.data.taskId;
-            // 查询下一节点的变量
-            this.taskVariables = {
-                entity: entity,  // 变量
-                //assignee: '1', // key
-                userId: '1',
-                //assigneeList: assigneeList
-            }
             this.$refs.verifyRef.visible = true
             this.$refs.verifyRef.reset()
         })
@@ -497,14 +506,14 @@ export default {
     cancelProcessApply(row){
          this.$modal.confirm('是否撤销申请').then(() => {
             this.loading = true;
-            return processAip.cancelProcessApply(row.processInstanceId);
+            return processApi.cancelProcessApply(row.actBusinessStatus.processInstanceId);
          }).then(() => {
             this.getList();
             this.$modal.msgSuccess("撤回成功");
          }).finally(() => {
             this.loading = false;
          });
-    },
+    }
   }
 };
 </script>

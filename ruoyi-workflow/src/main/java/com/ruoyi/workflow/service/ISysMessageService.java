@@ -27,9 +27,9 @@ public interface ISysMessageService {
 
     /**
      * 查询消息通知列表
-     *
      * @param bo 消息通知
-     * @return 消息通知集合
+     * @param pageQuery 分页
+     * @return
      */
     TableDataInfo<SysMessageVo> queryPageList(SysMessageBo bo, PageQuery pageQuery);
 

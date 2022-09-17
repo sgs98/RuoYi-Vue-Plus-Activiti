@@ -1,6 +1,5 @@
 package com.ruoyi.workflow.domain.vo;
 
-import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -12,12 +11,17 @@ import java.io.Serializable;
  * @created: 2022/07/23 14:54
  */
 @Data
-@ApiModel("任务视图")
 public class VariableVo implements Serializable {
 
     private static final long serialVersionUID=1L;
 
+    /**
+     * 变量key
+     */
     private String key;
 
+    /**
+     * 变量值
+     */
     private String value;
 }

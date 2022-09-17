@@ -2,7 +2,7 @@ package com.ruoyi.workflow.service;
 
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.page.TableDataInfo;
-import com.ruoyi.workflow.domain.bo.DefREQ;
+import com.ruoyi.workflow.domain.bo.DefinitionBo;
 import com.ruoyi.workflow.domain.vo.ActProcessNodeVo;
 import com.ruoyi.workflow.domain.vo.ProcessDefinitionVo;
 import org.springframework.web.multipart.MultipartFile;
@@ -11,13 +11,16 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @author gssong
+ */
 public interface IProcessDefinitionService {
     /**
      * 查询流程定义列表
      * @param defReq
      * @return
      */
-    TableDataInfo<ProcessDefinitionVo> getByPage(DefREQ defReq);
+    TableDataInfo<ProcessDefinitionVo> getByPage(DefinitionBo defReq);
 
     /**
      * 删除流程定义
@@ -45,6 +48,7 @@ public interface IProcessDefinitionService {
     /**
      * 查看xml文件
      * @param definitionId
+     * @return
      */
     String getXml(String definitionId);
 
@@ -53,7 +57,7 @@ public interface IProcessDefinitionService {
      * @param defReq
      * @return
      */
-    List<ProcessDefinitionVo> getHisByPage(DefREQ defReq);
+    List<ProcessDefinitionVo> getHisByPage(DefinitionBo defReq);
 
     /**
      * 激活或者挂起流程定义

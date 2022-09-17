@@ -34,7 +34,7 @@ import java.util.List;
 
 /**
  * @program: ruoyi-vue-plus
- * @description: 流程定义设置业务层
+ * @description: 流程节点人员设置业务层
  * @author: gssong
  * @created: 2021/11/21
  */
@@ -44,10 +44,8 @@ public class ActNodeAssigneeServiceImpl extends ServiceImpl<ActNodeAssigneeMappe
 
     private final RepositoryService repositoryService;
 
-    private final WorkFlowUtils workFlowUtils;
-
     /**
-     * @Description: 保存流程定义设置
+     * @Description: 保存流程节点人员设置
      * @param: actNodeAssignee
      * @return: com.ruoyi.workflow.domain.ActNodeAssignee
      * @Author: gssong
@@ -92,7 +90,7 @@ public class ActNodeAssigneeServiceImpl extends ServiceImpl<ActNodeAssigneeMappe
     }
 
     /**
-     * @Description: 按照流程定义id和流程节点id查询流程定义设置
+     * @Description: 按照流程定义id和流程节点id查询流程节点人员设置
      * @param: actNodeAssignee
      * @return: com.ruoyi.workflow.domain.ActNodeAssignee
      * @Author: gssong
@@ -107,7 +105,7 @@ public class ActNodeAssigneeServiceImpl extends ServiceImpl<ActNodeAssigneeMappe
     }
 
     /**
-     * @Description: 按照流程定义id和流程节点id查询流程定义设置
+     * @Description: 按照流程定义id和流程节点id查询流程节点人员设置
      * @param: actNodeAssignee
      * @return: com.ruoyi.workflow.domain.ActNodeAssignee
      * @Author: gssong
@@ -134,7 +132,7 @@ public class ActNodeAssigneeServiceImpl extends ServiceImpl<ActNodeAssigneeMappe
             nodeAssignee.setAddMultiInstance(false);
             nodeAssignee.setDeleteMultiInstance(false);
         }
-        MultiVo multiInstance = workFlowUtils.isMultiInstance(processDefinitionId, nodeId);
+        MultiVo multiInstance = WorkFlowUtils.isMultiInstance(processDefinitionId, nodeId);
         if (ObjectUtil.isNotEmpty(multiInstance)) {
             nodeAssignee.setMultiple(true);
             if (StringUtils.isBlank(multiInstance.getAssigneeList())) {
@@ -171,7 +169,7 @@ public class ActNodeAssigneeServiceImpl extends ServiceImpl<ActNodeAssigneeMappe
     }
 
     /**
-     * @Description: 删除流程定义设置
+     * @Description: 删除流程节点人员设置
      * @param: id
      * @return: java.lang.Boolean
      * @author: gssong
@@ -226,7 +224,7 @@ public class ActNodeAssigneeServiceImpl extends ServiceImpl<ActNodeAssigneeMappe
     }
 
     /**
-     * @Description: 复制给最新流程定义设置
+     * @Description: 复制给最新流程节点人员设置
      * @param: id
      * @param: key 流程定义key
      * @return: java.lang.Boolean

@@ -24,9 +24,6 @@ import com.ruoyi.workflow.domain.vo.SysMessageVo;
 import com.ruoyi.workflow.domain.bo.SysMessageBo;
 import com.ruoyi.workflow.service.ISysMessageService;
 import com.ruoyi.common.core.page.TableDataInfo;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiOperation;
 
 /**
  * 消息通知Controller
@@ -35,7 +32,6 @@ import io.swagger.annotations.ApiOperation;
  * @date 2022-06-17
  */
 @Validated
-@Api(value = "消息通知控制器", tags = {"消息通知管理"})
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/workflow/message")
@@ -46,7 +42,6 @@ public class SysMessageController extends BaseController {
     /**
      * 查询消息通知列表
      */
-    @ApiOperation("查询消息通知列表")
     @SaCheckPermission("workflow:message:list")
     @GetMapping("/list")
     public TableDataInfo<SysMessageVo> list(@Validated(QueryGroup.class) SysMessageBo bo, PageQuery pageQuery) {
@@ -56,7 +51,6 @@ public class SysMessageController extends BaseController {
     /**
      * 查询消息通知列表
      */
-    @ApiOperation("查询消息通知列表")
     @Anonymous
     @GetMapping("/waitingMessage")
     public TableDataInfo<SysMessageVo> message() {
@@ -66,7 +60,6 @@ public class SysMessageController extends BaseController {
     /**
      * 导出消息通知列表
      */
-    @ApiOperation("导出消息通知列表")
     @SaCheckPermission("workflow:message:export")
     @Log(title = "消息通知", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
@@ -78,19 +71,15 @@ public class SysMessageController extends BaseController {
     /**
      * 获取消息通知详细信息
      */
-    @ApiOperation("获取消息通知详细信息")
     @SaCheckPermission("workflow:message:query")
     @GetMapping("/{id}")
-    public R<SysMessageVo> getInfo(@ApiParam("主键")
-                                                  @NotNull(message = "主键不能为空")
-                                                  @PathVariable("id") Long id) {
+    public R<SysMessageVo> getInfo(@NotNull(message = "主键不能为空") @PathVariable("id") Long id) {
         return R.ok(iSysMessageService.queryById(id));
     }
 
     /**
      * 新增消息通知
      */
-    @ApiOperation("新增消息通知")
     @SaCheckPermission("workflow:message:add")
     @Log(title = "消息通知", businessType = BusinessType.INSERT)
     @RepeatSubmit()
@@ -102,7 +91,6 @@ public class SysMessageController extends BaseController {
     /**
      * 修改消息通知
      */
-    @ApiOperation("修改消息通知")
     @SaCheckPermission("workflow:message:edit")
     @Log(title = "消息通知", businessType = BusinessType.UPDATE)
     @RepeatSubmit()
@@ -114,13 +102,10 @@ public class SysMessageController extends BaseController {
     /**
      * 删除消息通知
      */
-    @ApiOperation("删除消息通知")
     @SaCheckPermission("workflow:message:remove")
     @Log(title = "消息通知", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
-    public R<Void> remove(@ApiParam("主键串")
-                                       @NotEmpty(message = "主键不能为空")
-                                       @PathVariable Long[] ids) {
+    public R<Void> remove(@NotEmpty(message = "主键不能为空") @PathVariable Long[] ids) {
         return toAjax(iSysMessageService.deleteWithValidByIds(Arrays.asList(ids), true) ? 1 : 0);
     }
     /**
@@ -130,7 +115,6 @@ public class SysMessageController extends BaseController {
      * @author: gssong
      * @Date: 2022/6/19 17:08
      */
-    @ApiOperation("阅读消息")
     @Log(title = "消息通知", businessType = BusinessType.INSERT)
     @GetMapping("/readMessage/{id}")
     public R<Void> readMessage(@PathVariable Long id) {
@@ -143,7 +127,6 @@ public class SysMessageController extends BaseController {
      * @author: gssong
      * @Date: 2022/6/19 17:08
      */
-    @ApiOperation("批量阅读消息")
     @Log(title = "消息通知", businessType = BusinessType.INSERT)
     @GetMapping("/batchReadMessage")
     public R<Void> batchReadMessage() {

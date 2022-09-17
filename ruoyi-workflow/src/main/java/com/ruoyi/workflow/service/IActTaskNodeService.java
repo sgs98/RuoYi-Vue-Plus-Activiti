@@ -31,6 +31,7 @@ public interface IActTaskNodeService extends IService<ActTaskNode> {
      * 删除驳回后的节点
      * @param processInstanceId
      * @param targetActivityId
+     * @return
      */
     Boolean deleteBackTaskNode(String processInstanceId, String targetActivityId);
 

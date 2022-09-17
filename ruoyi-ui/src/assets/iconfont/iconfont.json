@@ -1,0 +1,429 @@
+{
+  "id": "1782818",
+  "name": "form-designer",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "4766919",
+      "name": "table",
+      "font_class": "-table_layout",
+      "unicode": "e7de",
+      "unicode_decimal": 59358
+    },
+    {
+      "icon_id": "11179893",
+      "name": "拆分行",
+      "font_class": "-chaifenhang",
+      "unicode": "e60a",
+      "unicode_decimal": 58890
+    },
+    {
+      "icon_id": "11179898",
+      "name": "拆分列",
+      "font_class": "-chaifenlie",
+      "unicode": "e60b",
+      "unicode_decimal": 58891
+    },
+    {
+      "icon_id": "12819536",
+      "name": "拆分",
+      "font_class": "-chaifen",
+      "unicode": "e60d",
+      "unicode_decimal": 58893
+    },
+    {
+      "icon_id": "7040012",
+      "name": "行追加",
+      "font_class": "-zhuijiahang",
+      "unicode": "e6ce",
+      "unicode_decimal": 59086
+    },
+    {
+      "icon_id": "7040014",
+      "name": "列追加",
+      "font_class": "-zhuijialie",
+      "unicode": "e6cf",
+      "unicode_decimal": 59087
+    },
+    {
+      "icon_id": "10868107",
+      "name": "插入行",
+      "font_class": "-charuhang",
+      "unicode": "e8a2",
+      "unicode_decimal": 59554
+    },
+    {
+      "icon_id": "10868232",
+      "name": "插入列",
+      "font_class": "-charulie",
+      "unicode": "e8a4",
+      "unicode_decimal": 59556
+    },
+    {
+      "icon_id": "19324946",
+      "name": "上下合并",
+      "font_class": "-shangxiahebing",
+      "unicode": "e66a",
+      "unicode_decimal": 58986
+    },
+    {
+      "icon_id": "19324950",
+      "name": "左右合并",
+      "font_class": "-zuoyouhebing",
+      "unicode": "e66b",
+      "unicode_decimal": 58987
+    },
+    {
+      "icon_id": "19478268",
+      "name": "treeselect",
+      "font_class": "-treeselect",
+      "unicode": "e609",
+      "unicode_decimal": 58889
+    },
+    {
+      "icon_id": "6801615",
+      "name": "Barcode",
+      "font_class": "-barcode2",
+      "unicode": "e66e",
+      "unicode_decimal": 58990
+    },
+    {
+      "icon_id": "8924414",
+      "name": "bar-code",
+      "font_class": "-barcode",
+      "unicode": "e612",
+      "unicode_decimal": 58898
+    },
+    {
+      "icon_id": "16383562",
+      "name": "Dialog",
+      "font_class": "-dialog",
+      "unicode": "e692",
+      "unicode_decimal": 59026
+    },
+    {
+      "icon_id": "17412502",
+      "name": "Organization Chart",
+      "font_class": "-address",
+      "unicode": "e6b5",
+      "unicode_decimal": 59061
+    },
+    {
+      "icon_id": "16768231",
+      "name": "级联",
+      "font_class": "-cascader",
+      "unicode": "e697",
+      "unicode_decimal": 59031
+    },
+    {
+      "icon_id": "7213053",
+      "name": "Color picker",
+      "font_class": "-colorpicker",
+      "unicode": "e666",
+      "unicode_decimal": 58982
+    },
+    {
+      "icon_id": "14463272",
+      "name": "省市区",
+      "font_class": "-shengshiqu",
+      "unicode": "e75f",
+      "unicode_decimal": 59231
+    },
+    {
+      "icon_id": "3385558",
+      "name": "文本",
+      "font_class": "-text",
+      "unicode": "e6fb",
+      "unicode_decimal": 59131
+    },
+    {
+      "icon_id": "371393",
+      "name": "link",
+      "font_class": "-link",
+      "unicode": "e8fb",
+      "unicode_decimal": 59643
+    },
+    {
+      "icon_id": "762208",
+      "name": "警告",
+      "font_class": "-alert",
+      "unicode": "e61c",
+      "unicode_decimal": 58908
+    },
+    {
+      "icon_id": "15603541",
+      "name": "alert",
+      "font_class": "-alert1",
+      "unicode": "e68e",
+      "unicode_decimal": 59022
+    },
+    {
+      "icon_id": "8372144",
+      "name": "gitee",
+      "font_class": "-gitee",
+      "unicode": "e608",
+      "unicode_decimal": 58888
+    },
+    {
+      "icon_id": "18789786",
+      "name": "Logo GitHub",
+      "font_class": "-github",
+      "unicode": "e607",
+      "unicode_decimal": 58887
+    },
+    {
+      "icon_id": "14007542",
+      "name": "dialog",
+      "font_class": "dialog",
+      "unicode": "e82a",
+      "unicode_decimal": 59434
+    },
+    {
+      "icon_id": "16188455",
+      "name": "地图",
+      "font_class": "_map",
+      "unicode": "e68a",
+      "unicode_decimal": 59018
+    },
+    {
+      "icon_id": "18195942",
+      "name": "编辑器",
+      "font_class": "bianjiqi",
+      "unicode": "e7bd",
+      "unicode_decimal": 59325
+    },
+    {
+      "icon_id": "9434384",
+      "name": "divider",
+      "font_class": "divider",
+      "unicode": "e6b3",
+      "unicode_decimal": 59059
+    },
+    {
+      "icon_id": "7038155",
+      "name": "按钮",
+      "font_class": "anniu",
+      "unicode": "e642",
+      "unicode_decimal": 58946
+    },
+    {
+      "icon_id": "16859933",
+      "name": "按钮",
+      "font_class": "-button",
+      "unicode": "e648",
+      "unicode_decimal": 58952
+    },
+    {
+      "icon_id": "17692220",
+      "name": "按钮",
+      "font_class": "-button1",
+      "unicode": "e705",
+      "unicode_decimal": 59141
+    },
+    {
+      "icon_id": "5278848",
+      "name": "加号",
+      "font_class": "add",
+      "unicode": "e602",
+      "unicode_decimal": 58882
+    },
+    {
+      "icon_id": "13562655",
+      "name": "workbench_personal center_secondary password",
+      "font_class": "-password",
+      "unicode": "e600",
+      "unicode_decimal": 58880
+    },
+    {
+      "icon_id": "14007479",
+      "name": "lock",
+      "font_class": "-lock",
+      "unicode": "e822",
+      "unicode_decimal": 59426
+    },
+    {
+      "icon_id": "11889820",
+      "name": "HTML",
+      "font_class": "-html",
+      "unicode": "e622",
+      "unicode_decimal": 58914
+    },
+    {
+      "icon_id": "886505",
+      "name": "时间",
+      "font_class": "-time",
+      "unicode": "e61a",
+      "unicode_decimal": 58906
+    },
+    {
+      "icon_id": "1634604",
+      "name": "chart-area",
+      "font_class": "-chart1",
+      "unicode": "e60f",
+      "unicode_decimal": 58895
+    },
+    {
+      "icon_id": "1708415",
+      "name": "时间范围",
+      "font_class": "-timerange",
+      "unicode": "e601",
+      "unicode_decimal": 58881
+    },
+    {
+      "icon_id": "2883120",
+      "name": "多选项",
+      "font_class": "-checkbox",
+      "unicode": "e629",
+      "unicode_decimal": 58921
+    },
+    {
+      "icon_id": "3541137",
+      "name": "日期",
+      "font_class": "-date",
+      "unicode": "e7b2",
+      "unicode_decimal": 59314
+    },
+    {
+      "icon_id": "5112503",
+      "name": "编辑器",
+      "font_class": "-setting",
+      "unicode": "e7fe",
+      "unicode_decimal": 59390
+    },
+    {
+      "icon_id": "5672533",
+      "name": "滑块",
+      "font_class": "-slider",
+      "unicode": "e620",
+      "unicode_decimal": 58912
+    },
+    {
+      "icon_id": "5920510",
+      "name": "表格",
+      "font_class": "-table",
+      "unicode": "e802",
+      "unicode_decimal": 59394
+    },
+    {
+      "icon_id": "5981330",
+      "name": "stream list",
+      "font_class": "-list",
+      "unicode": "e7dc",
+      "unicode_decimal": 59356
+    },
+    {
+      "icon_id": "6664173",
+      "name": "input",
+      "font_class": "-input",
+      "unicode": "e619",
+      "unicode_decimal": 58905
+    },
+    {
+      "icon_id": "7036392",
+      "name": "开关 关",
+      "font_class": "-switch",
+      "unicode": "e62f",
+      "unicode_decimal": 58927
+    },
+    {
+      "icon_id": "8036637",
+      "name": "评分",
+      "font_class": "-rate",
+      "unicode": "e829",
+      "unicode_decimal": 59433
+    },
+    {
+      "icon_id": "8171626",
+      "name": "附 件",
+      "font_class": "-att",
+      "unicode": "e624",
+      "unicode_decimal": 58916
+    },
+    {
+      "icon_id": "9529563",
+      "name": "html",
+      "font_class": "-doc",
+      "unicode": "e621",
+      "unicode_decimal": 58913
+    },
+    {
+      "icon_id": "9702638",
+      "name": "编辑器",
+      "font_class": "-editor",
+      "unicode": "e614",
+      "unicode_decimal": 58900
+    },
+    {
+      "icon_id": "9750331",
+      "name": "textarea",
+      "font_class": "-textarea",
+      "unicode": "e603",
+      "unicode_decimal": 58883
+    },
+    {
+      "icon_id": "10995620",
+      "name": "定位",
+      "font_class": "-location",
+      "unicode": "e604",
+      "unicode_decimal": 58884
+    },
+    {
+      "icon_id": "11020734",
+      "name": "栅格",
+      "font_class": "-col",
+      "unicode": "e69d",
+      "unicode_decimal": 59037
+    },
+    {
+      "icon_id": "11809961",
+      "name": "分割线",
+      "font_class": "-divider",
+      "unicode": "e73e",
+      "unicode_decimal": 59198
+    },
+    {
+      "icon_id": "12263722",
+      "name": "日期范围",
+      "font_class": "-daterange",
+      "unicode": "e73b",
+      "unicode_decimal": 59195
+    },
+    {
+      "icon_id": "12278783",
+      "name": "下 拉",
+      "font_class": "-select",
+      "unicode": "e63c",
+      "unicode_decimal": 58940
+    },
+    {
+      "icon_id": "13176332",
+      "name": "单选",
+      "font_class": "-radio",
+      "unicode": "e605",
+      "unicode_decimal": 58885
+    },
+    {
+      "icon_id": "13225654",
+      "name": "chart-line",
+      "font_class": "-chart",
+      "unicode": "e606",
+      "unicode_decimal": 58886
+    },
+    {
+      "icon_id": "14006818",
+      "name": "计数器",
+      "font_class": "-inputNumber",
+      "unicode": "e6a7",
+      "unicode_decimal": 59047
+    },
+    {
+      "icon_id": "14066795",
+      "name": "tab",
+      "font_class": "-tab",
+      "unicode": "e6b4",
+      "unicode_decimal": 59060
+    }
+  ]
+}

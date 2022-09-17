@@ -1,7 +1,6 @@
 package com.ruoyi.workflow.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
-import io.swagger.annotations.ApiModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -16,7 +15,6 @@ import com.ruoyi.common.core.domain.BaseEntity;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("act_business_rule")
-@ApiModel("业务规则对象")
 public class ActBusinessRule extends BaseEntity {
 
     private static final long serialVersionUID=1L;

@@ -86,7 +86,7 @@ export default {
       }
 }
 </script>
-<style scoped>
+<style lang="scss" scoped>
  .msg{
   font-size: 10px;
  }
@@ -105,5 +105,8 @@ export default {
   padding: 0px 0 10px 0;
   font-size: 13px;
   font-weight: 900;
+ }
+ ::v-deep .el-badge__content.is-fixed {
+    margin-top: 7px;
  }
 </style>

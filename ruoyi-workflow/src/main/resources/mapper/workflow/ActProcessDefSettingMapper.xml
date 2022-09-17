@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.workflow.mapper.ActProcessDefSettingMapper">
+
+    <resultMap type="com.ruoyi.workflow.domain.ActProcessDefSetting" id="ActProcessDefSettingResult">
+        <result property="id" column="id"/>
+        <result property="processDefinitionId" column="process_definition_id"/>
+        <result property="processDefinitionKey" column="process_definition_key"/>
+        <result property="processDefinitionName" column="process_definition_name"/>
+        <result property="formId" column="form_id"/>
+        <result property="formKey" column="form_key"/>
+        <result property="formName" column="form_name"/>
+        <result property="formVariable" column="form_variable"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="updateBy" column="update_by"/>
+    </resultMap>
+
+
+</mapper>

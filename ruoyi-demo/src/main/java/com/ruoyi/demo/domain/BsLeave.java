@@ -2,7 +2,7 @@ package com.ruoyi.demo.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
-import lombok.experimental.Accessors;
+import lombok.EqualsAndHashCode;
 import java.util.Date;
 import java.math.BigDecimal;
 
@@ -15,7 +15,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * @date 2022-10-10
  */
 @Data
-@Accessors(chain = true)
+@EqualsAndHashCode(callSuper = true)
 @TableName("bs_leave")
 public class BsLeave extends BaseEntity {
 

@@ -22,9 +22,6 @@ import com.ruoyi.report.domain.vo.SysReportViewVo;
 import com.ruoyi.report.domain.bo.SysReportViewBo;
 import com.ruoyi.report.service.ISysReportViewService;
 import com.ruoyi.common.core.page.TableDataInfo;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiOperation;
 
 /**
  * 报表查看Controller
@@ -33,7 +30,6 @@ import io.swagger.annotations.ApiOperation;
  * @date 2022-08-07
  */
 @Validated
-@Api(value = "报表查看控制器", tags = {"报表查看管理"})
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/report/reportView")
@@ -44,7 +40,6 @@ public class SysReportViewController extends BaseController {
     /**
      * 查询报表查看列表
      */
-    @ApiOperation("查询报表查看列表")
     @SaCheckPermission("report:reportView:list")
     @GetMapping("/list")
     public TableDataInfo<SysReportViewVo> list(SysReportViewBo bo, PageQuery pageQuery) {
@@ -54,7 +49,6 @@ public class SysReportViewController extends BaseController {
     /**
      * 导出报表查看列表
      */
-    @ApiOperation("导出报表查看列表")
     @SaCheckPermission("report:reportView:export")
     @Log(title = "报表查看", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
@@ -66,19 +60,15 @@ public class SysReportViewController extends BaseController {
     /**
      * 获取报表查看详细信息
      */
-    @ApiOperation("获取报表查看详细信息")
     @SaCheckPermission("report:reportView:query")
     @GetMapping("/{id}")
-    public R<SysReportViewVo> getInfo(@ApiParam("主键")
-                                     @NotNull(message = "主键不能为空")
-                                     @PathVariable("id") Long id) {
+    public R<SysReportViewVo> getInfo(@NotNull(message = "主键不能为空") @PathVariable("id") Long id) {
         return R.ok(iSysReportViewService.queryById(id));
     }
 
     /**
      * 新增报表查看
      */
-    @ApiOperation("新增报表查看")
     @SaCheckPermission("report:reportView:add")
     @Log(title = "报表查看", businessType = BusinessType.INSERT)
     @RepeatSubmit()
@@ -90,7 +80,6 @@ public class SysReportViewController extends BaseController {
     /**
      * 修改报表查看
      */
-    @ApiOperation("修改报表查看")
     @SaCheckPermission("report:reportView:edit")
     @Log(title = "报表查看", businessType = BusinessType.UPDATE)
     @RepeatSubmit()
@@ -102,13 +91,10 @@ public class SysReportViewController extends BaseController {
     /**
      * 删除报表查看
      */
-    @ApiOperation("删除报表查看")
     @SaCheckPermission("report:reportView:remove")
     @Log(title = "报表查看", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
-    public R<Void> remove(@ApiParam("主键串")
-                                       @NotEmpty(message = "主键不能为空")
-                                       @PathVariable Long[] ids) {
+    public R<Void> remove(@NotEmpty(message = "主键不能为空") @PathVariable Long[] ids) {
         return toAjax(iSysReportViewService.deleteWithValidByIds(Arrays.asList(ids), true) ? 1 : 0);
     }
 }

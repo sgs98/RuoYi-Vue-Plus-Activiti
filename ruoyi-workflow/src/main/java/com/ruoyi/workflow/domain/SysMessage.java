@@ -2,14 +2,10 @@ package com.ruoyi.workflow.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import java.io.Serializable;
 import java.util.Date;
-import java.math.BigDecimal;
 
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ruoyi.common.core.domain.BaseEntity;
+import lombok.EqualsAndHashCode;
 
 /**
  * 消息通知对象 sys_message
@@ -18,6 +14,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * @date 2022-06-17
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 @TableName("sys_message")
 public class SysMessage extends BaseEntity {
 

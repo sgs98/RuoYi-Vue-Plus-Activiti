@@ -6,11 +6,10 @@ import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
-import com.ruoyi.workflow.domain.bo.DefREQ;
+import com.ruoyi.workflow.domain.bo.DefinitionBo;
 import com.ruoyi.workflow.domain.vo.ActProcessNodeVo;
 import com.ruoyi.workflow.domain.vo.ProcessDefinitionVo;
 import com.ruoyi.workflow.service.IProcessDefinitionService;
-import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -30,7 +29,6 @@ import java.util.Map;
  * @created: 2021/10/07 11:12
  */
 @Validated
-@Api(value = "流程定义控制器", tags = {"流程定义管理"})
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/workflow/definition")
@@ -45,23 +43,21 @@ public class ProcessDefinitionController extends BaseController {
      * @Author: gssong
      * @Date: 2021/10/7
      */
-    @ApiOperation("查询流程定义列表")
     @GetMapping("/list")
-    public TableDataInfo<ProcessDefinitionVo> getByPage(DefREQ defReq) {
+    public TableDataInfo<ProcessDefinitionVo> getByPage(DefinitionBo defReq) {
         return iProcessDefinitionService.getByPage(defReq);
     }
 
     /**
      * @Description: 查询历史流程定义列表
-     * @param: defReq
+     * @param: definitionBo
      * @return: com.ruoyi.common.core.domain.R<java.util.List < com.ruoyi.workflow.domain.vo.ProcessDefinitionVo>>
      * @Author: gssong
      * @Date: 2021/10/7
      */
-    @ApiOperation("查询历史流程定义列表")
     @GetMapping("/hisList")
-    public R<List<ProcessDefinitionVo>> getHisByPage(DefREQ defReq) {
-        List<ProcessDefinitionVo> definitionVoList = iProcessDefinitionService.getHisByPage(defReq);
+    public R<List<ProcessDefinitionVo>> getHisByPage(DefinitionBo definitionBo) {
+        List<ProcessDefinitionVo> definitionVoList = iProcessDefinitionService.getHisByPage(definitionBo);
         return R.ok(definitionVoList);
     }
 
@@ -74,11 +70,6 @@ public class ProcessDefinitionController extends BaseController {
      * @Author: gssong
      * @Date: 2021/10/7
      */
-    @ApiOperation("删除流程定义")
-    @ApiImplicitParams({
-        @ApiImplicitParam(name = "deploymentId", value = "流程部署id", required = true, dataTypeClass = String.class),
-        @ApiImplicitParam(name = "definitionId", value = "流程定义id", required = true, dataTypeClass = String.class)
-    })
     @Log(title = "流程定义管理", businessType = BusinessType.DELETE)
     @DeleteMapping("/{deploymentId}/{definitionId}")
     public R<Void> deleteDeployment(@NotBlank(message = "流程部署id不能为空") @PathVariable String deploymentId,
@@ -94,10 +85,6 @@ public class ProcessDefinitionController extends BaseController {
      * @author: gssong
      * @Date: 2022/4/12 13:32
      */
-    @ApiOperation("通过zip或xml部署流程定义")
-    @ApiImplicitParams({
-        @ApiImplicitParam(name = "file", value = "导入文件", dataType = "java.io.File", required = true)
-    })
     @Log(title = "流程定义管理", businessType = BusinessType.INSERT)
     @PostMapping("/deployByFile")
     public R<Void> deployByFile(@RequestParam("file") MultipartFile file) {
@@ -114,11 +101,6 @@ public class ProcessDefinitionController extends BaseController {
      * @Author: gssong
      * @Date: 2021/10/7
      */
-    @ApiOperation("导出流程定义文件（xml,png)")
-    @ApiImplicitParams({
-        @ApiImplicitParam(name = "type", value = "文件类型", required = true, dataTypeClass = String.class),
-        @ApiImplicitParam(name = "definitionId", value = "流程定义id", required = true, dataTypeClass = String.class)
-    })
     @Anonymous
     @GetMapping("/export/{type}/{definitionId}")
     public void exportFile(@NotBlank(message = "文件类型不能为空") @PathVariable String type,
@@ -134,10 +116,6 @@ public class ProcessDefinitionController extends BaseController {
      * @author: gssong
      * @Date: 2022/5/3 19:25
      */
-    @ApiOperation("查看xml文件")
-    @ApiImplicitParams({
-        @ApiImplicitParam(name = "definitionId", value = "流程定义id", required = true, dataTypeClass = String.class)
-    })
     @GetMapping("/getXml/{definitionId}")
     public R<Object> getXml(@NotBlank(message = "流程定义id不能为空") @PathVariable String definitionId) {
         String xmlStr = iProcessDefinitionService.getXml(definitionId);
@@ -152,7 +130,6 @@ public class ProcessDefinitionController extends BaseController {
      * @Author: gssong
      * @Date: 2021/10/10
      */
-    @ApiOperation("激活或者挂起流程定义")
     @Log(title = "流程定义管理", businessType = BusinessType.UPDATE)
     @PutMapping("/updateProcDefState")
     public R<Boolean> updateProcDefState(@RequestBody Map<String, Object> data) {
@@ -166,10 +143,6 @@ public class ProcessDefinitionController extends BaseController {
      * @author: gssong
      * @Date: 2021/11/19
      */
-    @ApiOperation("查询流程环节")
-    @ApiImplicitParams({
-        @ApiImplicitParam(name = "processDefinitionId", value = "流程定义id", required = true, dataTypeClass = String.class)
-    })
     @GetMapping("/setting/{processDefinitionId}")
     public R<List<ActProcessNodeVo>> setting(@NotBlank(message = "流程定义id不能为空") @PathVariable String processDefinitionId) {
         return iProcessDefinitionService.setting(processDefinitionId);

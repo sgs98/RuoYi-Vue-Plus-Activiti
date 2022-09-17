@@ -2,13 +2,17 @@ package com.ruoyi.workflow.service;
 
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.page.TableDataInfo;
-import com.ruoyi.workflow.domain.bo.ModeBo;
-import com.ruoyi.workflow.domain.bo.ModelREQ;
+import com.ruoyi.workflow.domain.bo.ModelBo;
 import org.activiti.engine.repository.Model;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
-
+/**
+ * @program: ruoyi-vue-plus
+ * @description: 模型接口
+ * @author: gssong
+ * @created: 2022-02-26
+ */
 public interface IModelService {
 
 
@@ -17,7 +21,7 @@ public interface IModelService {
      * @param data
      * @return
      */
-    R<Void> saveModelXml(ModeBo data);
+    R<Void> saveModelXml(ModelBo data);
 
     /**
      * 查询模型信息
@@ -28,17 +32,17 @@ public interface IModelService {
 
     /**
      * 分页查询模型
-     * @param modelReq
+     * @param modelBo
      * @return
      */
-    TableDataInfo<Model> getByPage(ModelREQ modelReq);
+    TableDataInfo<Model> getByPage(ModelBo modelBo);
 
     /**
      * 新增模型对象
      * @param data
      * @return
      */
-    R<Model> add(ModeBo data);
+    R<Model> add(ModelBo data);
 
     /**
      * 通过流程定义模型id部署流程定义

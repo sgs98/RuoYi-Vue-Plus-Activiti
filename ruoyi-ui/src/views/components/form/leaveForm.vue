@@ -48,20 +48,20 @@
           </el-date-picker>
         </el-form-item>
       </el-form>
-      <div slot="footer" v-show="parentTaskId===null" class="dialog-footer">
-        <el-button :loading="buttonLoading" size="mini" type="info" @click="submitForm">暂存</el-button>
-        <el-button :loading="buttonLoading" size="mini" type="primary" @click="submitForm">提交</el-button>
-        <el-button size="mini" @click="cancel">取 消</el-button>
+      <div v-show="parentTaskId===null" class="dialog-footer" style="text-align:center">
+        <el-button :loading="buttonLoading" size="small" type="info" @click="submitCallback">关闭</el-button>
+        <el-button :loading="buttonLoading" size="small" type="primary" @click="submitForm">提交</el-button>
       </div>
-      <verify ref="verifyRef" :taskId="taskId" @callSubmit="callSubmit"
+      <!-- 工作流开始 -->
+      <verify ref="verifyRef" :taskId="taskId" @submitCallback="submitCallback"
       :taskVariables="taskVariables" :sendMessage="sendMessage"></verify>
+      <!-- 工作流结束 -->
   </div>
 </template>
 
 <script>
 import { getLeave} from "@/api/demo/leave";
-import processAip from "@/api/workflow/processInst";
- import verify from "@/components/Process/Verify";
+import verify from "@/components/Process/Verify";
 export default {
   name: "Leave",
   dicts: ['bs_leave_type'],
@@ -72,7 +72,7 @@ export default {
   },
   components: {
       verify
-    },
+  },
   data() {
     return {
       // 按钮loading
@@ -132,11 +132,7 @@ export default {
       }
   },
   methods: {
-    // 取消按钮
-    cancel() {
-      this.$emit("closeForm")
-    },
-    callSubmit(){
+    submitCallback(){
       this.$emit("closeForm")
     },
     async getById() {
@@ -146,33 +142,17 @@ export default {
     /** 提交按钮 */
     submitForm() {
       getLeave(this.businessKey).then(response => {
-            this.taskVariables = {
-                 entity: response.data,
-                 userId :1
-            };
-            this.sendMessage = {
-              title:'请假申请',
-              messageContent:'单据【'+this.form.id+"】申请"
-            }
+          this.taskVariables = {
+                entity: response.data,
+                userId :1
+          };
+          this.sendMessage = {
+            title:'请假申请',
+            messageContent:'单据【'+this.form.id+"】申请"
+          }
       });
       this.$refs.verifyRef.visible = true
       this.$refs.verifyRef.reset()
-    },
-    //提交流程
-    submitFormAppply(){
-        getLeave(this.form.id).then(response => {
-            const data = {
-                processKey: 'testkey', // key
-                classFullName: 'com.ruoyi.demo.leave.domain.BsLeave', // 全类名
-                businessKey: response.data.id, // 业务id
-                variables: { entity: response.data }, // 变量
-            }
-            processAip.startProcessApply(data).then(response => {
-              if(response.code===200){
-                this.$modal.msgSuccess(response.msg);
-              }
-            })
-        });
     }
   }
 };

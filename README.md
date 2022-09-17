@@ -4,14 +4,18 @@
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://gitee.com/sgs98/RuoYi-Vue-Plus-Activiti/blob/master/LICENSE)
 [![使用IntelliJ IDEA开发维护](https://img.shields.io/badge/IntelliJ%20IDEA-提供支持-blue.svg)](https://www.jetbrains.com/?from=RuoYi-Vue-Plus)
 <br>
-[![RuoYi-Vue-Plus-Activiti](https://img.shields.io/badge/RuoYi_Vue_Plus_Activiti-4.2.0-success.svg)](https://gitee.com/sgs98/RuoYi-Vue-Plus-Activiti)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-2.6-blue.svg)]()
+[![RuoYi-Vue-Plus-Activiti](https://img.shields.io/badge/RuoYi_Vue_Plus_Activiti-4.3.0-success.svg)](https://gitee.com/sgs98/RuoYi-Vue-Plus-Activiti)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-2.7-blue.svg)]()
 [![JDK-8+](https://img.shields.io/badge/JDK-8-green.svg)]()
 [![JDK-11](https://img.shields.io/badge/JDK-11-green.svg)]()
 
 > RuoYi-Vue-Plus 是重写 RuoYi-Vue 针对 `分布式集群` 场景全方位升级(不兼容原框架)                                                                             
 > **master分支为activiti，flowable分支为flowable** 
 
+<<<<<<< HEAD
+=======
+[预览地址](https://ruoyi.lhailgl.cn/index)  
+>>>>>>> activiti-develop
 | 功能介绍     | 使用技术                | 文档地址                                                                                              | 特性注意事项                     |
 |----------|---------------------|---------------------------------------------------------------------------------------------------|----------------------------|
 | 当前框架     | RuoYi-Vue-Plus-Activiti      | [RuoYi-Vue-Plus-Activiti文档](https://gitee.com/sgs98/RuoYi-Vue-Plus-Activiti/wikis/pages)                       | 重写RuoYi-Vue全方位升级(不兼容原框架)   |
@@ -42,7 +46,7 @@
 | 监控框架     | SpringBoot-Admin    | [SpringBoot-Admin文档](https://codecentric.github.io/spring-boot-admin/current/)                    | 全方位服务监控                    |
 | 校验框架     | Validation          | [Validation文档](https://docs.jboss.org/hibernate/stable/validator/reference/en-US/html_single/)    | 增强接口安全性、严谨性 支持国际化          |
 | Excel框架  | Alibaba EasyExcel   | [EasyExcel文档](https://www.yuque.com/easyexcel/doc/easyexcel)                                      | 性能优异 扩展性强                  |
-| 文档框架     | Knife4j             | [Knife4j文档](https://doc.xiaominfo.com/knife4j/documentation/)                                     | 美化接口文档                     |
+| 文档框架     | SpringDoc、javadoc   | [接口文档](https://gitee.com/JavaLionLi/RuoYi-Vue-Plus/wikis/pages?sort_id=5805266&doc_id=1469725)    | 无注解零入侵基于java注释             |
 | 工具类框架    | Hutool、Lombok       | [Hutool文档](https://www.hutool.cn/docs/)                                                           | 减少代码冗余 增加安全性               |
 | 代码生成器    | 适配MP、Knife4j规范化代码   | [Hutool文档](https://www.hutool.cn/docs/)                                                           | 一键生成前后端代码                  |
 | 部署方式     | Docker              | [Docker文档](https://docs.docker.com/)                                                              | 容器编排 一键部署业务集群              |
@@ -72,9 +76,15 @@
 
 ### 其他
 
-* 同步升级 RuoYi-Vue-Plus
+* 同步升级 RuoYi-Vue-Plus [RuoYi-Vue-Plus](https://gitee.com/JavaLionLi/RuoYi-Vue-Plus)
 * GitHub 地址 [RuoYi-Vue-Plus-Activiti-github](https://github.com/sgs98/RuoYi-Vue-Plus-Activiti)
+* 参考bpmn.js 地址 [workflow-bpmn-modeler](https://github.com/GoldSubmarine/workflow-bpmn-modeler)
+* 动态表单地址 [formDesigner](https://gitee.com/wurong19870715/formDesigner)
 
+
+### 友情链接
+
+* 动态表单地址 [formDesigner](https://gitee.com/wurong19870715/formDesigner)
 
 ## 业务功能
 

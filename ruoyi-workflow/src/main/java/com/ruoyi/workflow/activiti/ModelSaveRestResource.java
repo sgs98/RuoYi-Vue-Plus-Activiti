@@ -22,6 +22,7 @@ import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.workflow.common.constant.ActConstant;
 import com.ruoyi.workflow.utils.WorkFlowUtils;
+import lombok.RequiredArgsConstructor;
 import org.activiti.editor.constants.ModelDataJsonConstants;
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.RepositoryService;
@@ -31,12 +32,10 @@ import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.PNGTranscoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -48,18 +47,14 @@ import java.util.Map;
  */
 @RestController
 @Anonymous
+@RequiredArgsConstructor
 public class ModelSaveRestResource extends BaseController implements ModelDataJsonConstants {
 
   protected static final Logger LOGGER = LoggerFactory.getLogger(ModelSaveRestResource.class);
 
-  @Autowired
-  private RepositoryService repositoryService;
+  private final RepositoryService repositoryService;
 
-  @Resource
-  private ObjectMapper objectMapper;
-
-  @Autowired
-  private WorkFlowUtils workFlowUtils;
+  private final ObjectMapper objectMapper;
 
     @RepeatSubmit
     @RequestMapping(value="/model/newModel", method = RequestMethod.POST)
@@ -139,7 +134,7 @@ public class ModelSaveRestResource extends BaseController implements ModelDataJs
 
 
       repositoryService.saveModel(model);
-      byte[] xmlBytes = workFlowUtils.bpmnJsonToXmlBytes(values.getFirst("json_xml").getBytes(StandardCharsets.UTF_8));
+      byte[] xmlBytes = WorkFlowUtils.bpmnJsonToXmlBytes(values.getFirst("json_xml").getBytes(StandardCharsets.UTF_8));
 
       repositoryService.addModelEditorSource(model.getId(), xmlBytes);
 

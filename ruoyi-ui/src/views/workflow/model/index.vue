@@ -112,7 +112,7 @@
 </template>
 
 <script>
-import {list,newModel,editModelInfo,del,deploy} from "@/api/workflow/model";
+import {list,newModel,del,deploy} from "@/api/workflow/model";
 import Design from './design'
 export default {
     name: 'Model', // 和对应路由表中配置的name值一致

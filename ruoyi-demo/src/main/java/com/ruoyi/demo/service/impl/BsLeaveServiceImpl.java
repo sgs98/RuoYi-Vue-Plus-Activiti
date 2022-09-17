@@ -16,13 +16,10 @@ import com.ruoyi.demo.service.IBsLeaveService;
 import com.ruoyi.workflow.service.IProcessInstanceService;
 import com.ruoyi.workflow.utils.WorkFlowUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -38,13 +35,10 @@ public class BsLeaveServiceImpl implements IBsLeaveService {
     private final BsLeaveMapper baseMapper;
 
     private final IProcessInstanceService iProcessInstanceService;
-
-    private final WorkFlowUtils workFlowUtils;
     @Override
     public BsLeaveVo queryById(String id){
         BsLeaveVo vo = baseMapper.selectVoById(id);
-        vo.setProcessInstanceId(iProcessInstanceService.getProcessInstanceId(id));
-        workFlowUtils.setStatusFileValue(vo, Arrays.asList(vo.getId()),vo.getId());
+        WorkFlowUtils.setStatusFileValue(vo,vo.getId());
         return vo;
     }
 
@@ -55,10 +49,7 @@ public class BsLeaveServiceImpl implements IBsLeaveService {
         List<BsLeaveVo> records = result.getRecords();
         if(CollectionUtil.isNotEmpty(records)){
             List<String> collectIds = records.stream().map(BsLeaveVo::getId).collect(Collectors.toList());
-            for (BsLeaveVo record : records) {
-                workFlowUtils.setStatusFileValue(record,collectIds,record.getId());
-                workFlowUtils.setProcessInstIdFileValue(record,collectIds,record.getId());
-            }
+            WorkFlowUtils.setStatusListFileValue(records,collectIds,"id");
         }
         result.setRecords(records);
         return TableDataInfo.build(result);
@@ -70,7 +61,6 @@ public class BsLeaveServiceImpl implements IBsLeaveService {
     }
 
     private LambdaQueryWrapper<BsLeave> buildQueryWrapper(BsLeaveBo bo) {
-        Map<String, Object> params = bo.getParams();
         LambdaQueryWrapper<BsLeave> lqw = Wrappers.lambdaQuery();
         lqw.like(StringUtils.isNotBlank(bo.getUsername()), BsLeave::getUsername, bo.getUsername());
         lqw.eq(bo.getDuration() != null, BsLeave::getDuration, bo.getDuration());
@@ -84,7 +74,6 @@ public class BsLeaveServiceImpl implements IBsLeaveService {
     @Override
     public BsLeave insertByBo(BsLeaveBo bo) {
         BsLeave add = BeanUtil.toBean(bo, BsLeave.class);
-        validEntityBeforeSave(add);
         baseMapper.insert(add);
         return add;
     }
@@ -92,32 +81,19 @@ public class BsLeaveServiceImpl implements IBsLeaveService {
     @Override
     public BsLeave updateByBo(BsLeaveBo bo) {
         BsLeave update = BeanUtil.toBean(bo, BsLeave.class);
-        validEntityBeforeSave(update);
         baseMapper.updateById(update);
         return update;
     }
 
-    /**
-     * 保存前的数据校验
-     *
-     * @param entity 实体类数据
-     */
-    private void validEntityBeforeSave(BsLeave entity){
-        //TODO 做一些数据校验,如唯一约束
-    }
-
     @Override
-    public Boolean deleteWithValidByIds(Collection<String> ids, Boolean isValid) {
-        if(isValid){
-            //TODO 做一些业务上的校验,判断是否需要校验
-        }
-        int i = baseMapper.deleteBatchIds(ids);
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean deleteWithValidByIds(Collection<String> ids) {
         for (String id : ids) {
             String processInstanceId = iProcessInstanceService.getProcessInstanceId(id);
             if(StringUtils.isNotBlank(processInstanceId)){
                 iProcessInstanceService.deleteRuntimeProcessAndHisInst(processInstanceId);
             }
         }
-        return i>0;
+        return baseMapper.deleteBatchIds(ids) > 0;
     }
 }

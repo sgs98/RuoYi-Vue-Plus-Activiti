@@ -1,7 +1,8 @@
 package com.ruoyi.workflow.domain.vo;
 
-import io.swagger.annotations.ApiModel;
 import lombok.Data;
+
+import java.io.Serializable;
 
 /**
  * @program: ruoyi-vue-plus
@@ -10,8 +11,10 @@ import lombok.Data;
  * @created: 2022/04/20 21:22
  */
 @Data
-@ApiModel("会签类型")
-public class MultiVo {
+public class MultiVo implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     /**
      * 会签类型（串行，并行）
      */
