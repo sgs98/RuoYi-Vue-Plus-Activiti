@@ -325,7 +325,7 @@ public class WorkFlowUtils {
                         }
                     }
                 }
-                if (ObjectUtil.isNotEmpty(paramClass) && CollectionUtil.isNotEmpty(businessRuleParams)) {
+                if (ObjectUtil.isEmpty(paramClass) && CollectionUtil.isNotEmpty(businessRuleParams)) {
                     String variableParams = businessRuleParams.stream().map(ActBusinessRuleParam::getParam).collect(Collectors.joining(","));
                     throw new ServiceException("【" + variableParams + "】流程变量不存在");
                 }

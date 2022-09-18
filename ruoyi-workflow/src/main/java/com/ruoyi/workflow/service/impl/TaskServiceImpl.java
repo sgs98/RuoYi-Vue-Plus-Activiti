@@ -571,64 +571,45 @@ public class TaskServiceImpl extends WorkflowService implements ITaskService {
         List<ActNodeAssignee> actNodeAssignees = iActNodeAssigneeService.getInfoByProcessDefinitionId(definitionId);
         if (CollectionUtil.isNotEmpty(actNodeAssignees)) {
             for (ProcessNode processNode : nodeList) {
-                //校验画流程模型该环节是否放置审批人员
-                if (StringUtils.isBlank(processNode.getAssignee())) {
-                    if (CollectionUtil.isEmpty(actNodeAssignees)) {
-                        throw new ServiceException("该流程定义未配置，请联系管理员！");
-                    }
-                    ActNodeAssignee nodeAssignee = actNodeAssignees.stream().filter(e -> e.getNodeId().equals(processNode.getNodeId())).findFirst().orElse(null);
+                if (CollectionUtil.isEmpty(actNodeAssignees)) {
+                    throw new ServiceException("该流程定义未配置，请联系管理员！");
+                }
+                ActNodeAssignee nodeAssignee = actNodeAssignees.stream().filter(e -> e.getNodeId().equals(processNode.getNodeId())).findFirst().orElse(null);
 
-                    //按角色 部门 人员id 等设置查询人员信息
-                    if (ObjectUtil.isNotNull(nodeAssignee) && StringUtils.isNotBlank(nodeAssignee.getAssigneeId())
-                        && nodeAssignee.getBusinessRuleId() == null && StringUtils.isNotBlank(nodeAssignee.getAssignee())) {
-                        processNode.setChooseWay(nodeAssignee.getChooseWay());
-                        processNode.setAssignee(nodeAssignee.getAssignee());
-                        processNode.setAssigneeId(nodeAssignee.getAssigneeId());
-                        processNode.setIsShow(nodeAssignee.getIsShow());
-                        if (nodeAssignee.getMultiple()) {
-                            processNode.setNodeId(nodeAssignee.getMultipleColumn());
-                        }
-                        processNode.setMultiple(nodeAssignee.getMultiple());
-                        processNode.setMultipleColumn(nodeAssignee.getMultipleColumn());
-                        //按照业务规则设置查询人员信息
-                    } else if (ObjectUtil.isNotNull(nodeAssignee) && nodeAssignee.getBusinessRuleId() != null) {
-                        ActBusinessRuleVo actBusinessRuleVo = iActBusinessRuleService.queryById(nodeAssignee.getBusinessRuleId());
-                        List<String> ruleAssignList = WorkFlowUtils.ruleAssignList(actBusinessRuleVo, processNode.getTaskId(), processNode.getNodeName());
-                        processNode.setChooseWay(nodeAssignee.getChooseWay());
-                        processNode.setAssignee("");
-                        processNode.setAssigneeId(String.join(",", ruleAssignList));
-                        processNode.setIsShow(nodeAssignee.getIsShow());
-                        processNode.setBusinessRuleId(nodeAssignee.getBusinessRuleId());
-                        if (nodeAssignee.getMultiple()) {
-                            processNode.setNodeId(nodeAssignee.getMultipleColumn());
-                        }
-                        processNode.setMultiple(nodeAssignee.getMultiple());
-                        processNode.setMultipleColumn(nodeAssignee.getMultipleColumn());
-                    } else {
-                        throw new ServiceException(processNode.getNodeName() + "未配置审批人，请联系管理员！");
+                //按角色 部门 人员id 等设置查询人员信息
+                if (ObjectUtil.isNotNull(nodeAssignee) && StringUtils.isNotBlank(nodeAssignee.getAssigneeId())
+                    && nodeAssignee.getBusinessRuleId() == null && StringUtils.isNotBlank(nodeAssignee.getAssignee())) {
+                    processNode.setChooseWay(nodeAssignee.getChooseWay());
+                    processNode.setAssignee(nodeAssignee.getAssignee());
+                    processNode.setAssigneeId(nodeAssignee.getAssigneeId());
+                    processNode.setIsShow(nodeAssignee.getIsShow());
+                    if (nodeAssignee.getMultiple()) {
+                        processNode.setNodeId(nodeAssignee.getMultipleColumn());
                     }
+                    processNode.setMultiple(nodeAssignee.getMultiple());
+                    processNode.setMultipleColumn(nodeAssignee.getMultipleColumn());
+                    //按照业务规则设置查询人员信息
+                } else if (ObjectUtil.isNotNull(nodeAssignee) && nodeAssignee.getBusinessRuleId() != null) {
+                    ActBusinessRuleVo actBusinessRuleVo = iActBusinessRuleService.queryById(nodeAssignee.getBusinessRuleId());
+                    List<String> ruleAssignList = WorkFlowUtils.ruleAssignList(actBusinessRuleVo, processNode.getTaskId(), processNode.getNodeName());
+                    processNode.setChooseWay(nodeAssignee.getChooseWay());
+                    processNode.setAssignee("");
+                    processNode.setAssigneeId(String.join(",", ruleAssignList));
+                    processNode.setIsShow(nodeAssignee.getIsShow());
+                    processNode.setBusinessRuleId(nodeAssignee.getBusinessRuleId());
+                    if (nodeAssignee.getMultiple()) {
+                        processNode.setNodeId(nodeAssignee.getMultipleColumn());
+                    }
+                    processNode.setMultiple(nodeAssignee.getMultiple());
+                    processNode.setMultipleColumn(nodeAssignee.getMultipleColumn());
                 } else {
-                    ActNodeAssignee nodeAssignee = actNodeAssignees.stream().filter(e -> e.getNodeId().equals(processNode.getNodeId())).findFirst().orElse(null);
-                    if (ObjectUtil.isNotEmpty(nodeAssignee)) {
-                        processNode.setChooseWay(nodeAssignee.getChooseWay());
-                        processNode.setAssignee(nodeAssignee.getAssignee());
-                        processNode.setAssigneeId(nodeAssignee.getAssigneeId());
-                        processNode.setIsShow(nodeAssignee.getIsShow());
-                        if (nodeAssignee.getMultiple()) {
-                            processNode.setNodeId(nodeAssignee.getMultipleColumn());
-                        }
-                        processNode.setMultiple(nodeAssignee.getMultiple());
-                        processNode.setMultipleColumn(nodeAssignee.getMultipleColumn());
-                    } else {
-                        processNode.setChooseWay(ActConstant.WORKFLOW_ASSIGNEE);
-                    }
+                    throw new ServiceException(processNode.getNodeName() + "未配置审批人，请联系管理员！");
                 }
             }
         }
         if (CollectionUtil.isNotEmpty(nodeList)) {
-            // 去除画流程时设置的选人节点  不需要弹窗 选人
             // 去除不需要弹窗选人的节点
-            nodeList.removeIf(node -> ActConstant.WORKFLOW_ASSIGNEE.equals(node.getChooseWay()) || !node.getIsShow());
+            nodeList.removeIf(node -> !node.getIsShow());
         }
         return nodeList;
     }
