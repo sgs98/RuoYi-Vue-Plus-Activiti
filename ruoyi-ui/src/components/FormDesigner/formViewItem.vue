@@ -58,10 +58,7 @@ export default {
   }
 }
 </script>
-<style>
-/* .el-form-item__label{
-  font-weight: 600;
-} */
+<style scoped>
 .el-form-item{
   margin-left:10px;
   margin-right:10px;
