@@ -24,7 +24,7 @@ import com.ruoyi.workflow.service.IActBusinessFormService;
 import com.ruoyi.common.core.page.TableDataInfo;
 
 /**
- * 业务表单Controller
+ * 业务表单
  *
  * @author gssong
  * @date 2022-08-19

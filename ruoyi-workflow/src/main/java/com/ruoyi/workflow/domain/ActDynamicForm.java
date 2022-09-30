@@ -48,5 +48,9 @@ public class ActDynamicForm extends BaseEntity {
      * 排序
      */
     private Integer orderNo;
+    /**
+     * 权限ID
+     */
+    private Long menuId;
 
 }

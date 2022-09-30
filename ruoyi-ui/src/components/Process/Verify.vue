@@ -1,11 +1,28 @@
 <template>
 <div v-if="visible">
   <!-- 提交申请开始 -->
-  <el-dialog  v-if="visible"  title="提交申请" :visible.sync="visible"  width="800px" :close-on-click-modal="false"
-  append-to-body destroy-on-close @close="closeDialog" >
+  <el-dialog  v-if="visible"  title="提交申请" :visible.sync="visible"  width="800px" :close-on-click-modal="false" append-to-body destroy-on-close @close="closeDialog" >
     <el-form v-loading="loading"  :rules="rules" ref="formData" :model="formData" status-icon >
       <el-form-item label="审批意见" prop="message" v-if="businessStatus.status==='waiting'" label-width="120px">
         <el-input  type="textarea" v-model="formData.message" maxlength="300" placeholder="请输入审批意见" :autosize="{ minRows: 4 }" show-word-limit ></el-input>
+      </el-form-item>
+      <el-form-item label="附件" prop="message" v-if="businessStatus.status==='waiting'" label-width="120px">
+        <el-upload ref="redmineUpload" :file-list="attachmentList"
+                    :multiple="true"
+                    :limit="5"
+                    action="'#'"
+                    :on-change="handleFileChange"
+                    :auto-upload="false"
+                    :show-file-list="true" >
+          <el-button slot="trigger" size="small" type="primary" icon="el-icon-upload">点击上传</el-button>
+        </el-upload>
+      </el-form-item>
+      <el-form-item label="提醒方式" prop="sendMessageType" label-width="120px">
+        <el-checkbox-group v-model="sendMessageType" size="small">
+            <el-checkbox v-for="dict in dict.type.sys_message" :disabled="parseInt(dict.value) === 1" :label="parseInt(dict.value)" :key="dict.value" border>
+                {{dict.label}}
+            </el-checkbox>
+        </el-checkbox-group>
       </el-form-item>
       <el-form-item v-if="nextNodes && nextNodes.length > 0" label="下一步审批人"  prop="assigneeMap" label-width="120px" >
         <div v-for="(item, index) in nextNodes" :key="index">
@@ -51,12 +68,10 @@
   <chooseWorkflowUser :dataObj="dataObj" :nodeId="nodeId" @confirmUser="clickUser" ref="wfUserRef"/>
   <sys-dept-user :propUserList="copyUserList" ref="userCopyRef" @confirmUser="confirmCopyUser"/>
   <!-- 选择人员组件结束 -->
+
   <!-- 委托申请开始 -->
   <el-dialog :close-on-click-modal="false" title="委托申请" :visible.sync="delegateVisible" width="700px"  append-to-body>
     <el-form  ref="delegateData" :model="delegateForm" status-icon >
-      <!-- <el-form-item label-width="80px" label="审批意见">
-        <el-input  type="textarea" v-model="delegateForm.message" maxlength="300"  placeholder="请输入审批意见" :autosize="{ minRows: 4 }" show-word-limit ></el-input>
-      </el-form-item> -->
       <el-form-item label-width="80px" label="委托人" prop="userName">
         <el-input  placeholder="请选择委托人" readonly v-model="delegateForm.delegateUserName" >
             <el-button  @click="delegatePeople() " slot="append" icon="el-icon-search" >选择</el-button>
@@ -70,6 +85,7 @@
     <sys-dept-user :propUserList="delegateUserList" :multiple = false ref="delegateUserRef" @confirmUser="confirmDelegateUser"/>
   </el-dialog>
   <!-- 委托申请结束 -->
+
   <!-- 转办申请开始 -->
   <el-dialog :close-on-click-modal="false" title="转发申请" :visible.sync="transmitVisible" width="700px"  append-to-body>
     <el-form  ref="transmitData" :model="transmitForm" :rules="transmitRules"  status-icon >
@@ -89,6 +105,7 @@
     <sys-dept-user :propUserList="transmitUserList" :multiple = false ref="transmitUserRef" @confirmUser="confirmTransmitUser"/>
   </el-dialog>
   <!-- 转办申请结束 -->
+
   <!-- 加签开始 -->
   <el-dialog  :close-on-click-modal="false" title="加签" :visible.sync="addMultiVisible" width="700px"  append-to-body>
     <el-form  :model="addMultiForm" status-icon >
@@ -105,6 +122,7 @@
     <multi-user :taskId="taskId" :propUserList="addMultiUserList" ref="addMultiUserRef" @confirmUser="confirmAddMultiUser"/>
   </el-dialog>
   <!-- 加签结束 -->
+
   <!-- 减签开始 -->
   <el-dialog :close-on-click-modal="false" title="减签" :visible.sync="deleteMultiVisible" width="700px"  append-to-body>
     <el-table border  @selection-change="handleSelectionMultiList" :data="multiList" style="width: 100%">
@@ -119,6 +137,7 @@
     </span>
   </el-dialog>
   <!-- 减签结束 -->
+
   <!-- 驳回开始 -->
   <back ref="backRef" :taskId = "taskId" @callBack="callBack()"
   :backNodeList = "backNodeList" :sendMessage="sendMessage"/>
@@ -137,6 +156,7 @@ export default {
     taskVariables: Object,
     sendMessage: Object
   },
+  dicts: ['sys_message'],
   components: {
     ChooseWorkflowUser,
     SysDeptUser,
@@ -145,6 +165,7 @@ export default {
   },
   data() {
     return {
+      processInstanceId: '',
       //弹出窗口，true弹出
       visible: false,
       loading: false,
@@ -223,9 +244,10 @@ export default {
       businessStatus: {},
       //消息提醒类型1.站内信,2.邮箱,3.短信
       sendMessageType:[1],
+      //附件
+      attachmentList: []
     };
   },
-
   watch: {
     async visible(newVal) {
       if (newVal) {
@@ -243,6 +265,8 @@ export default {
           this.backNodeList = data.backNodeList;
           this.setting = data.setting
           this.businessStatus = data.businessStatus
+          this.processInstanceId = data.processInstanceId
+          this.attachmentList = []
           this.loading = false;
         } catch (error) {
           this.loading = false;
@@ -257,6 +281,8 @@ export default {
         if (valid) {
           this.loading = true;
           try {
+            // 上传附件
+            this.submitUpload()
             this.formData.variables = this.taskVariables
             this.formData.taskId = this.taskId
             //消息提醒
@@ -285,6 +311,22 @@ export default {
           }
         }
       });
+    },
+    //附件上传
+    handleFileChange(file, fileList) {
+      this.attachmentList = fileList
+    },
+    //附件上传
+    async submitUpload() {
+      if(this.attachmentList.length>0){
+        const formData = new FormData()
+        console.log(this.attachmentList)
+
+        this.attachmentList.forEach((file) => {
+            formData.append('file', file.raw)
+        })
+        await api.attachmentUpload(formData,this.taskId,this.processInstanceId)
+      }
     },
     // 关闭
     closeDialog() {

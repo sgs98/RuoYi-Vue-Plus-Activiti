@@ -50,4 +50,14 @@ public class ActTaskNode extends BaseEntity{
      */
     private Boolean isBack;
 
+    /**
+     * 节点类型
+     */
+    private String taskType;
+
+    /**
+     * 审批人
+     */
+    private String assignee;
+
 }

@@ -1,12 +1,10 @@
 <template>
   <div>
     <div class="btn" v-show="parentTaskId===null">
-        <div class="btn-content">
-          <span>
-            <el-button type="info" @click="submitCallback">关闭</el-button>
-            <el-button type="primary" @click="submitForm">提交</el-button>
-          </span>
-        </div>
+        <span>
+        <el-button type="info" @click="submitCallback">关闭</el-button>
+        <el-button type="primary" @click="submitForm">提交</el-button>
+        </span>
     </div>
     <div>
       <el-row  :gutter="formConf.gutter" class="form-builder">
@@ -270,13 +268,5 @@ export default {
     position: relative;
     height: 50px;
     background: #fff;
-}
-.btn .btn-content{
-    z-index: 10;
-    height: 50px;
-    background: #fff;
-}
-.btn .btn-content span{
-    float: left;
 }
 </style>

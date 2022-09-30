@@ -61,11 +61,11 @@ public class ProcessDefinitionServiceImpl extends WorkflowService implements IPr
     private final IActProcessDefSetting iActProcessDefSetting;
 
     /**
-     * @Description: 查询流程定义列表
+     * @description: 查询流程定义列表
      * @param: definitionBo
      * @return: com.ruoyi.common.core.page.TableDataInfo<com.ruoyi.workflow.domain.vo.ProcessDefinitionVo>
      * @author: gssong
-     * @Date: 2021/10/7
+     * @date: 2021/10/7
      */
     @Override
     public TableDataInfo<ProcessDefinitionVo> getByPage(DefinitionBo definitionBo) {
@@ -105,11 +105,11 @@ public class ProcessDefinitionServiceImpl extends WorkflowService implements IPr
     }
 
     /**
-     * @Description: 查询历史流程定义列表
+     * @description: 查询历史流程定义列表
      * @param: definitionBo
      * @return: java.util.List<com.ruoyi.workflow.domain.vo.ProcessDefinitionVo>
      * @author: gssong
-     * @Date: 2021/10/7
+     * @date: 2021/10/7
      */
     @Override
     public List<ProcessDefinitionVo> getHisByPage(DefinitionBo definitionBo) {
@@ -135,40 +135,40 @@ public class ProcessDefinitionServiceImpl extends WorkflowService implements IPr
     }
 
     /**
-     * @Description: 删除流程定义
+     * @description: 删除流程定义
      * @param: deploymentId
      * @param: definitionId
-     * @return: com.ruoyi.common.core.domain.R<java.lang.Void>
+     * @return: java.lang.Boolean
      * @author: gssong
-     * @Date: 2021/10/7
+     * @date: 2021/10/7
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<Void> deleteDeployment(String deploymentId, String definitionId) {
+    public Boolean deleteDeployment(String deploymentId, String definitionId) {
         try {
             List<HistoricTaskInstance> taskInstanceList = historyService.createHistoricTaskInstanceQuery().processDefinitionId(definitionId).list();
             if (CollectionUtil.isNotEmpty(taskInstanceList)) {
-                return R.fail("当前流程定义已被使用不可删除！");
+                throw new ServiceException("当前流程定义已被使用不可删除！");
             }
             repositoryService.deleteDeployment(deploymentId);
             iActNodeAssigneeService.delByDefinitionId(definitionId);
-            return R.ok();
+            return true;
         } catch (Exception e) {
             e.printStackTrace();
-            return R.fail(e.getMessage());
+            throw new ServiceException(e.getMessage());
         }
     }
 
     /**
-     * @Description: 通过zip或xml部署流程定义
+     * @description: 通过zip或xml部署流程定义
      * @param: file
-     * @return: com.ruoyi.common.core.domain.R
+     * @return: java.lang.Boolean
      * @author: gssong
-     * @Date: 2022/4/12 13:32
+     * @date: 2022/4/12 13:32
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<Void> deployByFile(MultipartFile file) {
+    public Boolean deployByFile(MultipartFile file) {
         try {
             // 文件名+后缀名
             String filename = file.getOriginalFilename();
@@ -190,7 +190,7 @@ public class ProcessDefinitionServiceImpl extends WorkflowService implements IPr
             // 开始部署
             deployment.deploy();
 
-            return R.ok();
+            return true;
         } catch (IOException e) {
             e.printStackTrace();
             throw new ServiceException("部署失败" + e.getMessage());
@@ -198,13 +198,13 @@ public class ProcessDefinitionServiceImpl extends WorkflowService implements IPr
     }
 
     /**
-     * @Description: 导出流程定义文件（xml,png)
+     * @description: 导出流程定义文件（xml,png)
      * @param: type 类型 xml 或 png
      * @param: definitionId 流程定义id
      * @param: response
      * @return: void
-     * @Author: gssong
-     * @Date: 2021/10/7
+     * @author: gssong
+     * @date: 2021/10/7
      */
     @Override
     public void exportFile(String type, String definitionId, HttpServletResponse response) {
@@ -234,11 +234,11 @@ public class ProcessDefinitionServiceImpl extends WorkflowService implements IPr
     }
 
     /**
-     * @Description: 查看xml文件
+     * @description: 查看xml文件
      * @param: definitionId
      * @return: java.lang.String
      * @author: gssong
-     * @Date: 2022/5/3 19:34
+     * @date: 2022/5/3 19:34
      */
     @Override
     public String getXml(String definitionId) {
@@ -255,11 +255,11 @@ public class ProcessDefinitionServiceImpl extends WorkflowService implements IPr
     }
 
     /**
-     * @Description: 激活或者挂起流程定义
+     * @description: 激活或者挂起流程定义
      * @param: data 参数
      * @return: com.ruoyi.common.core.domain.R<java.lang.Boolean>
-     * @Author: gssong
-     * @Date: 2021/10/10
+     * @author: gssong
+     * @date: 2021/10/10
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -291,15 +291,15 @@ public class ProcessDefinitionServiceImpl extends WorkflowService implements IPr
     }
 
     /**
-     * @Description: 查询流程环节
+     * @description: 查询流程环节
      * @param: processDefinitionId
      * @return: com.ruoyi.common.core.domain.R<java.util.List < com.ruoyi.workflow.domain.vo.ActProcessNodeVo>>
      * @author: gssong
-     * @Date: 2021/11/19
+     * @date: 2021/11/19
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<List<ActProcessNodeVo>> setting(String processDefinitionId) {
+    public List<ActProcessNodeVo> setting(String processDefinitionId) {
         BpmnModel bpmnModel = repositoryService.getBpmnModel(processDefinitionId);
         List<Process> processes = bpmnModel.getProcesses();
         List<ActProcessNodeVo> processNodeVoList = new ArrayList<>();
@@ -357,6 +357,6 @@ public class ProcessDefinitionServiceImpl extends WorkflowService implements IPr
             iActNodeAssigneeService.delByDefinitionIdAndNodeId(actProcessNodeVo.getProcessDefinitionId(), actProcessNodeVo.getNodeId());
             iActNodeAssigneeService.add(actNodeAssignee);
         }
-        return R.ok(processNodeVoList);
+        return processNodeVoList;
     }
 }

@@ -10,6 +10,6 @@ import com.ruoyi.common.core.mapper.BaseMapperPlus;
  * @author gssong
  * @date 2022-08-11
  */
-public interface ActProcessFormMapper extends BaseMapperPlus<ActProcessFormMapper, ActDynamicForm, ActDynamicFormVo> {
+public interface ActDynamicFormMapper extends BaseMapperPlus<ActDynamicFormMapper, ActDynamicForm, ActDynamicFormVo> {
 
 }

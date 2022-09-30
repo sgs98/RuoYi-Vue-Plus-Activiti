@@ -11,11 +11,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
+
 /**
- * @program: ruoyi-vue-plus
- * @description: 工作流用户信息控制器
- * @author: gssong
- * @created: 2022-03-25
+ * 工作流用户信息
+ *
+ * @author gssong
+ * @date 2022-03-25
  */
 @Validated
 @RequiredArgsConstructor
@@ -26,11 +27,11 @@ public class UserController {
     private final IUserService iUserService;
 
     /**
-     * @Description: 分页查询工作流选人,角色，部门等
+     * 分页查询工作流选人,角色，部门等
      * @param: sysUserBo
      * @return: com.ruoyi.common.core.domain.R<java.util.Map<java.lang.String,java.lang.Object>>
-     * @Author: gssong
-     * @Date: 2021/12/10
+     * @author: gssong
+     * @date: 2021/12/10
      */
     @PostMapping("/getWorkflowUserListByPage")
     public R<Map<String,Object>> getWorkflowUserListByPage(@RequestBody SysUserBo sysUserBo){
@@ -39,11 +40,11 @@ public class UserController {
     }
 
     /**
-     * @Description: 分页查询工作流选择加签人员
+     * 分页查询工作流选择加签人员
      * @param: sysUserMultiBo
      * @return: com.ruoyi.common.core.domain.R<java.util.Map<java.lang.String,java.lang.Object>>
      * @author: gssong
-     * @Date: 2022/4/22 21:17
+     * @date: 2022/4/22 21:17
      */
     @PostMapping("/getWorkflowAddMultiListByPage")
     public R<Map<String,Object>> getWorkflowAddMultiListByPage(@RequestBody SysUserMultiBo sysUserMultiBo){

@@ -24,7 +24,7 @@ import com.ruoyi.workflow.service.IActDynamicFormService;
 import com.ruoyi.common.core.page.TableDataInfo;
 
 /**
- * 动态表单Controller
+ * 动态表单
  *
  * @author gssong
  * @date 2022-08-11
@@ -115,6 +115,6 @@ public class ActDynamicFormController extends BaseController {
     @Log(title = "动态表单", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public R<Void> remove(@NotEmpty(message = "主键不能为空") @PathVariable Long[] ids) {
-        return toAjax(iActDynamicFormService.deleteWithValidByIds(Arrays.asList(ids), true) ? 1 : 0);
+        return toAjax(iActDynamicFormService.deleteWithValidByIds(Arrays.asList(ids)) ? 1 : 0);
     }
 }

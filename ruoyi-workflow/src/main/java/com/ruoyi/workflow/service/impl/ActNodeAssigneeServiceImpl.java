@@ -45,11 +45,11 @@ public class ActNodeAssigneeServiceImpl extends ServiceImpl<ActNodeAssigneeMappe
     private final RepositoryService repositoryService;
 
     /**
-     * @Description: 保存流程节点人员设置
+     * @description: 保存流程节点人员设置
      * @param: actNodeAssignee
      * @return: com.ruoyi.workflow.domain.ActNodeAssignee
-     * @Author: gssong
-     * @Date: 2021/11/21
+     * @author: gssong
+     * @date: 2021/11/21
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -90,11 +90,11 @@ public class ActNodeAssigneeServiceImpl extends ServiceImpl<ActNodeAssigneeMappe
     }
 
     /**
-     * @Description: 按照流程定义id和流程节点id查询流程节点人员设置
+     * @description: 按照流程定义id和流程节点id查询流程节点人员设置
      * @param: actNodeAssignee
      * @return: com.ruoyi.workflow.domain.ActNodeAssignee
-     * @Author: gssong
-     * @Date: 2021/11/21
+     * @author: gssong
+     * @date: 2021/11/21
      */
     @Override
     public ActNodeAssignee getInfo(String processDefinitionId, String nodeId) {
@@ -105,11 +105,11 @@ public class ActNodeAssigneeServiceImpl extends ServiceImpl<ActNodeAssigneeMappe
     }
 
     /**
-     * @Description: 按照流程定义id和流程节点id查询流程节点人员设置
+     * @description: 按照流程定义id和流程节点id查询流程节点人员设置
      * @param: actNodeAssignee
      * @return: com.ruoyi.workflow.domain.ActNodeAssignee
-     * @Author: gssong
-     * @Date: 2022/6/10 23:22
+     * @author: gssong
+     * @date: 2022/6/10 23:22
      */
     @Override
     public ActNodeAssignee getInfoSetting(String processDefinitionId, String nodeId) {
@@ -155,11 +155,11 @@ public class ActNodeAssigneeServiceImpl extends ServiceImpl<ActNodeAssigneeMappe
     }
 
     /**
-     * @Description: 按照流程定义id查询
+     * @description: 按照流程定义id查询
      * @param: processDefinitionId
      * @return: java.util.List<com.ruoyi.workflow.domain.ActNodeAssignee>
      * @author: gssong
-     * @Date: 2021/11/21
+     * @date: 2021/11/21
      */
     @Override
     public List<ActNodeAssignee> getInfoByProcessDefinitionId(String processDefinitionId) {
@@ -169,11 +169,11 @@ public class ActNodeAssigneeServiceImpl extends ServiceImpl<ActNodeAssigneeMappe
     }
 
     /**
-     * @Description: 删除流程节点人员设置
+     * @description: 删除流程节点人员设置
      * @param: id
      * @return: java.lang.Boolean
      * @author: gssong
-     * @Date: 2021/11/21
+     * @date: 2021/11/21
      */
     @Override
     public Boolean del(String id) {
@@ -182,11 +182,11 @@ public class ActNodeAssigneeServiceImpl extends ServiceImpl<ActNodeAssigneeMappe
     }
 
     /**
-     * @Description: 按照流程定义id删除
+     * @description: 按照流程定义id删除
      * @param: definitionId
      * @return: java.lang.Boolean
      * @author: gssong
-     * @Date: 2021/11/21
+     * @date: 2021/11/21
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -202,12 +202,12 @@ public class ActNodeAssigneeServiceImpl extends ServiceImpl<ActNodeAssigneeMappe
     }
 
     /**
-     * @Description: 按照流程定义id与节点id删除
+     * @description: 按照流程定义id与节点id删除
      * @param: definitionId
      * @param: nodeId
      * @return: java.lang.Boolean
      * @author: gssong
-     * @Date: 2021/11/21
+     * @date: 2021/11/21
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -224,12 +224,12 @@ public class ActNodeAssigneeServiceImpl extends ServiceImpl<ActNodeAssigneeMappe
     }
 
     /**
-     * @Description: 复制给最新流程节点人员设置
+     * @description: 复制给最新流程节点人员设置
      * @param: id
      * @param: key 流程定义key
      * @return: java.lang.Boolean
      * @author: gssong
-     * @Date: 2021/11/21
+     * @date: 2021/11/21
      */
     @Override
     @Transactional(rollbackFor = Exception.class)

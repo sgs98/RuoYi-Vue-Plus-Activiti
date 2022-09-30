@@ -25,7 +25,7 @@ import com.ruoyi.workflow.service.IActBusinessRuleService;
 import com.ruoyi.common.core.page.TableDataInfo;
 
 /**
- * 业务规则Controller
+ * 业务规则
  *
  * @author gssong
  * @date 2021-12-16

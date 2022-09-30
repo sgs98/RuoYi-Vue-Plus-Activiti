@@ -27,17 +27,17 @@ public class ActBusinessStatusServiceImpl extends ServiceImpl<ActBusinessStatusM
 
 
     /**
-     * @Description: 修改业务状态
+     * @description: 修改业务状态
      * @param: businessKey 业务id
      * @param: statusEnum 业务状态
      * @param: procInstId 流程实例id
-     * @param: classFullName 全类名
+     * @param: tableName 表名
      * @return: boolean
      * @author: gssong
-     * @Date: 2021/10/21
+     * @date: 2021/10/21
      */
     @Override
-    public boolean updateState(String businessKey, BusinessStatusEnum statusEnum, String procInstId, String classFullName) {
+    public boolean updateState(String businessKey, BusinessStatusEnum statusEnum, String procInstId, String tableName) {
         try {
             // 1. 查询当前数据
             ActBusinessStatus bs = baseMapper.selectOne(new LambdaQueryWrapper<ActBusinessStatus>().eq(ActBusinessStatus::getBusinessKey, businessKey));
@@ -47,7 +47,7 @@ public class ActBusinessStatusServiceImpl extends ServiceImpl<ActBusinessStatusM
                 // 设置状态值
                 actBusinessStatus.setStatus(statusEnum.getStatus());
                 actBusinessStatus.setBusinessKey(businessKey);
-                actBusinessStatus.setClassFullName(classFullName);
+                actBusinessStatus.setTableName(tableName.toLowerCase());
                 // 只要判断不为null,就更新
                 if (procInstId != null) {
                     actBusinessStatus.setProcessInstanceId(procInstId);

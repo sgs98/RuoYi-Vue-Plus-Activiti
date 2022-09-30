@@ -47,5 +47,5 @@ public interface IActTaskNodeService extends IService<ActTaskNode> {
      * @param actTaskNode
      * @return
      */
-    void saveTaskNode(ActTaskNode actTaskNode);
+    Boolean saveTaskNode(ActTaskNode actTaskNode);
 }

@@ -21,14 +21,14 @@ public interface IModelService {
      * @param data
      * @return
      */
-    R<Void> saveModelXml(ModelBo data);
+    Boolean saveModelXml(ModelBo data);
 
     /**
      * 查询模型信息
      * @param modelId
      * @return
      */
-    R<Map<String,Object>> getEditorXml(String modelId);
+    Map<String,Object> getEditorXml(String modelId);
 
     /**
      * 分页查询模型
@@ -42,14 +42,14 @@ public interface IModelService {
      * @param data
      * @return
      */
-    R<Model> add(ModelBo data);
+    Boolean add(ModelBo data);
 
     /**
      * 通过流程定义模型id部署流程定义
      * @param id
      * @return
      */
-    R<Void> deploy(String id);
+    Boolean deploy(String id);
 
     /**
      * 导出流程定义模型zip压缩包

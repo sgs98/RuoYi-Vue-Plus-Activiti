@@ -18,6 +18,7 @@ import com.ruoyi.system.mapper.SysUserMapper;
 import com.ruoyi.system.mapper.SysUserRoleMapper;
 import com.ruoyi.workflow.activiti.cmd.DeleteExecutionCmd;
 import com.ruoyi.workflow.activiti.cmd.DeleteTaskCmd;
+import com.ruoyi.workflow.activiti.cmd.ExpressCheckCmd;
 import com.ruoyi.workflow.activiti.cmd.ExpressCmd;
 import com.ruoyi.workflow.common.constant.ActConstant;
 import com.ruoyi.workflow.common.enums.BusinessStatusEnum;
@@ -80,11 +81,11 @@ public class WorkFlowUtils {
     private static final IActTaskNodeService iActTaskNodeService = SpringUtils.getBean(IActTaskNodeService.class);
 
     /**
-     * @Description: bpmnModel转为xml
+     * @description: bpmnModel转为xml
      * @param: jsonBytes
      * @return: byte[]
-     * @Author: gssong
-     * @Date: 2021/11/5
+     * @author: gssong
+     * @date: 2021/11/5
      */
     public static byte[] bpmnJsonToXmlBytes(byte[] jsonBytes) throws IOException {
         if (jsonBytes == null) {
@@ -103,7 +104,7 @@ public class WorkFlowUtils {
     }
 
     /**
-     * @Description: 获取下一审批节点信息
+     * @description: 获取下一审批节点信息
      * @param: flowElements 全部节点
      * @param: flowElement 当前节点信息
      * @param: nextNodes 下一节点信息
@@ -112,7 +113,7 @@ public class WorkFlowUtils {
      * @param: gateway 网关
      * @return: void
      * @author: gssong
-     * @Date: 2022/4/11 13:37
+     * @date: 2022/4/11 13:37
      */
     public static void getNextNodeList(Collection<FlowElement> flowElements, FlowElement flowElement, ExecutionEntityImpl executionEntity, List<ProcessNode> nextNodes, List<ProcessNode> tempNodes, String taskId, String gateway) {
         // 获取当前节点的连线信息
@@ -155,7 +156,7 @@ public class WorkFlowUtils {
     }
 
     /**
-     * @Description: 构建下一审批节点
+     * @description: 构建下一审批节点
      * @param: executionEntity
      * @param: nextNodes 下一节点信息
      * @param: tempNodes 保存没有表达式的节点信息(用于排他网关)
@@ -167,10 +168,9 @@ public class WorkFlowUtils {
      * @param: outFlowElement 目标节点
      * @return: void
      * @author: gssong
-     * @Date: 2022/4/11 13:35
+     * @date: 2022/4/11 13:35
      */
     private static void nextNodeBuild(ExecutionEntityImpl executionEntity, List<ProcessNode> nextNodes, List<ProcessNode> tempNodes, String taskId, String gateway, SequenceFlow sequenceFlow, ProcessNode processNode, ProcessNode tempNode, FlowElement outFlowElement) {
-        // 用户任务，则获取响应给前端设置办理人或者候选人
         // 判断是否为排它网关
         if (ActConstant.EXCLUSIVE_GATEWAY.equals(gateway)) {
             String conditionExpression = sequenceFlow.getConditionExpression();
@@ -198,14 +198,14 @@ public class WorkFlowUtils {
     }
 
     /**
-     * @Description: 临时节点信息(排他网关)
+     * @description: 临时节点信息(排他网关)
      * @param: tempNodes 临时节点集合
      * @param: taskId 任务id
      * @param: tempNode 节点对象
      * @param: outFlowElement 节点信息
      * @return: void
      * @author: gssong
-     * @Date: 2022/7/16 19:17
+     * @date: 2022/7/16 19:17
      */
     private static void tempNodeBuildList(List<ProcessNode> tempNodes, String taskId, ProcessNode tempNode, FlowElement outFlowElement) {
         tempNode.setNodeId(outFlowElement.getId());
@@ -220,7 +220,7 @@ public class WorkFlowUtils {
     }
 
     /**
-     * @Description: 保存节点信息
+     * @description: 保存节点信息
      * @param: processNode 节点对象
      * @param: outFlowElement 节点信息
      * @param: exclusiveGateway 网关
@@ -229,7 +229,7 @@ public class WorkFlowUtils {
      * @param: nextNodes 节点集合
      * @return: void
      * @author: gssong
-     * @Date: 2022/7/16 19:17
+     * @date: 2022/7/16 19:17
      */
     private static void processNodeBuildList(ProcessNode processNode, FlowElement outFlowElement, String exclusiveGateway, String taskId, Boolean condition, List<ProcessNode> nextNodes) {
         processNode.setNodeId(outFlowElement.getId());
@@ -244,12 +244,12 @@ public class WorkFlowUtils {
     }
 
     /**
-     * @Description: 判断是否为主流程结束节点
+     * @description: 判断是否为主流程结束节点
      * @param: flowElements全部节点
      * @param: endElement 结束节点
      * @return: org.flowable.bpmn.model.FlowElement
      * @author: gssong
-     * @Date: 2022/7/11 20:39
+     * @date: 2022/7/11 20:39
      */
     public static FlowElement getSubProcess(Collection<FlowElement> flowElements, FlowElement endElement) {
         for (FlowElement mainElement : flowElements) {
@@ -265,14 +265,14 @@ public class WorkFlowUtils {
     }
 
     /**
-     * @Description: 查询业务规则中的人员id
+     * @description: 查询业务规则中的人员id
      * @param: businessRule 业务规则对象
      * @param: taskId 任务id
      * @param: taskName 任务名称
      * @return: 执行业务规则查询人员
      * @return: java.util.List<java.lang.String>
      * @author: gssong
-     * @Date: 2022/4/11 13:35
+     * @date: 2022/4/11 13:35
      */
     public static List<String> ruleAssignList(ActBusinessRuleVo businessRule, String taskId, String taskName) {
         try {
@@ -347,11 +347,11 @@ public class WorkFlowUtils {
     }
 
     /**
-     * @Description: 设置业务流程参数
+     * @description: 设置业务流程参数
      * @param: obj 对象
      * @param: id 主键id
-     * @Author: gssong
-     * @Date: 2022/1/16
+     * @author: gssong
+     * @date: 2022/1/16
      */
     public static void setStatusFileValue(Object obj, String id) {
         Class<?> claszz = obj.getClass();
@@ -379,13 +379,13 @@ public class WorkFlowUtils {
     }
 
     /**
-     * @Description: 设置业务流程参数
+     * @description: 设置业务流程参数
      * @param: obj 对象
      * @param: idList 主键集合
      * @param: fieldName 主键属性名称
      * @return: void
      * @author: gssong
-     * @Date: 2022/9/6
+     * @date: 2022/9/6
      */
     public static void setStatusListFileValue(Object obj, List<String> idList, String fieldName) {
         List<ActBusinessStatus> actBusinessStatusList = iActBusinessStatusService.getListInfoByBusinessKey(idList);
@@ -431,12 +431,12 @@ public class WorkFlowUtils {
     }
 
     /**
-     * @Description: 设置流程实例id
+     * @description: 设置流程实例id
      * @param: obj 对象
      * @param: id 主键id
      * @return: void
-     * @Author: gssong
-     * @Date: 2022/1/16
+     * @author: gssong
+     * @date: 2022/1/16
      */
     public static void setProcessInstIdFileValue(Object obj, String id) {
         Class<?> claszz = obj.getClass();
@@ -462,13 +462,13 @@ public class WorkFlowUtils {
     }
 
     /**
-     * @Description: 设置流程实例id
+     * @description: 设置流程实例id
      * @param: obj 对象
      * @param: idList 主键集合
      * @param: fieldName 主键属性名称
      * @return: void
      * @author: gssong
-     * @Date: 2022/9/6
+     * @date: 2022/9/6
      */
     public static void setProcessInstIdListFileValue(Object obj, List<String> idList, String fieldName) {
         List<ActBusinessStatus> actBusinessStatusList = iActBusinessStatusService.getListInfoByBusinessKey(idList);
@@ -508,13 +508,13 @@ public class WorkFlowUtils {
     }
 
     /**
-     * @Description: 查询审批人
+     * @description: 查询审批人
      * @param: params
      * @param: chooseWay
      * @param: nodeName
      * @return: java.util.List<java.lang.Long>
      * @author: gssong
-     * @Date: 2022/4/11 13:36
+     * @date: 2022/4/11 13:36
      */
     public static List<Long> getAssigneeIdList(String params, String chooseWay, String nodeName) {
         List<Long> paramList = new ArrayList<>();
@@ -549,11 +549,11 @@ public class WorkFlowUtils {
     }
 
     /**
-     * @Description: 删除正在执行的任务
+     * @description: 删除正在执行的任务
      * @param: task
      * @return: void
      * @author: gssong
-     * @Date: 2022/4/11 13:36
+     * @date: 2022/4/11 13:36
      */
     public static void deleteRuntimeTask(Task task) {
         DeleteTaskCmd deleteTaskCmd = new DeleteTaskCmd(task.getId());
@@ -566,12 +566,12 @@ public class WorkFlowUtils {
     }
 
     /**
-     * @Description: 判断当前节点是否为会签节点
+     * @description: 判断当前节点是否为会签节点
      * @param: processDefinitionId 流程定义id
      * @param: taskDefinitionKey 当前节点id
      * @return: com.ruoyi.workflow.domain.vo.MultiVo
      * @author: gssong
-     * @Date: 2022/4/16 13:31
+     * @date: 2022/4/16 13:31
      */
     public static MultiVo isMultiInstance(String processDefinitionId, String taskDefinitionKey) {
         BpmnModel bpmnModel = processEngine.getRepositoryService().getBpmnModel(processDefinitionId);
@@ -604,12 +604,12 @@ public class WorkFlowUtils {
     }
 
     /**
-     * @Description: 创建子任务
+     * @description: 创建子任务
      * @param: parentTask
      * @param: assignees
      * @return: java.util.List<org.activiti.engine.task.Task>
      * @author: gssong
-     * @Date: 2022/5/6 19:18
+     * @date: 2022/5/6 19:18
      */
     public static List<Task> createSubTask(List<Task> parentTaskList, String assignees) {
         List<Task> list = new ArrayList<>();
@@ -647,12 +647,12 @@ public class WorkFlowUtils {
     }
 
     /**
-     * @Description: 创建流程任务
+     * @description: 创建流程任务
      * @param: parentTask
      * @param: createTime
      * @return: org.flowable.task.service.impl.persistence.entity.TaskEntity
      * @author: gssong
-     * @Date: 2022/3/13
+     * @date: 2022/3/13
      */
     public static TaskEntity createNewTask(Task currentTask, Date createTime) {
         TaskEntity task = null;
@@ -684,12 +684,12 @@ public class WorkFlowUtils {
     }
 
     /**
-     * @Description: 发送站内信
+     * @description: 发送站内信
      * @param: sendMessage
      * @param: processInstanceId
      * @return: void
      * @author: gssong
-     * @Date: 2022/6/18 13:26
+     * @date: 2022/6/18 13:26
      */
     public static void sendMessage(SendMessage sendMessage, String processInstanceId) {
         List<SysMessage> messageList = new ArrayList<>();
@@ -722,16 +722,17 @@ public class WorkFlowUtils {
         }
         if (CollectionUtil.isNotEmpty(messageList)) {
             iSysMessageService.sendBatchMessage(messageList);
+            //TODO 邮件 短信 自行编写
         }
     }
 
     /**
-     * @Description: 执行bean中方法
+     * @description: 执行bean中方法
      * @param: serviceName bean名称
      * @param: methodName 方法名称
      * @param: params 参数
      * @author: gssong
-     * @Date: 2022/6/26 15:37
+     * @date: 2022/6/26 15:37
      */
     public static void springInvokeMethod(String serviceName, String methodName, Object... params) {
         Object service = SpringUtils.getBean(serviceName);
@@ -751,24 +752,24 @@ public class WorkFlowUtils {
     }
 
     /**
-     * @Description: 获取候选人
+     * @description: 获取候选人
      * @param: taskId
      * @return: java.util.List<org.flowable.identitylink.api.IdentityLink>
      * @author: gssong
-     * @Date: 2022/7/9 17:55
+     * @date: 2022/7/9 17:55
      */
     public static List<IdentityLink> getCandidateUser(String taskId) {
         return processEngine.getTaskService().getIdentityLinksForTask(taskId);
     }
 
     /**
-     * @Description: 自动办理任务
+     * @description: 自动办理任务
      * @param: processInstanceId 流程实例id
      * @param: businessKey 业务id
      * @param: actNodeAssignees 流程定义设置
      * @return: java.lang.Boolean
      * @author: gssong
-     * @Date: 2022/7/12 21:27
+     * @date: 2022/7/12 21:27
      */
     public static Boolean autoComplete(String processInstanceId, String businessKey, List<ActNodeAssignee> actNodeAssignees, TaskCompleteBo req) {
 
@@ -811,13 +812,13 @@ public class WorkFlowUtils {
     }
 
     /**
-     * @Description: 设置任务执行人员
+     * @description: 设置任务执行人员
      * @param: task 任务信息
      * @param: actNodeAssignee 人员设置
      * @param: multiple 是否为会签节点
      * @return: void
      * @author: gssong
-     * @Date: 2022/7/8
+     * @date: 2022/7/8
      */
     public static void settingAssignee(Task task, ActNodeAssignee actNodeAssignee, Boolean multiple) {
         //按业务规则选人
@@ -848,12 +849,12 @@ public class WorkFlowUtils {
     }
 
     /**
-     * @Description: 设置任务人员
+     * @description: 设置任务人员
      * @param: task 任务
      * @param: assignees 办理人
      * @return: void
      * @author: gssong
-     * @Date: 2021/10/21
+     * @date: 2021/10/21
      */
     public static void setAssignee(Task task, List<Long> assignees) {
         if (assignees.size() == 1) {
@@ -866,14 +867,13 @@ public class WorkFlowUtils {
         }
     }
 
-
     /**
-     * @Description: 记录审批节点
+     * @description: 记录审批节点
      * @param: task
      * @param: actNodeAssignees
      * @return: void
      * @author: gssong
-     * @Date: 2022/7/29 20:57
+     * @date: 2022/7/29 20:57
      */
     public static void recordExecuteNode(Task task, List<ActNodeAssignee> actNodeAssignees) {
         List<ActTaskNode> actTaskNodeList = iActTaskNodeService.getListByInstanceId(task.getProcessInstanceId());
@@ -881,6 +881,13 @@ public class WorkFlowUtils {
         actTaskNode.setNodeId(task.getTaskDefinitionKey());
         actTaskNode.setNodeName(task.getName());
         actTaskNode.setInstanceId(task.getProcessInstanceId());
+        actTaskNode.setAssignee(task.getAssignee());
+        MultiVo multiInstance = isMultiInstance(task.getProcessDefinitionId(), task.getTaskDefinitionKey());
+        if (ObjectUtil.isNotEmpty(multiInstance)) {
+            actTaskNode.setTaskType(MULTI_INSTANCE);
+        } else {
+            actTaskNode.setTaskType(USER_TASK);
+        }
         if (CollectionUtil.isEmpty(actTaskNodeList)) {
             actTaskNode.setOrderNo(0);
             actTaskNode.setIsBack(true);
@@ -895,5 +902,53 @@ public class WorkFlowUtils {
             }
             iActTaskNodeService.saveTaskNode(actTaskNode);
         }
+    }
+
+    /**
+     * @description: 获取当前驳回节点的网关（并行网关，包容网关），获取网关节点走向
+     * @param: task 任务
+     * @param: targetActivityId 驳回的节点id
+     * @return: java.util.List<java.lang.String>
+     * @author: gssong
+     * @date: 2022/4/10
+     */
+    public static List<String> getGatewayNode(Task task, String targetActivityId) {
+        List<String> nodeListId = new ArrayList<>();
+        Map<String, Object> variables = processEngine.getRuntimeService().getVariables(task.getExecutionId());
+        BpmnModel bpmnModel = processEngine.getRepositoryService().getBpmnModel(task.getProcessDefinitionId());
+        FlowElement flowElement = bpmnModel.getFlowElement(targetActivityId);
+        List<SequenceFlow> incomingFlows = ((FlowNode) flowElement).getIncomingFlows();
+        for (SequenceFlow incomingFlow : incomingFlows) {
+            FlowElement sourceFlowElement = incomingFlow.getSourceFlowElement();
+            //并行网关
+            if (sourceFlowElement instanceof ParallelGateway) {
+                List<SequenceFlow> parallelGatewayOutgoingFlow = ((ParallelGateway) sourceFlowElement).getOutgoingFlows();
+                for (SequenceFlow sequenceFlow : parallelGatewayOutgoingFlow) {
+                    FlowElement element = sequenceFlow.getTargetFlowElement();
+                    if (element instanceof UserTask) {
+                        nodeListId.add(element.getId());
+                    }
+                }
+                //包容网关
+            } else if (sourceFlowElement instanceof InclusiveGateway) {
+                List<SequenceFlow> inclusiveGatewayOutgoingFlow = ((InclusiveGateway) sourceFlowElement).getOutgoingFlows();
+                for (SequenceFlow sequenceFlow : inclusiveGatewayOutgoingFlow) {
+                    String conditionExpression = sequenceFlow.getConditionExpression();
+                    FlowElement element = sequenceFlow.getTargetFlowElement();
+                    if (element instanceof UserTask) {
+                        if (StringUtils.isBlank(conditionExpression)) {
+                            nodeListId.add(element.getId());
+                        } else {
+                            ExpressCheckCmd expressCmd = new ExpressCheckCmd(task.getProcessInstanceId(), conditionExpression, variables);
+                            Boolean condition = processEngine.getManagementService().executeCommand(expressCmd);
+                            if (condition) {
+                                nodeListId.add(element.getId());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return nodeListId;
     }
 }

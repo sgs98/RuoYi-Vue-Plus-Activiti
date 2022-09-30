@@ -52,6 +52,11 @@ public interface ActConstant {
     String USER_TASK = "userTask";
 
     /**
+     * 会签
+     */
+    String MULTI_INSTANCE = "multiInstance";
+
+    /**
      * 会签任务总数
      */
     String NUMBER_OF_INSTANCES = "nrOfInstances";

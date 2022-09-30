@@ -51,7 +51,7 @@ public interface IProcessInstanceService {
      * 挂起或激活流程实例
      * @param data
      */
-    void updateProcInstState(Map<String,Object> data);
+    Boolean updateProcInstState(Map<String,Object> data);
 
     /**
      * 作废流程实例，不会删除历史记录

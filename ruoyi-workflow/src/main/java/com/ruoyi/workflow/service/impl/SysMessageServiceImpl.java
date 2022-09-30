@@ -188,11 +188,11 @@ public class SysMessageServiceImpl implements ISysMessageService {
     }
 
     /**
-     * @Description: 阅读消息
+     * @description: 阅读消息
      * @param: id
      * @return: java.lang.Boolean
      * @author: gssong
-     * @Date: 2022/6/19 17:11
+     * @date: 2022/6/19 17:11
      */
     @Override
     public Boolean readMessage(Long id) {
@@ -203,10 +203,10 @@ public class SysMessageServiceImpl implements ISysMessageService {
     }
 
     /**
-     * @Description: 批量阅读消息
+     * @description: 批量阅读消息
      * @return: boolean
      * @author: gssong
-     * @Date: 2022/6/19 17:16
+     * @date: 2022/6/19 17:16
      */
     @Override
     public boolean batchReadMessage() {

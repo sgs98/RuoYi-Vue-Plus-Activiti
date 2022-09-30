@@ -19,10 +19,10 @@ public interface IActBusinessStatusService extends IService<ActBusinessStatus> {
      * @param businessKey 业务id
      * @param statusEnum 状态值
      * @param procInstId 流程实例id
-     * @param classFullName 全类名
+     * @param tableName 表名
      * @return
      */
-    boolean updateState(String businessKey, BusinessStatusEnum statusEnum, String procInstId,String classFullName);
+    boolean updateState(String businessKey, BusinessStatusEnum statusEnum, String procInstId,String tableName);
 
     /**
      * 更新业务状态

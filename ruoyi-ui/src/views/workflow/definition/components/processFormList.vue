@@ -46,13 +46,28 @@
       </el-row>
       <el-row v-if="formData.businessType === 1">
         <el-col class="line" :span="12">
+          <el-form-item label="表名称" prop="tableName">
+            <el-input v-model="formData.tableName" placeholder="请选择表名称" disabled>
+             <el-button slot="append" @click="handerOpenTable" icon="el-icon-search"></el-button>
+            </el-input>
+          </el-form-item>
+        </el-col>
+        <el-col class="line" :span="12">
           <el-form-item label="组件名称" prop="componentName">
             <el-input placeholder="请输入组件名称" v-model="formData.componentName"/>
           </el-form-item>
         </el-col>
       </el-row>
+      <el-row>
+        <el-col class="line" :span="24">
+          <el-form-item label="备注" prop="remork">
+            <el-input type="textarea" v-model="formData.remork"></el-input>
+          </el-form-item>
+        </el-col>
+      </el-row>
     </el-form>
-    <el-dialog title="表单" :visible.sync="formVisible" v-if="visible" width="70%" :close-on-click-modal="false" append-to-body>
+    <!-- 动态表单开始 -->
+    <el-dialog title="表单" :visible.sync="formVisible" v-if="formVisible" width="70%" :close-on-click-modal="false" append-to-body>
       <div class="app-container">
         <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
           <el-form-item label="表单key" prop="formKey">
@@ -81,7 +96,7 @@
           <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
         </el-row>
 
-        <el-table v-loading="loading" :highlight-current-row="true" :data="dynamicFormList" @row-click="handleChange">
+        <el-table v-loading="loading" :highlight-current-row="true" :data="dynamicFormList" @row-click="handleFormClick">
           <el-table-column label="主键" align="center" prop="id" v-if="false"/>
           <el-table-column label="表单key" align="center" prop="formKey" />
           <el-table-column label="表单名称" align="center" prop="formName" />
@@ -97,6 +112,56 @@
         />
       </div>
     </el-dialog>
+    <!-- 动态表单结束 -->
+    <!-- 导入表开始 -->
+    <el-dialog title="导入表" :visible.sync="tableVisible" width="800px" top="5vh" append-to-body>
+        <el-form :model="tableQueryParams" ref="tableQueryForm" size="small" :inline="true">
+        <el-form-item label="表名称" prop="tableName">
+            <el-input
+            v-model="tableQueryParams.tableName"
+            placeholder="请输入表名称"
+            clearable
+            @keyup.enter.native="handleQuery"
+            />
+        </el-form-item>
+        <el-form-item label="表描述" prop="tableComment">
+            <el-input
+            v-model="tableQueryParams.tableComment"
+            placeholder="请输入表描述"
+            clearable
+            @keyup.enter.native="handleQuery"
+            />
+        </el-form-item>
+        <el-form-item label="数据源名称" prop="dataName">
+            <el-input
+            v-model="tableQueryParams.dataName"
+            placeholder="请输入数据源名称"
+            clearable
+            @keyup.enter.native="handleQuery"
+            />
+        </el-form-item>
+        <el-form-item>
+            <el-button type="primary" icon="el-icon-search" size="mini" @click="handleTableQuery">搜索</el-button>
+            <el-button icon="el-icon-refresh" size="mini" @click="resetTableQuery">重置</el-button>
+        </el-form-item>
+        </el-form>
+        <el-row>
+            <el-table :highlight-current-row="true" @row-click="handleTableClick" ref="table" :data="dbTableList" height="260px">
+                <el-table-column prop="tableName" label="表名称" :show-overflow-tooltip="true"></el-table-column>
+                <el-table-column prop="tableComment" label="表描述" :show-overflow-tooltip="true"></el-table-column>
+                <el-table-column prop="createTime" label="创建时间"></el-table-column>
+                <el-table-column prop="updateTime" label="更新时间"></el-table-column>
+            </el-table>
+            <pagination
+                v-show="dbTableTotal>0"
+                :total="dbTableTotal"
+                :page.sync="tableQueryParams.pageNum"
+                :limit.sync="tableQueryParams.pageSize"
+                @pagination="getDbList"
+            />
+        </el-row>
+    </el-dialog>
+    <!-- 导入表结束 -->
      <span slot="footer" class="dialog-footer">
       <el-button @click="visible = false">取 消</el-button>
       <el-button type="primary" @click="submitForm('formDataRef')">确 定</el-button>
@@ -106,6 +171,7 @@
 
 <script>
 import { listDynamicFormEnable } from "@/api/workflow/dynamicForm";
+import { listDbTable } from "@/api/tool/gen";
 import { addProcessDefSetting,checkProcessDefSetting } from "@/api/workflow/processDefSetting";
 export default {
   props:{
@@ -120,6 +186,7 @@ export default {
       // 显示隐藏
       visible: false,
       formVisible: false,
+      tableVisible: false,
       // 按钮loading
       buttonLoading: false,
       // 遮罩层
@@ -139,6 +206,18 @@ export default {
         formKey: undefined,
         formName: undefined,
       },
+      // 表数据
+      dbTableList: [],
+      // 总条数
+      dbTableTotal: 0,
+      // 查询参数
+      tableQueryParams: {
+        pageNum: 1,
+        pageSize: 10,
+        tableName: undefined,
+        tableComment: undefined,
+        dataName: 'master',
+      },
       // 表单校验
       rulesFrom: {
         processDefinitionKey: [
@@ -155,6 +234,9 @@ export default {
         ],
         businessType: [
           { required: true, message: '业务类型不能为空', trigger: 'blur' }
+        ],
+        tableName: [
+          { required: true, message: '表名称不能为空', trigger: 'blur' }
         ],
         componentName: [
           { required: true, message: '组件名称不能为空', trigger: 'blur' }
@@ -178,7 +260,6 @@ export default {
         this.loading = false;
       });
     },
-
     /** 搜索按钮操作 */
     handleQuery() {
       this.queryParams.pageNum = 1;
@@ -190,36 +271,75 @@ export default {
       this.handleQuery();
     },
     // 选中数据
-    handleChange(row) {
+    handleFormClick(row) {
       this.$set(this.formData,'formId',row.id)
       this.$set(this.formData,'formKey',row.formKey)
       this.$set(this.formData,'formName',row.formName)
       this.formVisible = false;
+    },
+    // 选中数据
+    handleTableClick(row){
+      this.$set(this.formData,'tableName',row.tableName)
+      this.tableVisible = false;
     },
     // 打开表单
     handerOpenForm(){
       this.getList();
       this.formVisible = true
     },
+    // 表数据
+    getDbList(){
+      localStorage.setItem("dataName", this.tableQueryParams.dataName);
+      listDbTable(this.tableQueryParams).then(res => {
+        if (res.code === 200) {
+          this.dbTableList = res.rows;
+          this.dbTableTotal = res.total;
+        }
+      });
+    },
+    /** 打开表弹窗 */
+    handerOpenTable() {
+      this.tableVisible = true;
+      this.getDbList()
+    },
+     /** 搜索按钮操作 */
+    handleTableQuery() {
+      this.tableQueryParams.pageNum = 1;
+      this.getDbList();
+    },
+    /** 重置按钮操作 */
+    resetTableQuery() {
+      this.resetForm("tableQueryForm");
+      this.handleTableQuery();
+    },
     // 确认
     submitForm(formName){
       this.loading = true;
       this.$refs[formName].validate((valid) => {
-      if (valid) {
-        let param = ''
+       if (valid) {
+        let param = {}
         if(this.formData.businessType === 0){
-          param = this.formData.formId
+            param = {
+                processDefinitionId: this.formData.processDefinitionId,
+                businessType: 0,
+                formId: this.formData.formId
+            } 
         }else{
-          param = this.formData.componentName
+            param = {
+                processDefinitionId: this.formData.processDefinitionId,
+                businessType: 1,
+                componentName: this.formData.componentName,
+                tableName: this.formData.tableName
+            } 
         }
-        checkProcessDefSetting(this.formData.processDefinitionId,param,this.formData.businessType).then(response => {
+        checkProcessDefSetting(param).then(response => {
           if(response.data){
             this.$confirm(response.msg, '提示', {
               confirmButtonText: '确定',
               cancelButtonText: '取消',
               type: 'warning'
             }).then(() => {
-              this.formData.ids = response.data
+              this.formData.settingId = response.data
               addProcessDefSetting(this.formData).then(response => {
                 this.$modal.msgSuccess("保存成功");
                 this.loading = false;
@@ -236,8 +356,8 @@ export default {
               });
           }
         })
-      }
-    })
+       }
+      })
     }
   }
 };

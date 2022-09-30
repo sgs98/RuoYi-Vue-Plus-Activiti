@@ -40,9 +40,9 @@ public class ActBusinessStatus  extends BaseEntity{
     private String status;
 
     /**
-     * 全类名
+     * 表名
      */
-    private String classFullName;
+    private String tableName;
 
     /**
      * 挂起流程原因

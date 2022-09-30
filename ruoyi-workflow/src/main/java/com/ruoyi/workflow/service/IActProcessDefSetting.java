@@ -36,7 +36,7 @@ public interface IActProcessDefSetting {
     /**
      * 校验表单是否关联
      */
-    R<List<Long>> checkProcessDefSetting(String defId, String param, Integer businessType);
+    R<Long> checkProcessDefSetting(ActProcessDefSettingBo bo);
 
     /**
      * 查询流程定义设置列表
@@ -61,7 +61,7 @@ public interface IActProcessDefSetting {
     /**
      * 校验并批量删除流程定义设置信息
      */
-    Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid);
+    Boolean deleteWithValidByIds(Collection<Long> ids);
 
     /**
      * 按照formId查询

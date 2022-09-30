@@ -32,11 +32,11 @@ public class WorkflowRuleUserComponent {
     }
 
     /**
-     * @Description: 获取流程发起人
+     * @description: 获取流程发起人
      * @param: processInstanceId
      * @return: java.lang.String
      * @author: gssong
-     * @Date: 2022/8/10 22:41
+     * @date: 2022/8/10 22:41
      */
     public String startUserId(String processInstanceId){
         RuntimeService runtimeService = SpringUtils.getBean(RuntimeService.class);

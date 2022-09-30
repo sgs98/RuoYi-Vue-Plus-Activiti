@@ -1,6 +1,5 @@
 package com.ruoyi.workflow.service;
 
-import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.workflow.domain.ActTaskNode;
 import com.ruoyi.workflow.domain.bo.*;
@@ -8,7 +7,9 @@ import com.ruoyi.workflow.domain.bo.BackProcessBo;
 import com.ruoyi.workflow.domain.vo.TaskFinishVo;
 import com.ruoyi.workflow.domain.vo.TaskWaitingVo;
 import com.ruoyi.workflow.domain.vo.VariableVo;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +33,23 @@ public interface ITaskService {
      * @return
      */
     Boolean completeTask(TaskCompleteBo req);
+
+    /**
+     * 上传附件
+     * @param fileList
+     * @param taskId
+     * @param processInstanceId
+     * @return
+     */
+    Boolean attachmentUpload(MultipartFile[] fileList, String taskId, String processInstanceId);
+
+    /**
+     * 附件下载
+     * @param attachmentId
+     * @param response
+     * @return
+     */
+    void downloadAttachment(String attachmentId, HttpServletResponse response);
 
     /**
      * 查询当前用户的已办任务
@@ -87,28 +105,28 @@ public interface ITaskService {
      * @param transmitBo
      * @return
      */
-    R<Boolean> transmitTask(TransmitBo transmitBo);
+    Boolean transmitTask(TransmitBo transmitBo);
 
     /**
      * 会签任务加签
      * @param addMultiBo
      * @return
      */
-    R<Boolean> addMultiInstanceExecution(AddMultiBo addMultiBo);
+    Boolean addMultiInstanceExecution(AddMultiBo addMultiBo);
 
     /**
      * 会签任务减签
      * @param deleteMultiBo
      * @return
      */
-    R<Boolean> deleteMultiInstanceExecution(DeleteMultiBo deleteMultiBo);
+    Boolean deleteMultiInstanceExecution(DeleteMultiBo deleteMultiBo);
 
     /**
      * 修改办理人
      * @param updateAssigneeBo
      * @return
      */
-    R<Void> updateAssignee(UpdateAssigneeBo updateAssigneeBo);
+    Boolean updateAssignee(UpdateAssigneeBo updateAssigneeBo);
 
 
     /**
@@ -116,7 +134,7 @@ public interface ITaskService {
      * @param taskId
      * @return
      */
-    R<List<VariableVo>> getProcessInstVariable(String taskId);
+    List<VariableVo> getProcessInstVariable(String taskId);
 
     /**
      * 修改审批意见
@@ -124,5 +142,22 @@ public interface ITaskService {
      * @param comment
      * @return
      */
-    R<Void> editComment(String commentId,String comment);
+    Boolean editComment(String commentId,String comment);
+
+    /**
+     * 修改附件
+     * @param fileList
+     * @param taskId
+     * @param processInstanceId
+     * @return
+     */
+    Boolean editAttachment(MultipartFile[] fileList, String taskId, String processInstanceId);
+
+    /**
+     * 删除附件
+     * @param attachmentId
+     * @return
+     */
+    Boolean deleteAttachment(String attachmentId);
+
 }

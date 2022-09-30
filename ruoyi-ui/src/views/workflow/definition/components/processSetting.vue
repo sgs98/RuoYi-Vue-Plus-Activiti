@@ -232,26 +232,28 @@ export default {
           this.loading = true
           this.nodeName = this.nodeList[this.activeName].nodeName
           this.index = this.nodeList[this.activeName].index
-          getInfoSetting(this.definitionId,this.nodeList[this.activeName].nodeId).then(response => {
-            if(response.code === 200){
-              this.form = response.data
-              this.form.nodeName = response.data.nodeName
-              this.loading = false
-              if(this.form.id === undefined){
-                this.form.isBack = false
-              }
-              if(this.form.chooseWay === "person"){
-                this.btnText = "选择人员"
-              }else if(this.form.chooseWay === "role"){
-                this.btnText = "选择角色"
-              }else if(this.form.chooseWay === "dept"){
-                this.btnText = "选择部门"
-              }else if(this.form.chooseWay === "rule"){
-                this.btnText = "选择规则"
-              }
-              this.$forceUpdate()
-            }
-          })
+          if(this.nodeList.length > 0 && this.nodeList[this.activeName].nodeId){
+            getInfoSetting(this.definitionId,this.nodeList[this.activeName].nodeId).then(response => {
+                if(response.code === 200){
+                    this.form = response.data
+                    this.form.nodeName = response.data.nodeName
+                    this.loading = false
+                    if(this.form.id === undefined){
+                        this.form.isBack = false
+                    }
+                    if(this.form.chooseWay === "person"){
+                        this.btnText = "选择人员"
+                    }else if(this.form.chooseWay === "role"){
+                        this.btnText = "选择角色"
+                    }else if(this.form.chooseWay === "dept"){
+                        this.btnText = "选择部门"
+                    }else if(this.form.chooseWay === "rule"){
+                        this.btnText = "选择规则"
+                    }
+                    this.$forceUpdate()
+                }
+            })
+          }
         },
         //保存设置
         onSubmit(){

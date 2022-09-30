@@ -1,7 +1,8 @@
 package com.ruoyi.workflow.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.StringUtils;
@@ -13,6 +14,8 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.workflow.domain.ActProcessDefSetting;
 import com.ruoyi.workflow.mapper.ActProcessDefSettingMapper;
 import lombok.RequiredArgsConstructor;
+import org.activiti.engine.TaskService;
+import org.activiti.engine.task.Task;
 import org.springframework.stereotype.Service;
 import com.ruoyi.workflow.domain.bo.ActProcessDefSettingBo;
 import com.ruoyi.workflow.domain.vo.ActProcessDefSettingVo;
@@ -21,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Collection;
-import java.util.stream.Collectors;
 
 /**
  * 流程定义设置Service业务层处理
@@ -34,6 +36,8 @@ import java.util.stream.Collectors;
 public class ActProcessDefSettingImpl implements IActProcessDefSetting {
 
     private final ActProcessDefSettingMapper baseMapper;
+
+    private final TaskService taskService;
 
     /**
      * 查询流程定义设置
@@ -58,24 +62,24 @@ public class ActProcessDefSettingImpl implements IActProcessDefSetting {
     }
 
     @Override
-    public R<List<Long>> checkProcessDefSetting(String defId, String param, Integer businessType) {
+    public R<Long> checkProcessDefSetting(ActProcessDefSettingBo bo) {
         LambdaQueryWrapper<ActProcessDefSetting> lqw = Wrappers.lambdaQuery();
-        lqw.ne(ActProcessDefSetting::getProcessDefinitionId, defId);
-        if (0 == businessType) {
-            lqw.eq(ActProcessDefSetting::getFormId, param);
-            List<ActProcessDefSetting> processDefSettings = baseMapper.selectList(lqw);
-            if (CollectionUtil.isNotEmpty(processDefSettings)) {
-                String collect = processDefSettings.stream().map(ActProcessDefSetting::getProcessDefinitionKey).collect(Collectors.joining(","));
-                List<Long> ids = processDefSettings.stream().map(ActProcessDefSetting::getId).collect(Collectors.toList());
-                return R.ok("表单已被流程【" + collect + "】绑定，是否确认删除绑定，绑定当前选项？", ids);
+        lqw.ne(ActProcessDefSetting::getProcessDefinitionId, bo.getProcessDefinitionId());
+        if (0 == bo.getBusinessType()) {
+            lqw.eq(ActProcessDefSetting::getFormId, bo.getFormId());
+            ActProcessDefSetting setting = baseMapper.selectOne(lqw);
+            if (ObjectUtil.isNotEmpty(setting)) {
+                return R.ok("表单已被流程【" + setting.getProcessDefinitionName() + "】绑定，是否确认删除绑定，绑定当前选项？", setting.getId());
             }
         } else {
-            lqw.eq(ActProcessDefSetting::getComponentName, param);
-            List<ActProcessDefSetting> processDefSettings = baseMapper.selectList(lqw);
-            if (CollectionUtil.isNotEmpty(processDefSettings)) {
-                String collect = processDefSettings.stream().map(ActProcessDefSetting::getComponentName).collect(Collectors.joining(","));
-                List<Long> ids = processDefSettings.stream().map(ActProcessDefSetting::getId).collect(Collectors.toList());
-                return R.ok("组件已被流程【" + collect + "】绑定，是否确认删除绑定，绑定当前选项？", ids);
+            lqw.eq(ActProcessDefSetting::getComponentName, bo.getComponentName());
+            ActProcessDefSetting setting = baseMapper.selectOne(lqw);
+            if (ObjectUtil.isNotEmpty(setting)) {
+                List<Task> taskList = taskService.createTaskQuery().processDefinitionId(setting.getProcessDefinitionId()).list();
+                if (CollUtil.isNotEmpty(taskList)) {
+                    throw new ServiceException("当前表单有运行中的单据不可切换绑定！");
+                }
+                return R.ok("组件已被流程【" + setting.getProcessDefinitionName() + "】绑定，是否确认删除绑定，绑定当前选项？", setting.getId());
             }
         }
         return R.ok();
@@ -132,8 +136,8 @@ public class ActProcessDefSettingImpl implements IActProcessDefSetting {
         } else {
             add.setComponentName(bo.getComponentName());
         }
-        if (CollectionUtil.isNotEmpty(bo.getIds())) {
-            baseMapper.deleteBatchIds(bo.getIds());
+        if (ObjectUtil.isNotEmpty(bo.getSettingId())) {
+            baseMapper.deleteById(bo.getSettingId());
         }
         if (bo.getId() != null) {
             baseMapper.deleteById(bo.getId());
@@ -143,6 +147,9 @@ public class ActProcessDefSettingImpl implements IActProcessDefSetting {
         }
         if (1 == bo.getBusinessType() && StringUtils.isBlank(bo.getComponentName())) {
             throw new ServiceException("组件名称不能为空");
+        }
+        if (1 == bo.getBusinessType() && StringUtils.isBlank(bo.getTableName())) {
+            throw new ServiceException("表名不能为空");
         }
         return baseMapper.insert(add) > 0;
     }
@@ -162,19 +169,16 @@ public class ActProcessDefSettingImpl implements IActProcessDefSetting {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid) {
-        if (isValid) {
-            //TODO 做一些业务上的校验,判断是否需要校验
-        }
+    public Boolean deleteWithValidByIds(Collection<Long> ids) {
         return baseMapper.deleteBatchIds(ids) > 0;
     }
 
     /**
-     * @Description: 按照表单id查询
+     * @description: 按照表单id查询
      * @param: formId
      * @return: com.ruoyi.workflow.domain.ActProcessDefSetting
      * @author: gssong
-     * @Date: 2022/8/30 22:10
+     * @date: 2022/8/30 22:10
      */
     @Override
     public ActProcessDefSetting queryByFormId(Long formId) {

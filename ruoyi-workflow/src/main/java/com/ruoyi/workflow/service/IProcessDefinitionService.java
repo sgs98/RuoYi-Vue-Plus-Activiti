@@ -1,6 +1,5 @@
 package com.ruoyi.workflow.service;
 
-import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.workflow.domain.bo.DefinitionBo;
 import com.ruoyi.workflow.domain.vo.ActProcessNodeVo;
@@ -28,14 +27,14 @@ public interface IProcessDefinitionService {
      * @param definitionId
      * @return
      */
-    R<Void> deleteDeployment(String deploymentId,String definitionId);
+    Boolean deleteDeployment(String deploymentId,String definitionId);
 
     /**
      * 通过zip或xml部署流程定义
      * @param file
      * @return
      */
-    R<Void> deployByFile(MultipartFile file);
+    Boolean deployByFile(MultipartFile file);
 
     /**
      * 导出流程定义文件（xml,png)
@@ -71,5 +70,5 @@ public interface IProcessDefinitionService {
      * @param processDefinitionId
      * @return
      */
-    R<List<ActProcessNodeVo>> setting(String processDefinitionId);
+    List<ActProcessNodeVo> setting(String processDefinitionId);
 }

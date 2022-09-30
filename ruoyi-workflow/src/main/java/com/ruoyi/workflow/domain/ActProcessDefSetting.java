@@ -41,6 +41,10 @@ public class ActProcessDefSetting extends BaseEntity {
      */
     private Integer businessType;
     /**
+     * 表名
+     */
+    private String tableName;
+    /**
      * 组件名称
      */
     private String componentName;

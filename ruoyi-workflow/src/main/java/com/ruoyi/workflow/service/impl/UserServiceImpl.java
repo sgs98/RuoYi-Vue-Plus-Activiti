@@ -45,11 +45,11 @@ public class UserServiceImpl implements IUserService {
     private final RuntimeService runtimeService;
 
     /**
-     * @Description: 按照用户id查询用户集合
+     * @description: 按照用户id查询用户集合
      * @param: userIds
      * @return: java.util.List<com.ruoyi.common.core.domain.entity.SysUser>
      * @author: gssong
-     * @Date: 2021/12/10
+     * @date: 2021/12/10
      */
     @Override
     public List<SysUser> selectListUserByIds(List<Long> userIds) {
@@ -57,11 +57,11 @@ public class UserServiceImpl implements IUserService {
     }
 
     /**
-     * @Description: 按照用户id查询用户
+     * @description: 按照用户id查询用户
      * @param: userId
      * @return: com.ruoyi.common.core.domain.entity.SysUser
      * @author: gssong
-     * @Date: 2021/12/10
+     * @date: 2021/12/10
      */
     @Override
     public SysUser selectUserById(Long userId) {
@@ -69,11 +69,11 @@ public class UserServiceImpl implements IUserService {
     }
 
     /**
-     * @Description: 分页查询工作流选人, 角色，部门等
+     * @description: 分页查询工作流选人, 角色，部门等
      * @param: sysUserBo
      * @return: java.util.Map<java.lang.String, java.lang.Object>
-     * @Author: gssong
-     * @Date: 2021/12/10
+     * @author: gssong
+     * @date: 2021/12/10
      */
     @Override
     public Map<String, Object> getWorkflowUserListByPage(SysUserBo sysUserBo) {
@@ -198,11 +198,11 @@ public class UserServiceImpl implements IUserService {
     }
 
     /**
-     * @Description: 分页查询工作流选择加签人员
+     * @description: 分页查询工作流选择加签人员
      * @param: sysUserMultiBo
      * @return: java.util.Map<java.lang.String, java.lang.Object>
      * @author: gssong
-     * @Date: 2022/4/22 21:17
+     * @date: 2022/4/22 21:17
      */
     @Override
     public Map<String, Object> getWorkflowAddMultiListByPage(SysUserMultiBo sysUserMultiBo) {

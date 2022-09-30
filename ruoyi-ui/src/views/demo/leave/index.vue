@@ -1,243 +1,248 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="申请人" prop="username">
-        <el-input
-          v-model="queryParams.username"
-          placeholder="请输入申请人"
-          clearable
-          size="small"
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="请假时长" prop="duration">
-        <el-input
-          v-model="queryParams.duration"
-          placeholder="请输入请假时长"
-          clearable
-          size="small"
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="请假类型" prop="leaveType">
-        <el-select v-model="queryParams.leaveType" placeholder="请选择请假类型" clearable size="small">
-          <el-option
-            v-for="dict in dict.type.bs_leave_type"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="标题" prop="title">
-        <el-input
-          v-model="queryParams.title"
-          placeholder="请输入标题"
-          clearable
-          size="small"
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
-      </el-form-item>
-    </el-form>
-
-    <el-form label-width="68px">
-      <el-form-item label="流程Key" prop="processKey">
-        <el-input
-          v-model="processKey"
-          placeholder="请输入流程Key"
-          clearable
-          size="small"
-          style="width:200px"
-        />
-      </el-form-item>
-    </el-form>
-
-    <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-          v-hasPermi="['demo:leave:add']"
-        >新增</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['demo:leave:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['demo:leave:remove']"
-        >删除</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="el-icon-download"
-          size="mini"
-          :loading="exportLoading"
-          @click="handleExport"
-          v-hasPermi="['demo:leave:export']"
-        >导出</el-button>
-      </el-col>
-      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
-    </el-row>
-
-    <el-table v-loading="loading" :data="leaveList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="主键ID" align="center" prop="id" v-if="false"/>
-      <el-table-column label="申请人" align="center" prop="username" />
-      <el-table-column label="请假时长" align="center" prop="duration" />
-      <el-table-column label="工作委托人" align="center" prop="principal" />
-      <el-table-column label="联系电话" align="center" prop="contactPhone" />
-      <el-table-column label="请假类型" align="center" prop="leaveType">
-        <template slot-scope="scope">
-          <dict-tag :options="dict.type.bs_leave_type" :value="scope.row.leaveType"/>
-        </template>
-      </el-table-column>
-      <el-table-column label="标题" align="center" prop="title" />
-      <el-table-column label="请假原因" align="center" prop="leaveReason" />
-      <el-table-column label="请假开始时间" align="center" prop="startDate" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.startDate, '{y}-{m}-{d}') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="请假结束时间" align="center" prop="endDate" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.endDate, '{y}-{m}-{d}') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="流程状态" align="center" prop="actBusinessStatus.status">
-        <template slot-scope="scope">
-          <dict-tag :options="dict.type.act_status" :value="scope.row.actBusinessStatus.status"/>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-        <template slot-scope="scope">
-          <el-button
-            v-if="scope.row.actBusinessStatus.status==='draft'||scope.row.actBusinessStatus.status==='back'||scope.row.actBusinessStatus.status==='cancel'"
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['demo:leave:edit']"
-          >修改</el-button>
-          <el-button
-            v-if="scope.row.actBusinessStatus.status==='draft'||scope.row.actBusinessStatus.status==='back'||scope.row.actBusinessStatus.status==='cancel'"
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['demo:leave:remove']"
-          >删除</el-button>
-          <el-button
-            v-if="scope.row.actBusinessStatus.status==='waiting'"
-            size="mini"
-            type="text"
-            icon="el-icon-back"
-            @click="cancelProcessApply(scope.row)"
-          >撤销</el-button>
-          <el-button
-            v-if="scope.row.actBusinessStatus.status!=='draft'"
-            size="mini"
-            type="text"
-            icon="el-icon-view"
-            @click="handleView(scope.row)"
-          >查看</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-
-    <pagination
-      v-show="total>0"
-      :total="total"
-      :page.sync="queryParams.pageNum"
-      :limit.sync="queryParams.pageSize"
-      @pagination="getList"
-    />
-
-    <!-- 添加或修改请假业务对话框 -->
-    <el-dialog :title="title" :visible.sync="open" v-if="open" width="800px" append-to-body>
-      <el-tabs  type="border-card" >
-        <el-tab-pane label="业务单据" v-loading="loading">
-            <el-form ref="form" :model="form" :rules="rules" label-width="120px">
-              <el-form-item label="申请人用户名" prop="username">
-                <el-input v-model="form.username" placeholder="请输入申请人用户名" />
-              </el-form-item>
-              <el-form-item label="请假时长" prop="duration">
-                <el-input v-model="form.duration" placeholder="请输入请假时长，单位：天" />
-              </el-form-item>
-              <el-form-item label="工作委托人" prop="principal">
-                <el-input v-model="form.principal" placeholder="请输入工作委托人" />
-              </el-form-item>
-              <el-form-item label="联系电话" prop="contactPhone">
-                <el-input v-model="form.contactPhone" placeholder="请输入联系电话" />
-              </el-form-item>
-              <el-form-item label="请假类型" prop="leaveType">
-                <el-select v-model="form.leaveType" placeholder="请选择请假类型">
-                  <el-option
+    <div v-if="dataVisible">
+        <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
+            <el-form-item label="申请人" prop="username">
+                <el-input
+                v-model="queryParams.username"
+                placeholder="请输入申请人"
+                clearable
+                size="small"
+                @keyup.enter.native="handleQuery"
+                />
+            </el-form-item>
+            <el-form-item label="请假时长" prop="duration">
+                <el-input
+                v-model="queryParams.duration"
+                placeholder="请输入请假时长"
+                clearable
+                size="small"
+                @keyup.enter.native="handleQuery"
+                />
+            </el-form-item>
+            <el-form-item label="请假类型" prop="leaveType">
+                <el-select v-model="queryParams.leaveType" placeholder="请选择请假类型" clearable size="small">
+                <el-option
                     v-for="dict in dict.type.bs_leave_type"
                     :key="dict.value"
                     :label="dict.label"
-                    :value="parseInt(dict.value)"
-                  ></el-option>
+                    :value="dict.value"
+                />
                 </el-select>
-              </el-form-item>
-              <el-form-item label="标题" prop="title">
-                <el-input v-model="form.title" placeholder="请输入标题" />
-              </el-form-item>
-              <el-form-item label="请假原因" prop="leaveReason">
-                <el-input v-model="form.leaveReason" type="textarea" placeholder="请输入内容" />
-              </el-form-item>
-              <el-form-item label="请假开始时间" prop="startDate">
-                <el-date-picker clearable size="small"
-                  v-model="form.startDate"
-                  type="datetime"
-                  value-format="yyyy-MM-dd HH:mm:ss"
-                  placeholder="选择请假开始时间">
-                </el-date-picker>
-              </el-form-item>
-              <el-form-item label="请假结束时间" prop="endDate">
-                <el-date-picker clearable size="small"
-                  v-model="form.endDate"
-                  type="datetime"
-                  value-format="yyyy-MM-dd HH:mm:ss"
-                  placeholder="选择请假结束时间">
-                </el-date-picker>
-              </el-form-item>
+            </el-form-item>
+            <el-form-item label="标题" prop="title">
+                <el-input
+                v-model="queryParams.title"
+                placeholder="请输入标题"
+                clearable
+                size="small"
+                @keyup.enter.native="handleQuery"
+                />
+            </el-form-item>
+            <el-form-item>
+                <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
+                <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+            </el-form-item>
             </el-form>
-            <div class="dialog-footer" style="float:right" v-if="flag">
-              <el-button :loading="buttonLoading" type="info" @click="submitForm('zancun')">暂存</el-button>
-              <el-button :loading="buttonLoading" type="primary" @click="submitForm('submit')">提交</el-button>
-              <el-button @click="cancel">取 消</el-button>
-            </div>
-        </el-tab-pane>
-        <!-- 审批历史 -->
-        <el-tab-pane label="审批历史" v-if="processInstanceId">
-              <history ref="historyRef" :processInstanceId="processInstanceId" ></history>
-        </el-tab-pane>
-      </el-tabs>
-    </el-dialog>
+
+            <el-form label-width="68px">
+            <el-form-item label="流程Key" prop="processKey">
+                <el-input
+                v-model="processKey"
+                placeholder="请输入流程Key"
+                clearable
+                size="small"
+                style="width:200px"
+                />
+            </el-form-item>
+            </el-form>
+
+            <el-row :gutter="10" class="mb8">
+            <el-col :span="1.5">
+                <el-button
+                type="primary"
+                plain
+                icon="el-icon-plus"
+                size="mini"
+                @click="handleAdd"
+                v-hasPermi="['demo:leave:add']"
+                >新增</el-button>
+            </el-col>
+            <el-col :span="1.5">
+                <el-button
+                type="success"
+                plain
+                icon="el-icon-edit"
+                size="mini"
+                :disabled="single"
+                @click="handleUpdate"
+                v-hasPermi="['demo:leave:edit']"
+                >修改</el-button>
+            </el-col>
+            <el-col :span="1.5">
+                <el-button
+                type="danger"
+                plain
+                icon="el-icon-delete"
+                size="mini"
+                :disabled="multiple"
+                @click="handleDelete"
+                v-hasPermi="['demo:leave:remove']"
+                >删除</el-button>
+            </el-col>
+            <el-col :span="1.5">
+                <el-button
+                type="warning"
+                plain
+                icon="el-icon-download"
+                size="mini"
+                :loading="exportLoading"
+                @click="handleExport"
+                v-hasPermi="['demo:leave:export']"
+                >导出</el-button>
+            </el-col>
+            <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
+            </el-row>
+
+            <el-table v-loading="loading" :data="leaveList" @selection-change="handleSelectionChange">
+            <el-table-column type="selection" width="55" align="center" />
+            <el-table-column label="主键ID" align="center" prop="id" v-if="false"/>
+            <el-table-column label="申请人" align="center" prop="username" />
+            <el-table-column label="请假时长" align="center" prop="duration" />
+            <el-table-column label="工作委托人" align="center" prop="principal" />
+            <el-table-column label="联系电话" align="center" prop="contactPhone" />
+            <el-table-column label="请假类型" align="center" prop="leaveType">
+                <template slot-scope="scope">
+                <dict-tag :options="dict.type.bs_leave_type" :value="scope.row.leaveType"/>
+                </template>
+            </el-table-column>
+            <el-table-column label="标题" align="center" prop="title" />
+            <el-table-column label="请假原因" align="center" prop="leaveReason" />
+            <el-table-column label="请假开始时间" align="center" prop="startDate" width="180">
+                <template slot-scope="scope">
+                <span>{{ parseTime(scope.row.startDate, '{y}-{m}-{d}') }}</span>
+                </template>
+            </el-table-column>
+            <el-table-column label="请假结束时间" align="center" prop="endDate" width="180">
+                <template slot-scope="scope">
+                <span>{{ parseTime(scope.row.endDate, '{y}-{m}-{d}') }}</span>
+                </template>
+            </el-table-column>
+            <el-table-column label="流程状态" align="center" prop="actBusinessStatus.status">
+                <template slot-scope="scope">
+                <dict-tag :options="dict.type.act_status" :value="scope.row.actBusinessStatus.status"/>
+                </template>
+            </el-table-column>
+            <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+                <template slot-scope="scope">
+                <el-button
+                    v-if="scope.row.actBusinessStatus.status==='draft'||scope.row.actBusinessStatus.status==='back'||scope.row.actBusinessStatus.status==='cancel'"
+                    size="mini"
+                    type="text"
+                    icon="el-icon-edit"
+                    @click="handleUpdate(scope.row)"
+                    v-hasPermi="['demo:leave:edit']"
+                >修改</el-button>
+                <el-button
+                    v-if="scope.row.actBusinessStatus.status==='draft'||scope.row.actBusinessStatus.status==='back'||scope.row.actBusinessStatus.status==='cancel'"
+                    size="mini"
+                    type="text"
+                    icon="el-icon-delete"
+                    @click="handleDelete(scope.row)"
+                    v-hasPermi="['demo:leave:remove']"
+                >删除</el-button>
+                <el-button
+                    v-if="scope.row.actBusinessStatus.status==='waiting'"
+                    size="mini"
+                    type="text"
+                    icon="el-icon-back"
+                    @click="cancelProcessApply(scope.row)"
+                >撤销</el-button>
+                <el-button
+                    v-if="scope.row.actBusinessStatus.status!=='draft'"
+                    size="mini"
+                    type="text"
+                    icon="el-icon-view"
+                    @click="handleView(scope.row)"
+                >查看</el-button>
+                </template>
+            </el-table-column>
+            </el-table>
+
+            <pagination
+            v-show="total>0"
+            :total="total"
+            :page.sync="queryParams.pageNum"
+            :limit.sync="queryParams.pageSize"
+            @pagination="getList"
+            />
+    </div>
+    
+    <!-- 单据信息开始 -->
+    <div class="form-container" v-if="formVisible">
+        <div class="form-container-header"><i class="el-dialog__close el-icon el-icon-close" @click="closeForm"></i></div>
+        <el-tabs  type="border-card" class="container-tab">
+            <el-tab-pane label="业务单据" v-loading="loading">
+                <el-form ref="form" :model="form" :rules="rules" label-width="120px">
+                <el-form-item label="申请人用户名" prop="username">
+                    <el-input v-model="form.username" placeholder="请输入申请人用户名" />
+                </el-form-item>
+                <el-form-item label="请假时长" prop="duration">
+                    <el-input v-model="form.duration" placeholder="请输入请假时长，单位：天" />
+                </el-form-item>
+                <el-form-item label="工作委托人" prop="principal">
+                    <el-input v-model="form.principal" placeholder="请输入工作委托人" />
+                </el-form-item>
+                <el-form-item label="联系电话" prop="contactPhone">
+                    <el-input v-model="form.contactPhone" placeholder="请输入联系电话" />
+                </el-form-item>
+                <el-form-item label="请假类型" prop="leaveType">
+                    <el-select v-model="form.leaveType" placeholder="请选择请假类型">
+                    <el-option
+                        v-for="dict in dict.type.bs_leave_type"
+                        :key="dict.value"
+                        :label="dict.label"
+                        :value="parseInt(dict.value)"
+                    ></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="标题" prop="title">
+                    <el-input v-model="form.title" placeholder="请输入标题" />
+                </el-form-item>
+                <el-form-item label="请假原因" prop="leaveReason">
+                    <el-input v-model="form.leaveReason" type="textarea" placeholder="请输入内容" />
+                </el-form-item>
+                <el-form-item label="请假开始时间" prop="startDate">
+                    <el-date-picker clearable size="small"
+                    v-model="form.startDate"
+                    type="datetime"
+                    value-format="yyyy-MM-dd HH:mm:ss"
+                    placeholder="选择请假开始时间">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="请假结束时间" prop="endDate">
+                    <el-date-picker clearable size="small"
+                    v-model="form.endDate"
+                    type="datetime"
+                    value-format="yyyy-MM-dd HH:mm:ss"
+                    placeholder="选择请假结束时间">
+                    </el-date-picker>
+                </el-form-item>
+                </el-form>
+                <div class="dialog-footer" style="float:right">
+                <el-button :loading="buttonLoading" type="primary" @click="submitForm()">提交</el-button>
+                <el-button @click="closeForm">取 消</el-button>
+                </div>
+            </el-tab-pane>
+            <el-tab-pane label="审批意见" v-if="processInstanceId">
+                <HistoryRecord :processInstanceId="processInstanceId"/>
+            </el-tab-pane>
+            <el-tab-pane label="流程进度" v-if="processInstanceId">
+                <HistoryImage :processInstanceId="processInstanceId"/>
+            </el-tab-pane>
+        </el-tabs>
+    </div>
+    <!-- 单据信息结束 -->
     <!-- 提交 -->
     <verify ref="verifyRef" @submitCallback="submitCallback" :taskId="taskId" :taskVariables="taskVariables" :sendMessage="sendMessage"></verify>
   </div>
@@ -246,13 +251,15 @@
 <script>
 import { listLeave, getLeave, delLeave, addLeave, updateLeave } from "@/api/demo/leave";
 import processApi from "@/api/workflow/processInst";
-import history from "@/components/Process/History";
+import HistoryRecord from "@/components/Process/HistoryRecord";
+import HistoryImage from "@/components/Process/HistoryImage";
 import verify from "@/components/Process/Verify";
 export default {
   name: "Leave",
   dicts: ['bs_leave_type','act_status'],
   components: {
-    history,
+    HistoryRecord,
+    HistoryImage,
     verify
   },
   data() {
@@ -280,7 +287,8 @@ export default {
       // 弹出层标题
       title: "",
       // 是否显示弹出层
-      open: false,
+      dataVisible: true,
+      formVisible: false,
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -327,10 +335,9 @@ export default {
       },
       taskVariables: {}, //流程变量
       taskId: undefined, //任务id
-      flag: true,
       // 消息提醒
       sendMessage: {},
-      processKey: 'huiqian'
+      processKey: 'purchase'
     };
   },
   created() {
@@ -346,9 +353,10 @@ export default {
         this.loading = false;
       });
     },
-    // 取消按钮
-    cancel() {
-      this.open = false;
+    // 关闭表单
+    closeForm(){
+      this.dataVisible = true;
+      this.formVisible = false;
       this.reset();
     },
     // 表单重置
@@ -386,14 +394,12 @@ export default {
     },
     /** 新增按钮操作 */
     handleAdd() {
-      this.flag = true
       this.reset();
-      this.open = true;
-      this.title = "添加请假业务";
+      this.dataVisible = false;
+      this.formVisible = true
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
-      this.flag = true
       this.loading = true;
       this.reset();
       const id = row.id || this.ids
@@ -403,8 +409,8 @@ export default {
         this.$nextTick(() => {
           this.processInstanceId=response.data.actBusinessStatus.processInstanceId
         })
-        this.open = true;
-        this.title = "修改请假业务";
+        this.dataVisible = false;
+        this.formVisible = true
         this.sendMessage = {
           title:'请假申请',
           messageContent:'单据【'+row.id+"】申请"
@@ -413,7 +419,6 @@ export default {
     },
     //查看
     handleView(row){
-      this.flag = false
       this.loading = true;
       this.reset();
       const id = row.id || this.ids
@@ -423,29 +428,26 @@ export default {
         this.$nextTick(() => {
           this.processInstanceId=response.data.actBusinessStatus.processInstanceId
         })
-        this.open = true;
-        this.title = "查看请假业务";
+        this.dataVisible = false;
+        this.formVisible = true
       });
     },
     /** 提交按钮 */
-    submitForm(flag) {
+    submitForm() {
       this.$refs["form"].validate(valid => {
         if (valid) {
           this.buttonLoading = true;
           if (this.form.id != null) {
             updateLeave(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功");
-              if(flag === 'submit'){
-                this.submitFormApply(response.data)
-              }
+              this.form = response.data
+              this.submitFormApply(response.data)
             }).finally(() => {
               this.buttonLoading = false;
             });
           } else {
             addLeave(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功");
-              this.open = false;
-              this.getList();
+              this.form = response.data
+              this.submitFormApply(response.data)
             }).finally(() => {
               this.buttonLoading = false;
             });
@@ -455,7 +457,8 @@ export default {
     },
     // 提交成功回调
     submitCallback(){
-      this.open = false;
+      this.dataVisible = false;
+      this.formVisible = true
       this.getList();
     },
     /** 删除按钮操作 */
@@ -493,7 +496,7 @@ export default {
             processKey: this.processKey, // key
             businessKey: entity.id, // 业务id
             variables: this.taskVariables,
-            classFullName: 'com.ruoyi.demo.domain.BsLeave'
+            tableName: 'bs_leave'
         }
         // 启动流程
         processApi.startProcessApply(data).then(response => {
@@ -517,3 +520,24 @@ export default {
   }
 };
 </script>
+<style scoped>
+    .container-tab{
+        height: calc(100vh - 155px);
+        overflow-y: auto;
+    }
+    /* 修改滚动条样式 */
+    .container-tab::-webkit-scrollbar {
+        width: 4px;
+    }
+    .container-tab::-webkit-scrollbar-thumb {
+        border-radius: 10px;
+    }
+    .form-container-header{
+        height: 30px;
+        padding-bottom: 10px;
+    }
+    .el-icon-close{
+        float: right;
+        cursor: pointer;
+    }
+</style>

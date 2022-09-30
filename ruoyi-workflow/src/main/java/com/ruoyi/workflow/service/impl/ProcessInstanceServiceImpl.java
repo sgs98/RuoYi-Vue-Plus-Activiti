@@ -35,6 +35,7 @@ import org.activiti.engine.impl.identity.Authentication;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.runtime.ProcessInstanceQuery;
+import org.activiti.engine.task.Attachment;
 import org.activiti.engine.task.Comment;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskQuery;
@@ -69,11 +70,11 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
 
 
     /**
-     * @Description: 提交申请，启动流程实例
+     * @description: 提交申请，启动流程实例
      * @param: startProcessBo
      * @return: java.util.Map<java.lang.String, java.lang.Object>
      * @author: gssong
-     * @Date: 2021/10/10
+     * @date: 2021/10/10
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -109,9 +110,9 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
             throw new ServiceException("请检查流程第一个环节是否为申请人！");
         }
         taskService.setAssignee(taskList.get(0).getId(), LoginHelper.getUserId().toString());
-        taskService.setVariable(taskList.get(0).getId(),"processInstanceId", pi.getProcessInstanceId());
+        taskService.setVariable(taskList.get(0).getId(), "processInstanceId", pi.getProcessInstanceId());
         // 更新业务状态
-        iActBusinessStatusService.updateState(startProcessBo.getBusinessKey(), BusinessStatusEnum.DRAFT, taskList.get(0).getProcessInstanceId(), startProcessBo.getClassFullName());
+        iActBusinessStatusService.updateState(startProcessBo.getBusinessKey(), BusinessStatusEnum.DRAFT, taskList.get(0).getProcessInstanceId(), startProcessBo.getTableName());
 
         map.put("processInstanceId", pi.getProcessInstanceId());
         map.put("taskId", taskList.get(0).getId());
@@ -119,11 +120,11 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
     }
 
     /**
-     * @Description: 通过流程实例id查询流程审批记录
+     * @description: 通过流程实例id查询流程审批记录
      * @param: processInstanceId
      * @return: java.util.List<com.ruoyi.workflow.domain.vo.ActHistoryInfoVo>
-     * @Author: gssong
-     * @Date: 2021/10/16
+     * @author: gssong
+     * @date: 2021/10/16
      */
     @Override
     public List<ActHistoryInfoVo> getHistoryInfoList(String processInstanceId) {
@@ -137,13 +138,18 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
             BeanUtils.copyProperties(historicTaskInstance, actHistoryInfoVo);
             actHistoryInfoVo.setStatus(actHistoryInfoVo.getEndTime() == null ? "待处理" : "已处理");
             List<Comment> taskComments = taskService.getTaskComments(historicTaskInstance.getId());
-            if(CollectionUtil.isNotEmpty(taskComments)){
+            if (CollectionUtil.isNotEmpty(taskComments)) {
                 actHistoryInfoVo.setCommentId(taskComments.get(0).getId());
                 String message = taskComments.stream()
                     .map(Comment::getFullMessage).collect(Collectors.joining("。"));
                 if (StringUtils.isNotBlank(message)) {
                     actHistoryInfoVo.setComment(message);
                 }
+            }
+            List<Attachment> taskAttachments = taskService.getTaskAttachments(historicTaskInstance.getId());
+            actHistoryInfoVo.setFileList(taskAttachments);
+            if (ObjectUtil.isNotEmpty(historicTaskInstance.getDurationInMillis())) {
+                actHistoryInfoVo.setRunDuration(getDuration(historicTaskInstance.getDurationInMillis()));
             }
             actHistoryInfoVoList.add(actHistoryInfoVo);
         }
@@ -181,12 +187,12 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
     }
 
     /**
-     * @Description: 通过流程实例id获取历史流程图
+     * @description: 通过流程实例id获取历史流程图
      * @param: processInstId
      * @param: response
      * @return: void
-     * @Author: gssong
-     * @Date: 2021/10/16
+     * @author: gssong
+     * @date: 2021/10/16
      */
     @Override
     public void getHistoryProcessImage(String processInstanceId, HttpServletResponse response) {
@@ -247,11 +253,11 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
     }
 
     /**
-     * @Description: 查询正在运行的流程实例
+     * @description: 查询正在运行的流程实例
      * @param: req
      * @return: com.ruoyi.common.core.page.TableDataInfo<com.ruoyi.workflow.domain.vo.ProcessInstRunningVo>
-     * @Author: gssong
-     * @Date: 2021/10/16
+     * @author: gssong
+     * @date: 2021/10/16
      */
     @Override
     public TableDataInfo<ProcessInstRunningVo> getProcessInstRunningByPage(ProcessInstRunningBo req) {
@@ -319,43 +325,47 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
     }
 
     /**
-     * @Description: 挂起或激活流程实例
+     * @description: 挂起或激活流程实例
      * @param: data
      * @return: void
-     * @Author: gssong
-     * @Date: 2021/10/16
+     * @author: gssong
+     * @date: 2021/10/16
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updateProcInstState(Map<String, Object> data) {
-        String processInstId = data.get("processInstId").toString();
-        String reason = data.get("reason").toString();
-        // 1. 查询指定流程实例的数据
-        ProcessInstance processInstance = runtimeService.createProcessInstanceQuery()
-            .processInstanceId(processInstId)
-            .singleResult();
-        // 2. 判断当前流程实例的状态
-        if (processInstance.isSuspended()) {
-            // 如果是已挂起，则更新为激活状态
-            runtimeService.activateProcessInstanceById(processInstId);
-        } else {
-            // 如果是已激活，则更新为挂起状态
-            runtimeService.suspendProcessInstanceById(processInstId);
+    public Boolean updateProcInstState(Map<String, Object> data) {
+        try {
+            String processInstId = data.get("processInstId").toString();
+            String reason = data.get("reason").toString();
+            // 1. 查询指定流程实例的数据
+            ProcessInstance processInstance = runtimeService.createProcessInstanceQuery()
+                .processInstanceId(processInstId)
+                .singleResult();
+            // 2. 判断当前流程实例的状态
+            if (processInstance.isSuspended()) {
+                // 如果是已挂起，则更新为激活状态
+                runtimeService.activateProcessInstanceById(processInstId);
+            } else {
+                // 如果是已激活，则更新为挂起状态
+                runtimeService.suspendProcessInstanceById(processInstId);
+            }
+            ActBusinessStatus businessStatus = iActBusinessStatusService.getInfoByProcessInstId(processInstId);
+            if (ObjectUtil.isEmpty(businessStatus)) {
+                throw new ServiceException("当前流程异常，未生成act_business_status对象");
+            }
+            businessStatus.setSuspendedReason(reason);
+            return iActBusinessStatusService.updateById(businessStatus);
+        } catch (ServiceException e) {
+            throw new ServiceException(e.getMessage());
         }
-        ActBusinessStatus businessStatus = iActBusinessStatusService.getInfoByProcessInstId(processInstId);
-        if (ObjectUtil.isEmpty(businessStatus)) {
-            throw new ServiceException("当前流程异常，未生成act_business_status对象");
-        }
-        businessStatus.setSuspendedReason(reason);
-        iActBusinessStatusService.updateById(businessStatus);
     }
 
     /**
-     * @Description: 作废流程实例，不会删除历史记录
+     * @description: 作废流程实例，不会删除历史记录
      * @param: processInstId
      * @return: boolean
-     * @Author: gssong
-     * @Date: 2021/10/16
+     * @author: gssong
+     * @date: 2021/10/16
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -376,11 +386,11 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
     }
 
     /**
-     * @Description: 运行中的实例 删除程实例，删除历史记录，删除业务与流程关联信息
+     * @description: 运行中的实例 删除程实例，删除历史记录，删除业务与流程关联信息
      * @param: processInstId
      * @return: boolean
-     * @Author: gssong
-     * @Date: 2021/10/16
+     * @author: gssong
+     * @date: 2021/10/16
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -408,11 +418,11 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
     }
 
     /**
-     * @Description: 已完成的实例 删除程实例，删除历史记录，删除业务与流程关联信息
+     * @description: 已完成的实例 删除程实例，删除历史记录，删除业务与流程关联信息
      * @param: processInstId
      * @return: boolean
-     * @Author: gssong
-     * @Date: 2021/10/16
+     * @author: gssong
+     * @date: 2021/10/16
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -430,11 +440,11 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
     }
 
     /**
-     * @Description: 查询已结束的流程实例
+     * @description: 查询已结束的流程实例
      * @param: req
      * @return: com.ruoyi.common.core.page.TableDataInfo<com.ruoyi.workflow.domain.vo.ProcessInstFinishVo>
-     * @Author: gssong
-     * @Date: 2021/10/23
+     * @author: gssong
+     * @date: 2021/10/23
      */
     @Override
     public TableDataInfo<ProcessInstFinishVo> getProcessInstFinishByPage(ProcessInstFinishBo req) {
@@ -471,7 +481,7 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
     public String getProcessInstanceId(String businessKey) {
         String processInstanceId;
         ActBusinessStatus infoByBusinessKey = iActBusinessStatusService.getInfoByBusinessKey(businessKey);
-        if (ObjectUtil.isNotEmpty(infoByBusinessKey) && (infoByBusinessKey.getStatus().equals(BusinessStatusEnum.FINISH.getStatus())||infoByBusinessKey.getStatus().equals(BusinessStatusEnum.INVALID.getStatus()))) {
+        if (ObjectUtil.isNotEmpty(infoByBusinessKey) && (infoByBusinessKey.getStatus().equals(BusinessStatusEnum.FINISH.getStatus()) || infoByBusinessKey.getStatus().equals(BusinessStatusEnum.INVALID.getStatus()))) {
             HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery().processInstanceBusinessKey(businessKey).singleResult();
             processInstanceId = ObjectUtil.isNotEmpty(historicProcessInstance) ? historicProcessInstance.getId() : "";
         } else {
@@ -482,11 +492,11 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
     }
 
     /**
-     * @Description: 撤销申请
+     * @description: 撤销申请
      * @param: processInstId
      * @return: boolean
      * @author: gssong
-     * @Date: 2022/1/21
+     * @date: 2022/1/21
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -573,9 +583,38 @@ public class ProcessInstanceServiceImpl extends WorkflowService implements IProc
 
             // 13. 更新业务状态
             return iActBusinessStatusService.updateState(processInstance.getBusinessKey(), BusinessStatusEnum.CANCEL);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             throw new ServiceException("撤销失败:" + e.getMessage());
+        }
+    }
+
+    /**
+     * 任务完成时间处理
+     *
+     * @param time
+     * @return
+     */
+    private String getDuration(long time) {
+
+        long day = time / (24 * 60 * 60 * 1000);
+        long hour = (time / (60 * 60 * 1000) - day * 24);
+        long minute = ((time / (60 * 1000)) - day * 24 * 60 - hour * 60);
+        long second = (time / 1000 - day * 24 * 60 * 60 - hour * 60 * 60 - minute * 60);
+
+        if (day > 0) {
+            return day + "天" + hour + "小时" + minute + "分钟";
+        }
+        if (hour > 0) {
+            return hour + "小时" + minute + "分钟";
+        }
+        if (minute > 0) {
+            return minute + "分钟";
+        }
+        if (second > 0) {
+            return second + "秒";
+        } else {
+            return 0 + "秒";
         }
     }
 }

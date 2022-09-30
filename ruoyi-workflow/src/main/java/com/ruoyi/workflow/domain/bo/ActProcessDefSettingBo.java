@@ -9,7 +9,6 @@ import javax.validation.constraints.*;
 
 import com.ruoyi.common.core.domain.BaseEntity;
 
-import java.util.List;
 
 /**
  * 流程定义设置业务对象 act_process_def_Setting
@@ -53,6 +52,11 @@ public class ActProcessDefSettingBo extends BaseEntity {
     private Integer businessType;
 
     /**
+     * 表名
+     */
+    private String tableName;
+
+    /**
      * 组件名称
      */
     private String componentName;
@@ -83,10 +87,9 @@ public class ActProcessDefSettingBo extends BaseEntity {
     private String remark;
 
     /**
-     * 主键集合
+     * 主键
      */
-    private List<Long> ids;
-
+    private Long settingId;
 
 
 }

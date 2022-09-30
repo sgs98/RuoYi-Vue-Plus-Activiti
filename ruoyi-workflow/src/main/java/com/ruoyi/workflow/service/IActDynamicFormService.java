@@ -54,5 +54,5 @@ public interface IActDynamicFormService {
     /**
      * 校验并批量删除流程单信息
      */
-    Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid);
+    Boolean deleteWithValidByIds(Collection<Long> ids);
 }

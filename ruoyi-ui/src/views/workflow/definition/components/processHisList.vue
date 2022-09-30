@@ -79,7 +79,7 @@
                           type="text"
                           icon="el-icon-copy-document"
                           @click="copySetting(scope.row)"
-                        >复制流程</el-button>
+                        >复制节点设置</el-button>
                       </el-col>
                     </el-row>
                   </template>
@@ -257,7 +257,7 @@ export default {
         })
       },
       copySetting(row){
-        this.$modal.confirm('是否确认将此设置复制为最新？').then(() => {
+        this.$modal.confirm('是否确认将此设置复制为最新节点设置？').then(() => {
            this.loading = true;
            copy(row.id,row.key).then(response => {
               if(response.code === 200){

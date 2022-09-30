@@ -54,11 +54,11 @@ public enum BusinessStatusEnum {
     private final String desc;
 
     /**
-     * @Description: 获取业务状态
+     * @description: 获取业务状态
      * @param: status 状态
      * @return: void
      * @author: gssong
-     * @Date: 2022/09/02
+     * @date: 2022/09/02
      */
     public static BusinessStatusEnum getEumByStatus(String status) {
         if (StringUtils.isBlank(status)) {
@@ -74,11 +74,11 @@ public enum BusinessStatusEnum {
     }
 
     /**
-     * @Description: 启动流程校验
+     * @description: 启动流程校验
      * @param: status 状态
      * @return: void
      * @author: gssong
-     * @Date: 2022/7/28
+     * @date: 2022/7/28
      */
     public static void checkStatus(String status) {
         if (status.equals(WAITING.getStatus())) {
@@ -93,11 +93,11 @@ public enum BusinessStatusEnum {
     }
 
     /**
-     * @Description: 校验撤销申请
+     * @description: 校验撤销申请
      * @param: status 状态
      * @return: void
      * @author: gssong
-     * @Date: 2022/7/28
+     * @date: 2022/7/28
      */
     public static void checkCancel(String status) {
         if (status.equals(FINISH.getStatus())) {

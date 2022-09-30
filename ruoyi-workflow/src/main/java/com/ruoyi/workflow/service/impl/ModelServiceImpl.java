@@ -7,8 +7,8 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.JsonUtils;
 import com.ruoyi.workflow.common.constant.ActConstant;
 import com.ruoyi.workflow.activiti.factory.WorkflowService;
@@ -51,15 +51,15 @@ import java.util.zip.ZipOutputStream;
 public class ModelServiceImpl extends WorkflowService implements IModelService {
 
     /**
-     * @Description: 保存模型
+     * @description: 保存模型
      * @param: data
-     * @return: com.ruoyi.common.core.domain.R<java.lang.Void>
+     * @return: java.lang.Boolean
      * @author: gssong
-     * @Date: 2022/5/22 13:51
+     * @date: 2022/5/22 13:51
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<Void> saveModelXml(ModelBo data) {
+    public Boolean saveModelXml(ModelBo data) {
         try {
             String xml = data.getXml();
             String svg = data.getSvg();
@@ -82,7 +82,7 @@ public class ModelServiceImpl extends WorkflowService implements IModelService {
             if(CollectionUtil.isNotEmpty(modelList)){
                 List<Model> models = modelList.stream().filter(e -> e.getKey().equals(key)).collect(Collectors.toList());
                 if(CollectionUtil.isNotEmpty(models)){
-                    return R.fail("模型KEY已存在");
+                    throw new ServiceException("模型KEY已存在！");
                 }
             }
             model.setKey(key);
@@ -108,21 +108,21 @@ public class ModelServiceImpl extends WorkflowService implements IModelService {
             transcoder.transcode(input, output);
             final byte[] result = outStream.toByteArray();
             repositoryService.addModelEditorSourceExtra(model.getId(), result);
-            return R.ok();
+            return true;
         } catch (Exception e) {
             throw new ActivitiException("Error saving model", e);
         }
     }
 
     /**
-     * @Description: 查询模型信息
+     * @description: 查询模型信息
      * @param: modelId
-     * @return: com.ruoyi.common.core.domain.R<java.lang.String>
+     * @return: java.util.Map<java.lang.String,java.lang.Object>
      * @author: gssong
-     * @Date: 2022/5/22 13:54
+     * @date: 2022/5/22 13:54
      */
     @Override
-    public R<Map<String,Object>> getEditorXml(String modelId) {
+    public Map<String,Object> getEditorXml(String modelId) {
         Map<String, Object> map = new HashMap<>(16);
         Model model = repositoryService.getModel(modelId);
         if (model != null) {
@@ -130,20 +130,20 @@ public class ModelServiceImpl extends WorkflowService implements IModelService {
                 byte[] modelEditorSource = repositoryService.getModelEditorSource(model.getId());
                 map.put("xml",StrUtil.utf8Str(modelEditorSource));
                 map.put("model",model);
-                return R.ok("操作成功",map);
+                return map;
             } catch (Exception e) {
                 throw new ActivitiException(e.getMessage());
             }
         }
-        return R.fail();
+        return map;
     }
 
     /**
-     * @Description: 查询模型列表
+     * @description: 查询模型列表
      * @param: modelBo 请求参数
      * @return: com.ruoyi.common.core.page.TableDataInfo<org.activiti.engine.repository.Model>
-     * @Author: gssong
-     * @Date: 2021/10/3
+     * @author: gssong
+     * @date: 2021/10/3
      */
     @Override
     public TableDataInfo<Model> getByPage(ModelBo modelBo) {
@@ -175,15 +175,15 @@ public class ModelServiceImpl extends WorkflowService implements IModelService {
     }
 
     /**
-     * @Description: 新建模型
+     * @description: 新建模型
      * @param: modelAdd
-     * @return: com.ruoyi.common.core.domain.R<org.activiti.engine.repository.Model>
-     * @Author: gssong
-     * @Date: 2021/10/3
+     * @return: java.lang.Boolean
+     * @author: gssong
+     * @date: 2021/10/3
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<Model> add(ModelBo data){
+    public Boolean add(ModelBo data){
         try {
             String xml = data.getXml();
             String svg = data.getSvg();
@@ -191,7 +191,7 @@ public class ModelServiceImpl extends WorkflowService implements IModelService {
             String name = data.getProcess().getName();
             String category = data.getProcess().getCategory();
             if(StringUtils.isBlank(category)){
-                return R.fail("请选择流程分类");
+                throw new ServiceException("请选择流程分类！");
             }
             JSONObject jsonObject = JSONUtil.xmlToJson(xml);
             JSONObject definitions = (JSONObject) jsonObject.get("definitions");
@@ -205,7 +205,7 @@ public class ModelServiceImpl extends WorkflowService implements IModelService {
             int version = 0;
             Model checkModel = repositoryService.createModelQuery().modelKey(key).singleResult();
             if(ObjectUtil.isNotNull(checkModel)){
-                return R.fail("模型KEY已存在");
+                throw new ServiceException("模型KEY已存在！");
             }
             //初始空的模型
             Model model = repositoryService.newModel();
@@ -232,27 +232,27 @@ public class ModelServiceImpl extends WorkflowService implements IModelService {
             transcoder.transcode(input, output);
             final byte[] result = outStream.toByteArray();
             repositoryService.addModelEditorSourceExtra(model.getId(), result);
-            return R.ok();
+            return true;
         }catch (Exception e){
             throw new ActivitiException("Error saving model", e);
         }
     }
 
     /**
-     * @Description: 通过流程定义模型id部署流程定义
+     * @description: 通过流程定义模型id部署流程定义
      * @param: id 模型id
-     * @return: com.ruoyi.common.core.domain.R
-     * @Author: gssong
-     * @Date: 2021/10/3
+     * @return: java.lang.Boolean
+     * @author: gssong
+     * @date: 2021/10/3
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<Void> deploy(String id){
+    public Boolean deploy(String id){
         try {
             //1.查询流程定义模型xml
             byte[] xmlBytes = repositoryService.getModelEditorSource(id);
             if (xmlBytes == null) {
-                return R.fail("模型数据为空，请先设计流程定义模型，再进行部署");
+                throw new ServiceException("模型数据为空，请先设计流程定义模型，再进行部署！");
             }
             //2. 查询流程定义模型的图片
             byte[] pngBytes = repositoryService.getModelEditorSourceExtra(id);
@@ -279,20 +279,20 @@ public class ModelServiceImpl extends WorkflowService implements IModelService {
             // 更新 部署id 到流程定义模型数据表中
             model.setDeploymentId(deployment.getId());
             repositoryService.saveModel(model);
-            return R.ok();
+            return true;
         }catch (Exception e){
             e.printStackTrace();
-            return R.fail(e.getMessage());
+            throw new ServiceException(e.getMessage());
         }
     }
 
     /**
-     * @Description: 导出流程定义模型zip压缩包
+     * @description: 导出流程定义模型zip压缩包
      * @param: modelId
      * @param: response
      * @return: void
-     * @Author: gssong
-     * @Date: 2021/10/7
+     * @author: gssong
+     * @date: 2021/10/7
      */
     @Override
     public void exportZip(String modelId, HttpServletResponse response) {
@@ -342,11 +342,11 @@ public class ModelServiceImpl extends WorkflowService implements IModelService {
     }
 
     /**
-     * @Description: 将流程定义转换为模型
+     * @description: 将流程定义转换为模型
      * @param: processDefinitionId 流程定义id
      * @return: java.lang.Boolean
-     * @Author: gssong
-     * @Date: 2021/11/6
+     * @author: gssong
+     * @date: 2021/11/6
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -390,7 +390,7 @@ public class ModelServiceImpl extends WorkflowService implements IModelService {
             } catch (Exception e) {
                 e.printStackTrace();
                 log.error(e.getMessage());
-                return false;
+                throw new ServiceException(e.getMessage());
             }
     }
 }

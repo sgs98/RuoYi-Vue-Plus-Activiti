@@ -26,10 +26,11 @@ export function getProcessDefSettingByDefId(id) {
 }
 
 // 校验表单是否关联
-export function checkProcessDefSetting(defId,param,businessType) {
+export function checkProcessDefSetting(data) {
   return request({
-    url: `/workflow/processDefSetting/checkProcessDefSetting/${defId}/${param}/${businessType}` ,
-    method: 'get'
+    url: `/workflow/processDefSetting/checkProcessDefSetting`,
+    method: 'post',
+    data: data
   })
 }
 

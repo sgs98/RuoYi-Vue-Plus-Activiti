@@ -18,7 +18,7 @@ public interface TaskMapper {
      * @param comment 批注
      */
     @Update("update act_hi_comment set message_=#{comment},full_msg_=#{comment} where id_ = #{commentId}")
-    void editComment(@Param("commentId") String commentId, @Param("comment") String comment);
+    int editComment(@Param("commentId") String commentId, @Param("comment") String comment);
 
     @Delete("delete from act_hi_actinst  where task_id_ = #{taskId}")
     void deleteActHiActInstByTaskId(@Param("taskId") String taskId);

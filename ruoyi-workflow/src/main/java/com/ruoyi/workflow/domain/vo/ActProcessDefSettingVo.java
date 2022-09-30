@@ -38,6 +38,12 @@ public class ActProcessDefSettingVo implements Serializable {
     private String processDefinitionKey;
 
     /**
+     * 表名
+     */
+    @ExcelProperty(value = "表名")
+    private String tableName;
+
+    /**
      * 流程定义名称
      */
     @ExcelProperty(value = "流程定义名称")

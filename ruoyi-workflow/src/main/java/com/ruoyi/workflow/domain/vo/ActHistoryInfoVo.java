@@ -1,9 +1,11 @@
 package com.ruoyi.workflow.domain.vo;
 
 import lombok.Data;
+import org.activiti.engine.task.Attachment;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @program: ruoyi-vue-plus
@@ -36,6 +38,10 @@ public class ActHistoryInfoVo implements Serializable {
      */
     private Date endTime;
     /**
+     * 运行时长
+     */
+    private String runDuration;
+    /**
      * 状态
      */
     private String status;
@@ -63,4 +69,9 @@ public class ActHistoryInfoVo implements Serializable {
      * 审批信息
      */
     private String comment;
+
+    /**
+     * 审批附件
+     */
+    private List<Attachment> fileList;
 }

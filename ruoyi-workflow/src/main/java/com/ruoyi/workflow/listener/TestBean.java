@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * @program: ruoyi-vue-plus
- * @description: ²âÊÔ
+ * @description: æµ‹è¯•
  * @author: gssong
  * @created: 2022-06-26
  */

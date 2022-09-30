@@ -31,11 +31,11 @@ public class ProcessRunningPathUtils {
     private static final ProcessEngine PROCESS_ENGINE = SpringUtils.getBean(ProcessEngine.class);
 
     /**
-     * @Description: 获取流程审批路线
+     * @description: 获取流程审批路线
      * @param: processInstanceId 流程实例id
      * @return: java.util.List<com.ruoyi.workflow.domain.vo.ProcessNodePath>
      * @author: gssong
-     * @Date: 2022/8/23 19:28
+     * @date: 2022/8/23 19:28
      */
     public static List<ProcessNodePath> getProcessNodeList(String processInstanceId) {
 
@@ -82,7 +82,7 @@ public class ProcessRunningPathUtils {
     }
 
     /**
-     * @Description: 递归获取下一节点
+     * @description: 递归获取下一节点
      * @param: processNodePathList 存储可用节点集合
      * @param: flowElements 全部节点
      * @param: sequenceFlow 节点出口连线
@@ -91,7 +91,7 @@ public class ProcessRunningPathUtils {
      * @param: gateway 网关
      * @return: void
      * @author: gssong
-     * @Date: 2022/8/23 19:40
+     * @date: 2022/8/23 19:40
      */
     private static void getNextNodeList(List<ProcessNodePath> processNodePathList, Collection<FlowElement> flowElements, SequenceFlow sequenceFlow, Map<String, Object> variables, String processInstanceId, String gateway) {
         FlowElement targetFlowElement = sequenceFlow.getTargetFlowElement();
@@ -120,7 +120,7 @@ public class ProcessRunningPathUtils {
     }
 
     /**
-     * @Description: 判断网关构建节点
+     * @description: 判断网关构建节点
      * @param: processNodePathList 存储可用节点集合
      * @param: flowElements 全部节点
      * @param: currentFlowElement 当前节点
@@ -130,7 +130,7 @@ public class ProcessRunningPathUtils {
      * @param: gateway 网关
      * @return: void
      * @author: gssong
-     * @Date: 2022/8/23 20:11
+     * @date: 2022/8/23 20:11
      */
     private static void nextNodeBuild(List<ProcessNodePath> processNodePathList, Collection<FlowElement> flowElements, FlowElement currentFlowElement, SequenceFlow sequenceFlow, Map<String, Object> variableMap, String processInstanceId, String gateway) {
         String conditionExpression = sequenceFlow.getConditionExpression();
@@ -149,7 +149,7 @@ public class ProcessRunningPathUtils {
     }
 
     /**
-     * @Description: 构建数据
+     * @description: 构建数据
      * @param: processNodePath 数据对象
      * @param: conditionExpression 网关条件
      * @param: processInstanceId 流程实例id
@@ -160,7 +160,7 @@ public class ProcessRunningPathUtils {
      * @param: processNodePathList 存储可用节点集合
      * @return: void
      * @author: gssong
-     * @Date: 2022/8/23 20:26
+     * @date: 2022/8/23 20:26
      */
     private static void buildData(ProcessNodePath processNodePath, String conditionExpression, String processInstanceId, Map<String, Object> variableMap, FlowElement currentFlowElement, FlowElement sourceFlowElement, String gateway, List<ProcessNodePath> processNodePathList) {
         if (ActConstant.USER_TASK.equals(gateway)) {

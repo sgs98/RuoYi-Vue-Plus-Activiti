@@ -34,9 +34,9 @@ public class StartProcessBo implements Serializable {
     private List<String> assignees;
 
     /**
-     * 全类名
+     * 表名
      */
-    private String classFullName;
+    private String tableName;
 
     /**
      * 流程变量，前端会提交一个元素{'entity': {业务详情数据对象}}

@@ -25,7 +25,7 @@ import com.ruoyi.workflow.service.IActProcessDefSetting;
 import com.ruoyi.common.core.page.TableDataInfo;
 
 /**
- * 流程定义设置Controller
+ * 流程定义设置
  *
  * @author gssong
  * @date 2022-08-28
@@ -75,11 +75,9 @@ public class ActProcessDefSettingController extends BaseController {
     /**
      * 校验表单是否关联
      */
-    @GetMapping("/checkProcessDefSetting/{defId}/{param}/{businessType}")
-    public R<List<Long>> checkProcessDefSetting(@NotNull(message = "流程定义id不能为空") @PathVariable("defId") String defId,
-                                                                @NotNull(message = "参数不能为空") @PathVariable("param") String param,
-                                                                @NotNull(message = "业务类型") @PathVariable("businessType") Integer businessType) {
-        return iActProcessDefSetting.checkProcessDefSetting(defId, param, businessType);
+    @PostMapping("/checkProcessDefSetting")
+    public R<Long> checkProcessDefSetting(@RequestBody ActProcessDefSettingBo bo) {
+        return iActProcessDefSetting.checkProcessDefSetting(bo);
     }
 
     /**
@@ -108,6 +106,6 @@ public class ActProcessDefSettingController extends BaseController {
     @Log(title = "流程定义设置", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public R<Void> remove(@NotEmpty(message = "主键不能为空") @PathVariable Long[] ids) {
-        return toAjax(iActProcessDefSetting.deleteWithValidByIds(Arrays.asList(ids), true) ? 1 : 0);
+        return toAjax(iActProcessDefSetting.deleteWithValidByIds(Arrays.asList(ids)) ? 1 : 0);
     }
 }

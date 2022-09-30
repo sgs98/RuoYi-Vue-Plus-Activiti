@@ -60,4 +60,14 @@ public class ActDynamicFormVo {
     @ExcelProperty(value = "排序")
     private Integer orderNo;
 
+    /**
+     * 权限字符
+     */
+    private String perms;
+
+    /**
+     * 权限ID
+     */
+    private Long menuId;
+
 }
